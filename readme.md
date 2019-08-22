@@ -48,11 +48,11 @@ If you have a complex project, where you need to edit the database tables direct
 
 If you need to build a site, use a CMS. [Kirby](https://getkirby.com/) is an excellent choice for that.
 
-### Inspired by Spreadsheets, Airtable and Tableplus
+## Inspired by Spreadsheets, Handsontable, Airtable and Tableplus
 
 I'm heavily inspired by these tools, how they work and how they look.
 
-[Spreadsheets](https://spreadsheets.google.com) and [Airtable](https://airtable.com/) can however never compete, because they are not made for editing self hosted database tables. They are made for editing data and store it in the cloud.
+[Spreadsheets](https://spreadsheets.google.com), [Handsontable](https://handsontable.com/examples) and [Airtable](https://airtable.com/) can however never compete, because they are not made for editing self hosted database tables. They are made for editing data and store it in the cloud.
 
 [Tableplus](https://tableplus.com/) however is a competitor as it's ment to solve the exact same problems as Squares. It still lack some features like markdown support in the Windows version.
 
@@ -62,13 +62,6 @@ I'm heavily inspired by these tools, how they work and how they look.
 - https://vuejs.org/
 - https://vuex.vuejs.org/
 - https://router.vuejs.org/
-
-## Inspiration
-
-- https://tableplus.io/
-- https://handsontable.com/examples
-- https://airtable.com/
-- https://spreadsheets.google.com
 
 ## Donate
 
