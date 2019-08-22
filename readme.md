@@ -54,7 +54,7 @@ I'm heavily inspired by these tools, how they work and how they look.
 
 [Spreadsheets](https://spreadsheets.google.com), [Handsontable](https://handsontable.com/examples) and [Airtable](https://airtable.com/) can however never compete, because they are not made for editing self hosted database tables. They are made for editing data and store it in the cloud.
 
-[Tableplus](https://tableplus.com/) however is a competitor as it's ment to solve the exact same problems as Squares. It still lack some features like markdown support in the Windows version.
+[Tableplus](https://tableplus.com/) however is a competitor as it's meant to solve the exact same problems as Squares. It still lacks some features like markdown support in the Windows version.
 
 ## Libraries used
 
