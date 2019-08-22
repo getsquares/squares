@@ -8,7 +8,7 @@ When building complex projects with custom databases, editing the data can be a 
 
 ## Screenshot
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot2.png)
 
 *Unpolished screenshot*
 
