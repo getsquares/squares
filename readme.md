@@ -2,7 +2,7 @@
 
 *Version: Unreleased*
 
-## Make databases fun!
+## Fun with databases!
 
 When building complex projects with custom databases, editing the data can be a pain. With Squares, it's as simple as editing a spreadsheet.
 
@@ -14,7 +14,6 @@ When building complex projects with custom databases, editing the data can be a 
 
 ## Features
 
-- Javascript/ajax driven
 - Spreadsheet like table
 - Select table from multiple databases
 - Get info about the table
@@ -25,15 +24,15 @@ When building complex projects with custom databases, editing the data can be a 
 - Pagination
 - Plugin support
 
-## Answers
+## Squares is not...
 
-### Squares is not phpMyAdmin
+### ...phpMyAdmin
 
-With phpMyAdmin you can create tables and run SQL queries. The downside is that phpMyAdmin does not have a great user experience, in my opinion.
+With phpMyAdmin you can create tables and run SQL queries. You can't do that with Squares. For editing the table data, phpMyAdmin does not have a great user experience, in my opinion.
 
-Squares is more focused around editing the data with already created tables. It's really easy to step between different cells and edit the data without hassle. Squares also provide more field types, like checkboxes and markdown.
+Squares is more focused around editing the data with already created tables. It's really easy to step between different cells and edit the data without hassle. Squares also provide more field types, like checkboxes and markdown. That way, it's a more visual user experience.
 
-### Squares is not a CMS
+### ...a CMS
 
 Different field types can be seen in html5, in forms but also in CMS. Squares have different field types as well. It's still not a form or a CMS.
 
@@ -42,7 +41,7 @@ Different field types can be seen in html5, in forms but also in CMS. Squares ha
 
 If you have a complex project, where you need to edit the database tables directly, use Squares. If you need to build a site, use a CMS. [Kirby](https://getkirby.com/) is an excellent choice for that.
 
-## Squares is not Airtable or a spreadsheet
+### ...a spreadsheet or Airtable
 
 I'm heavily inspired by these services. However, they can never compete because they are not made for editing self hosted database tables. They are made for editing data and store it in the cloud.
 
