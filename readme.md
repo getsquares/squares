@@ -35,24 +35,26 @@ Below is an incomplete comparison table, just to show some major differences bet
 | Field types      | -          | Yes     |
 | Spreadsheet UI   | -          | Yes     |
 
-In conclusion, phpMyAdmin is a feature rich tool, while Squares is focused on editing the data with a great user experience.
+In conclusion, [phpMyAdmin](https://www.phpmyadmin.net/) is a feature rich tool, while Squares is focused on editing the data with a great user experience.
 
 ## Squares is not a CMS
 
-Different field types can be seen in html5, in forms but also in CMS. Squares have different field types as well. It's still not a form or a CMS.
+Different field types can be seen in html5, in forms but also in CMS. Squares also have different field types. It's still not a form or a CMS.
 
 - In a CMS you are editing pages. In Squares, you edit table cells.
 - In a CMS you have functions and classes to create a site. Squares can not be used to build a site. It has no functions and no classes for site building.
 
-If you have a complex project, where you need to edit the database tables directly, use Squares. If you need to build a site, use a CMS. [Kirby](https://getkirby.com/) is an excellent choice for that.
+If you have a complex project, where you need to edit the database tables directly, use Squares.
+
+If you need to build a site, use a CMS. [Kirby](https://getkirby.com/) is an excellent choice for that.
 
 ### Inspired by Spreadsheets, Airtable and Tableplus
 
-I'm heavily inspired by these tools.
+I'm heavily inspired by these tools, how they work and how they look.
 
-Spreadsheets and Airtable can never compete, because they are not made for edit self hosted database tables. They are made for editing data and store it in the cloud.
+[Spreadsheets](https://spreadsheets.google.com) and [Airtable](https://airtable.com/) can however never compete, because they are not made for editing self hosted database tables. They are made for editing data and store it in the cloud.
 
-Tableplus however is a competitor as it's ment to solve the exact same problems as Squares. It still lack some features like markdown support in the Windows version.
+[Tableplus](https://tableplus.com/) however is a competitor as it's ment to solve the exact same problems as Squares. It still lack some features like markdown support in the Windows version.
 
 ## Libraries used
 
