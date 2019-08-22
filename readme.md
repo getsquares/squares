@@ -24,26 +24,35 @@ When building complex projects with custom databases, editing the data can be a 
 - Pagination
 - Plugin support
 
-## What Squares is not
+## Differences to phpMyAdmin
 
-### phpMyAdmin
+Below is an incomplete comparison table, just to show some major differences between the two.
 
-With phpMyAdmin you can create tables and run SQL queries. You can't do that with Squares. For editing the table data, phpMyAdmin does not have a great user experience, in my opinion.
+| Feature          | phpMyAdmin | Squares |
+| ---------------- | ---------- | ------- |
+| Create tables    | Yes        | -       |
+| Run SQL queries  | Yes        | -       |
+| Field types      | -          | Yes     |
+| Spreadsheet UI   | -          | Yes     |
 
-Squares is more focused around editing the data with already created tables. It's really easy to step between different cells and edit the data without hassle. Squares also provide more field types, like checkboxes and markdown. That way, it's a more visual user experience.
+In conclusion, phpMyAdmin is a feature rich tool, while Squares is focused on editing the data with a great user experience.
 
-### A CMS
+## Squares is not a CMS
 
 Different field types can be seen in html5, in forms but also in CMS. Squares have different field types as well. It's still not a form or a CMS.
 
-- In a CMS you are editing pages. In Squares, you edit tables and table cells.
+- In a CMS you are editing pages. In Squares, you edit table cells.
 - In a CMS you have functions and classes to create a site. Squares can not be used to build a site. It has no functions and no classes for site building.
 
 If you have a complex project, where you need to edit the database tables directly, use Squares. If you need to build a site, use a CMS. [Kirby](https://getkirby.com/) is an excellent choice for that.
 
-### A spreadsheet or Airtable
+### Inspired by Spreadsheets, Airtable and Tableplus
 
-I'm heavily inspired by these services. However, they can never compete because they are not made for editing self hosted database tables. They are made for editing data and store it in the cloud.
+I'm heavily inspired by these tools.
+
+Spreadsheets and Airtable can never compete, because they are not made for edit self hosted database tables. They are made for editing data and store it in the cloud.
+
+Tableplus however is a competitor as it's ment to solve the exact same problems as Squares. It still lack some features like markdown support in the Windows version.
 
 ## Libraries used
 
