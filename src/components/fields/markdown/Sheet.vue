@@ -1,40 +1,44 @@
 <template>
   <div class="sheet">
     <button class="close" @click="close()">
-      <img src="../../assets/icomoon/272-cross.svg" />
+      <img src="../../../assets/icomoon/272-cross.svg" />
     </button>
     <div class="preview" v-html="input"></div>
+    <MarkdownIndicator></MarkdownIndicator>
   </div>
 </template>
 
 <script>
 import Marked from "marked";
+import MarkdownIndicator from "@/components/fields/markdown/Indicator.vue";
 
 export default {
   name: "MarkdownSheet",
   components: {
-    //Marked
+    MarkdownIndicator
   },
   computed: {
     input() {
-      return Marked(this.$store.state.fieldMarkdown.input);
+      return Marked(this.$store.state["field/markdown/editor"].input);
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
+.sheet {
+  overflow-x: auto;
+}
 .preview {
   font-size: 17px;
   font-family: roboto;
   color: #333;
-  overflow: auto;
   box-sizing: border-box;
   line-height: 1.5;
   overflow-wrap: break-word;
   padding: 4rem;
   height: 100%;
-  overflow: auto;
+  overflow-y: auto;
 
   img {
     max-width: 100%;

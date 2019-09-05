@@ -10,15 +10,11 @@ import Marked from "marked";
 
 export default {
   name: "MarkdownCounters",
-  components: {
-    //Marked
-  },
   computed: {
     input() {
-      return this.$store.state.fieldMarkdown.input;
+      return this.$store.state["field/markdown/editor"].input;
     },
     sanitized() {
-      //console.log(this.input.length);
       let markdown = Marked(this.input);
       return markdown.replace(/(\r\n|\n|\r)/gm, " ");
     },
@@ -30,9 +26,7 @@ export default {
       }).length;
     },
     countChars() {
-      let code = this.sanitized;
-
-      return code.length;
+      return this.sanitized.length;
     }
   }
 };

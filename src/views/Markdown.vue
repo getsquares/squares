@@ -4,11 +4,8 @@
       <!--
       <file-browser v-show="tree" @loaded="hasLoaded($event)"></file-browser>
       -->
+      <MarkdownTree></MarkdownTree>
       <MarkdownEditor></MarkdownEditor>
-
-      <!--
-      <markdown-indicator :savingState="savingState"></markdown-indicator>
-      -->
       <MarkdownSheet></MarkdownSheet>
     </main>
 
@@ -22,24 +19,23 @@
       <ul v-show="tree" class="field-markdown-breadcrumbs">
         <li>{{ trail }}</li>
       </ul>
-      <ul style="justify-self: center; display: flex; justify-content: center;">
-        <markdown-timeago :lastSave="lastSave" :timer="timer"></markdown-timeago>
-      </ul>
     -->
   </div>
 </template>
 
 <script>
-import MarkdownSheet from "@/components/markdown/Sheet.vue";
-import MarkdownEditor from "@/components/markdown/Editor.vue";
-import MarkdownFooter from "@/components/markdown/Footer.vue";
+import MarkdownTree from "@/components/fields/markdown/Tree.vue";
+import MarkdownSheet from "@/components/fields/markdown/Sheet.vue";
+import MarkdownEditor from "@/components/fields/markdown/Editor.vue";
+import MarkdownFooter from "@/components/fields/markdown/Footer.vue";
 
 export default {
   name: "markdown",
   components: {
     MarkdownSheet,
     MarkdownEditor,
-    MarkdownFooter
+    MarkdownFooter,
+    MarkdownTree
   },
   data: function() {
     return {
@@ -48,20 +44,11 @@ export default {
   },
   created() {
     // eslint-disable-next-line
-    console.log("oki");
-
-    // eslint-disable-next-line
     console.log(process.env.VUE_APP_ROOT_API);
 
     this.$store.registerModule("fieldMarkdown", {
       state: {
         well: "fine",
-        timer: 0,
-        ticking: true,
-        input: "",
-        buffer: "",
-        timeObject: null,
-        savedTime: Date.now(),
         lastSaveText: "init",
         saving: false,
         error: false,
@@ -73,41 +60,10 @@ export default {
         files: [],
         folders: [],
         params: []
-      },
-      mutations: {
-        fieldMarkdownSetInput(state, value) {
-          state.input = value;
-        },
-        fieldMarkdownAddTimer(state) {
-          state.timer++;
-        },
-        fieldMarkdownStopTimer(state) {
-          state.ticking = false;
-        },
-        fieldMarkdownResetTimer(state) {
-          state.ticking = true;
-          state.timer = 0;
-        },
-        fieldMarkdownSetTimeObject(state) {
-          clearInterval(state.timeObject);
-          state.timeObject = setInterval(() => {
-            if (!state.ticking) return;
-            state.timer++;
-          }, 1000);
-        }
       }
     });
-
-    // eslint-disable-next-line
-    console.log(this.$store);
   },
-  methods: {
-    test() {
-      this.$store.state.boom = "world";
-      /*console.log(window.parent);
-      console.log(window.location.href);*/
-    }
-  }
+  methods: {}
 };
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="limit">
+  <div class="limit" :title="title">
     <strong>Limit:</strong>
     <span
       :class="warningClass"
@@ -22,25 +22,37 @@ export default {
       // Change later
     },
     input() {
-      return this.$store.state.fieldMarkdown.input;
+      return this.$store.state["field/markdown/editor"].input;
     },
     overflow() {
-      return this.limit < this.input.length;
+      console.log(this.$store.state["field/markdown/limit"]);
+      return this.$store.state["field/markdown/limit"].overflow;
     },
     warningClass() {
       return { warning: this.overflow };
+    },
+    title() {
+      if (this.overflow) {
+        return "Write a shorter text, or increase the length of the field in your database";
+      }
+      return "";
     }
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.warning {
-  color: red; /* Change */
-}
-span {
-  &:before {
-    content: " ";
+.limit {
+  cursor: default;
+  user-select: none;
+  span {
+    &:before {
+      content: " ";
+    }
+
+    &.warning {
+      color: var(--color-danger);
+    }
   }
 }
 </style>
