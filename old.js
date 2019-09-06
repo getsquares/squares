@@ -6,22 +6,10 @@
   "server_url": "{{$url}}plugins/markdown/api/file-browser-server/api/"
 }
 
-.markdown-indicator.saving .markdown-indicator-saving {
-	opacity: 1;
-	animation: spin 4s linear infinite;
-}
-
-@keyframes spin {
-	100% {
-		transform: rotate(360deg);
-	}
-}
-
 Vue.component('field-markdown', {
 	props: [ 'data', 'x', 'y' ],
 	data: function() {
-		return {
-			buffer: '',
+		return {			
 			interval: null,
 			lastSaveText: 'init',
 			saving: false,
@@ -32,7 +20,6 @@ Vue.component('field-markdown', {
 		};
 	},
 	mounted() {
-		this.load();
 		this.setTimer();		
 	},
 	template: /*html*/ `
@@ -238,30 +225,6 @@ Vue.component('file-browser', {
 			this.filename = '';
 			this.uri = this.uri == '' ? name : this.uri + '/' + name;
 		},
-		get() {
-			let data = {
-				uri: this.uri,
-				active: false,
-				token: '57jZiiGxGkaB2Mrm0MKj3zmoYQUXVOcS',
-				whitelist: this.whitelist
-			};
-
-			let result = axios({
-				method: 'post',
-				url: this.serverUrl + 'browse/',
-				data: data
-			})
-				.then((response) => {
-					this.params = response.data;
-
-					this.files = response.data.files;
-					this.folders = response.data.folders;
-
-					this.$emit('loaded', this.params);
-				})
-				.catch((error) => {
-				})
-				.finally(() => {});
-		}
+		
 	}
 });

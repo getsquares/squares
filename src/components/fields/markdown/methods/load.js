@@ -1,11 +1,11 @@
-import Vue from 'vue';
+//import Vue from 'vue';
 import Axios from 'axios';
-
-Vue.use(Axios);
 
 export default {
 	load(vue) {
-		let uri = `api`;
+		console.log(process.env.VUE_APP_ROOT_API);
+		let uri = `/api`;
+		uri = 'http://localhost/squares/server/api/fields/markdown/load/';
 
 		Axios.get(uri, {
 			params: {
@@ -19,12 +19,20 @@ export default {
 				/*this.input = response.data;
           this.buffer = this.input;
           */
+
+				vue.$store.commit('field/markdown/editor/input', response.data.value);
+				vue.$store.commit('field/markdown/editor/buffer', response.data.value);
+				vue.$store.commit('field/markdown/limit/max', response.data.length);
+
+				console.log(vue.$store.state);
+
+				vue.$store.commit('field/markdown/timer/reset');
 				console.log('SUCCESS');
-				console.log(response.data);
+				console.log(response);
 			})
-			.catch(() => {
-				//console.log('ERROR');
-				//console.log(error);
+			.catch((error) => {
+				console.log('ERROR');
+				console.log(error);
 			})
 			.finally(() => {
 				//this.resetTimer();

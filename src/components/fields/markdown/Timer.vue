@@ -8,7 +8,7 @@
 <script>
 export default {
   name: "MarkdownTimer",
-  created() {
+  mounted() {
     this.set();
   },
   computed: {

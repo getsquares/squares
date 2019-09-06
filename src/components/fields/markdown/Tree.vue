@@ -33,14 +33,12 @@
     -->
     <div class="folders">
       <ul>
-        <li>gittor</li>
-        <li>gittor</li>
+        <li v-for="folder in folders" :key="folder.name">{{ folder.name }}</li>
       </ul>
     </div>
     <div class="files">
       <ul>
-        <li>gittor</li>
-        <li>gittor</li>
+        <li v-for="file in files" :key="file.name">{{ file.name }}</li>
       </ul>
     </div>
     <footer>
@@ -54,11 +52,58 @@
 </template>
 
 <script>
+import Axios from "axios";
+
 export default {
   name: "MarkdownTree",
+  mounted() {
+    this.load();
+  },
   computed: {
     treeState() {
       return this.$store.state["field/markdown/tree"].showTree;
+    },
+    folders() {
+      return this.$store.state["field/markdown/tree"].folders;
+    },
+    files() {
+      return this.$store.state["field/markdown/tree"].files;
+    }
+  },
+  methods: {
+    load() {
+      let uri =
+        "http://localhost/squares/server/api/fields/markdown/browse/?uri=/";
+
+      Axios.get(uri)
+        .then(response => {
+          /*
+this.params = response.data;
+
+					this.files = response.data.files;
+					this.folders = response.data.folders;
+
+*/
+          this.$store.commit("field/markdown/tree/files", response.data.files);
+          this.$store.commit(
+            "field/markdown/tree/folders",
+            response.data.folders
+          );
+          this.$store.commit(
+            "field/markdown/tree/trail",
+            response.data.breadcrumbs
+          );
+
+          let filename =
+            response.data.current.type == "file"
+              ? response.data.current.name
+              : "";
+          this.$store.commit("field/markdown/tree/filename", filename);
+          //console.log(response);
+          console.log(this.$store.state);
+        })
+        .catch(error => {})
+        .finally(() => {});
     }
   }
 };

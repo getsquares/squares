@@ -10,7 +10,7 @@
     <button class="tree" @click="toggleTree()">
       <img src="../../../assets/icomoon/040-file-picture.svg" />
     </button>
-    {{ treeState }}
+    {{ showTree }}
   </div>
 </template>
 
@@ -22,7 +22,7 @@ export default {
   components: {},
   mounted() {
     this.$refs.input.focus();
-    //MethodsLoad.load(this);
+    MethodsLoad.load(this);
     MethodsSave.saveWatch(this);
   },
   methods: {
@@ -48,15 +48,14 @@ export default {
       MethodsSave.saveNow(this);
     },
     toggleTree() {
-      this.$store.commit("field/markdown/tree/setTreeState", !this.treeState);
+      this.$store.commit("field/markdown/tree/setTreeState", !this.showTree);
     }
   },
   computed: {
     input() {
-      //console.log(this.$store.state);
       return this.$store.state["field/markdown/editor"].input;
     },
-    treeState() {
+    showTree() {
       return this.$store.state["field/markdown/tree"].showTree;
     },
     limit() {

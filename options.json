@@ -1,0 +1,27 @@
+{
+	"db": {
+		"presenth_pollenbutiken": {
+			"user": "root",
+			"pass": "jt",
+			"host": "localhost",
+			"tables": [ "cms_pages", "products" ]
+		},
+		"meta": {
+			"user": "root",
+			"pass": "jt",
+			"host": "localhost"
+		}
+	},
+	"fields": {
+		"markdown": {
+			"revisions": {
+				"path": "revisions/markdown"
+			},
+			"media": {
+				"path": "server-media"
+			},
+			"limit": 5,
+			"autosave": 15
+		}
+	}
+}

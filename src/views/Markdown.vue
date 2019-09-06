@@ -53,12 +53,8 @@ export default {
         saving: false,
         error: false,
         tree: false,
-        breadcrumbs: [],
         filename: "",
         uri: "",
-        alt: "",
-        files: [],
-        folders: [],
         params: []
       }
     });
