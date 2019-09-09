@@ -3,9 +3,7 @@ import Axios from 'axios';
 
 export default {
 	load(vue) {
-		console.log(process.env.VUE_APP_ROOT_API);
-		let uri = `/api`;
-		uri = 'http://localhost/squares/server/api/fields/markdown/load/';
+		const uri = '/fields/markdown/load';
 
 		Axios.get(uri, {
 			params: {

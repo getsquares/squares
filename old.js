@@ -211,20 +211,6 @@ Vue.component('file-browser', {
 
 			this.$emit('loaded', this.params);
 		},
-		parent() {
-			if (this.uri == '') return;
-
-			let parts = this.uri.split('/');
-			parts.pop();
-			let parent = parts.join('/');
-
-			this.uri = parent;
-			this.filename = '';
-		},
-		goto(name) {
-			this.filename = '';
-			this.uri = this.uri == '' ? name : this.uri + '/' + name;
-		},
 		
 	}
 });

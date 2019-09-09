@@ -4,9 +4,12 @@ module.exports = {
 	//publicPath: '/client/'
 	devServer: {
 		proxy: {
-			'/api': {
-				target: 'http://localhost/tools/squares2/server/get/value',
-				//target: 'http://localhost/squares/server',
+			'/fields/markdown/load': {
+				target: process.env.VUE_APP_ROOT_API + '/api/fields/markdown/load/index.php',
+				changeOrigin: true
+			},
+			'/fields/markdown/browse': {
+				target: process.env.VUE_APP_ROOT_API + '/api/fields/markdown/browse/index.php',
 				changeOrigin: true
 			}
 		}

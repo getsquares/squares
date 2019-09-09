@@ -2,10 +2,11 @@ export default {
 	namespaced: true,
 	state: {
 		showTree: false,
+		loading: false,
 		folders: [],
 		files: [],
-		trail: '',
 		filename: '',
+		uri: '',
 		alt: ''
 	},
 	mutations: {
@@ -24,9 +25,35 @@ export default {
 		alt(state, value) {
 			state.alt = value;
 		},
+		loading(state, value) {
+			state.loading = value;
+		},
 		filename(state, value) {
 			state.filename = value;
+		},
+		uri(state, name) {
+			state.uri = state.uri == '' ? name : state.uri + '/' + name;
+		},
+		backFolder(state) {
+			let parts = state.uri.split('/');
+			parts.pop();
+			let parent = parts.join('/');
+
+			state.uri = parent;
 		}
 	},
-	actions: {}
+	getters: {
+		trail: (state) => {
+			const slash = state.uri == '' ? '' : '/';
+			return state.uri + slash + state.filename;
+		}
+	},
+	actions: {
+		back(context) {
+			if (context.state.uri == '') return;
+
+			context.commit('backFolder');
+			context.commit('filename', '');
+		}
+	}
 };

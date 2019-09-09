@@ -16,9 +16,6 @@
         <v-table-location></v-table-location>
         <v-cell-target></v-cell-target>
       </ul>
-      <ul v-show="tree" class="field-markdown-breadcrumbs">
-        <li>{{ trail }}</li>
-      </ul>
     -->
   </div>
 </template>

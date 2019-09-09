@@ -1,51 +1,39 @@
 <template>
   <div class="tree" v-show="treeState">
     <!--
-    <div class="file-browser-breadcrumbs"></div>
-    <div class="folders">
-      <ul>
         <li @click="parent(); get();">
           ..
         </li>
-        <li v-for="folder in folders" @click="goto(folder.name); get();">
-          {{ folder.name }}
-        </li>
-      </ul>
-    </div>
-    <div class="files">
-      <ul>
-        <li v-for="file in files" @click="setFilename(file.name)" :class="{ active: filename == file.name }">
-          {{ file.name }}
-        </li>
-      </ul>
-    </div>
-    <div class="file-browser-bottom" v-if="filename != ''">
-      <div class="file-browser-alt">
-        <input placeholder="Alt text" type="text" v-model="alt" spellcheck="false">
-      </div>
-      <div class="file-browser-code">
-        <div tabindex="0" spellcheck="false">![{{ alt }}]({{ fileuri }})</div>
-      </div>
-      <div class="file-browser-preview">
         <img :src="src">
-      </div>
-    </div>
     -->
     <div class="folders">
       <ul>
-        <li v-for="folder in folders" :key="folder.name">{{ folder.name }}</li>
+        <li @click="back()" v-show="!isRoot && !loading">..</li>
+        <li
+          v-for="folder in folders"
+          :key="folder.name"
+          @click="goto(folder.name);"
+        >{{ folder.name }}</li>
       </ul>
     </div>
     <div class="files">
       <ul>
-        <li v-for="file in files" :key="file.name">{{ file.name }}</li>
+        <li
+          v-for="file in files"
+          :key="file.name"
+          @click="gotoFile(file.name);"
+          :class="{ active: filename == file.name }"
+        >{{ file.name }}</li>
       </ul>
     </div>
-    <footer>
+    {{ isRoot }}
+    <footer v-if="filename != ''">
       <div class="alt">
-        <input type="text" spellcheck="false" placeholder="Alt text" />
+        <input type="text" spellcheck="false" @keyup="setAlt($event)" placeholder="Alt text" />
       </div>
-      <div class="code"></div>
+      <div class="code">
+        <div tabindex="0" spellcheck="false">![{{ alt }}]({{ trail }})</div>
+      </div>
       <div class="preview"></div>
     </footer>
   </div>
@@ -66,32 +54,51 @@ export default {
     folders() {
       return this.$store.state["field/markdown/tree"].folders;
     },
+    filename() {
+      return this.$store.state["field/markdown/tree"].filename;
+    },
+    alt() {
+      return this.$store.state["field/markdown/tree"].alt;
+    },
     files() {
       return this.$store.state["field/markdown/tree"].files;
+    },
+    uri() {
+      return this.$store.state["field/markdown/tree"].uri;
+    },
+    loading() {
+      return this.$store.state["field/markdown/tree"].loading;
+    },
+    trail() {
+      return this.$store.getters["field/markdown/tree/trail"];
+    },
+    isRoot() {
+      const trail = this.$store.getters["field/markdown/tree/trail"];
+      const level = trail.split("/").length - 1;
+      return level == 0;
     }
   },
   methods: {
     load() {
-      let uri =
-        "http://localhost/squares/server/api/fields/markdown/browse/?uri=/";
+      this.$store.commit("field/markdown/tree/loading", true);
 
-      Axios.get(uri)
+      const uri = "/fields/markdown/browse";
+
+      //uri = base + "server/api/fields/markdown/browse/?uri=/";
+
+      console.log(this.uri);
+
+      Axios.get(uri, {
+        params: {
+          uri: this.uri
+        }
+      })
         .then(response => {
-          /*
-this.params = response.data;
-
-					this.files = response.data.files;
-					this.folders = response.data.folders;
-
-*/
+          console.log(response);
           this.$store.commit("field/markdown/tree/files", response.data.files);
           this.$store.commit(
             "field/markdown/tree/folders",
             response.data.folders
-          );
-          this.$store.commit(
-            "field/markdown/tree/trail",
-            response.data.breadcrumbs
           );
 
           let filename =
@@ -101,9 +108,39 @@ this.params = response.data;
           this.$store.commit("field/markdown/tree/filename", filename);
           //console.log(response);
           console.log(this.$store.state);
+
+          this.$store.commit("field/markdown/tree/loading", false);
         })
-        .catch(error => {})
+        .catch(error => {
+          console.log(error);
+        })
         .finally(() => {});
+    },
+    setUri(name) {
+      this.$store.commit("field/markdown/tree/uri", name);
+    },
+    setFilename(name) {
+      this.$store.commit("field/markdown/tree/filename", name);
+    },
+    setAlt(e) {
+      this.$store.commit("field/markdown/tree/alt", e.target.value);
+    },
+    back() {
+      if (this.loading) return;
+      this.$store.dispatch("field/markdown/tree/back");
+      this.load();
+    },
+    goto(name) {
+      if (this.loading) return;
+
+      this.setUri(name);
+      this.load();
+    },
+    gotoFile(name) {
+      if (this.loading) return;
+
+      this.setFilename(name);
+      //this.load();
     }
   }
 };

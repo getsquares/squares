@@ -42,7 +42,9 @@ class FileBrowserServer {
 
   // Breadcrumbs
   private function breadcrumbs() {
-    return explode('/', $this->data['uri']);
+    $exploded = explode('/', $this->data['uri']);
+    //array_filter($exploded);
+    return $exploded;
   }
 
   // Current
