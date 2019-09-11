@@ -1,22 +1,12 @@
 <template>
   <div class="fieldMarkdown view">
     <main>
-      <!--
-      <file-browser v-show="tree" @loaded="hasLoaded($event)"></file-browser>
-      -->
       <MarkdownTree></MarkdownTree>
       <MarkdownEditor></MarkdownEditor>
       <MarkdownSheet></MarkdownSheet>
     </main>
 
     <MarkdownFooter></MarkdownFooter>
-
-    <!--
-      <ul v-show="!tree">
-        <v-table-location></v-table-location>
-        <v-cell-target></v-cell-target>
-      </ul>
-    -->
   </div>
 </template>
 
@@ -65,7 +55,7 @@ export default {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  height: 100vh;
+  height: calc(100vh - 3rem);
 
   main {
     display: flex;

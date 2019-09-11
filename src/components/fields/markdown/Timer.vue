@@ -1,7 +1,8 @@
 <template>
   <div class="timeago">
-    <strong @click="reset()">Saved:</strong>
+    <strong>Saved:</strong>
     {{ ago }}
+    {{ $store.state['field/markdown/timer'].duration }}
   </div>
 </template>
 
@@ -18,9 +19,9 @@ export default {
     timer() {
       return this.state.timer;
     },
-    ticking() {
+    /*ticking() {
       return this.state.ticking;
-    },
+    },*/
     ago() {
       let timer = this.timer;
       var unit,
@@ -45,10 +46,8 @@ export default {
   },
   methods: {
     set() {
-      this.$store.commit("field/markdown/timer/set");
-    },
-    reset() {
-      this.$store.commit("field/markdown/timer/reset");
+      this.$store.commit("field/markdown/timer/timerSet");
+      this.$store.commit("field/markdown/timer/durationSet");
     }
   }
 };

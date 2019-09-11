@@ -1,8 +1,7 @@
 <template>
-  <div class="limit" :title="title">
+  <div class="limit" :title="title" :class="warningClass">
     <strong>Limit:</strong>
     <span
-      :class="warningClass"
       title="If this is turning red, increase the length to this field in your database."
     >{{ input.length }} / {{ limit }} bytes</span>
   </div>
@@ -29,7 +28,7 @@ export default {
       return this.$store.state["field/markdown/limit"].overflow;
     },
     warningClass() {
-      return { warning: this.overflow };
+      return { danger: this.overflow };
     },
     title() {
       if (this.overflow) {
@@ -48,10 +47,6 @@ export default {
   span {
     &:before {
       content: " ";
-    }
-
-    &.warning {
-      color: var(--color-danger);
     }
   }
 }

@@ -32,17 +32,46 @@ export default {
 };
 </script>
 
-<style lang="scss" scoped>
-.footer {
+<style lang="scss">
+.fieldMarkdown .footer {
   background: #eee;
   font-size: 13px;
   font-family: roboto;
-  padding: 5px;
+  height: 3rem;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
 
   display: flex;
+  align-items: center;
+  border-top: 1px solid #ddd;
+  box-sizing: border-box;
 
   > * {
-    padding: 0 0.75rem;
+    padding: 0.5rem 0.75rem;
+    margin: 0 0.5rem;
+    border-radius: 3px;
+
+    &.warning,
+    &.danger,
+    &.success {
+      strong,
+      span {
+        color: #fff;
+      }
+    }
+
+    &.warning {
+      background-color: var(--color-warning);
+    }
+
+    &.danger {
+      background-color: var(--color-danger);
+    }
+
+    &.success {
+      background-color: var(--color-success);
+    }
   }
 }
 </style>

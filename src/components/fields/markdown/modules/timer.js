@@ -2,29 +2,39 @@ export default {
 	namespaced: true,
 	state: {
 		timeObject: null,
-		ticking: true,
-		timer: 0
-		//savedTime: Date.now()
+		durationObject: null,
+		timer: 0,
+		duration: 0
 	},
 	mutations: {
-		set(state) {
+		timerSet(state) {
 			clearInterval(state.timeObject);
 			state.timeObject = setInterval(() => {
-				if (!state.ticking) return;
 				state.timer++;
 			}, 1000);
 		},
-		apppend(state) {
+		timerApppend(state) {
 			state.timer++;
 		},
-		reset(state) {
-			state.ticking = true;
+		timerReset(state) {
 			state.timer = 0;
+		},
+		durationSet(state) {
+			clearInterval(state.durationObject);
+			state.durationObject = setInterval(() => {
+				state.duration++;
+			}, 1000);
+		},
+		durationAppend(state) {
+			state.duration++;
+		},
+		durationReset(state) {
+			state.duration = 0;
 		}
 	},
 	actions: {
 		reset() {
-			this.$store.commit('field/markdown/timer/reset');
+			//this.$store.commit('field/markdown/timer/timerReset');
 		}
 	}
 };

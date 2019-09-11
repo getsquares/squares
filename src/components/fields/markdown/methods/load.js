@@ -1,4 +1,3 @@
-//import Vue from 'vue';
 import Axios from 'axios';
 
 export default {
@@ -24,7 +23,8 @@ export default {
 
 				console.log(vue.$store.state);
 
-				vue.$store.commit('field/markdown/timer/reset');
+				vue.$store.commit('field/markdown/timer/timerReset');
+				vue.$store.commit('field/markdown/timer/durationReset');
 				console.log('SUCCESS');
 				console.log(response);
 			})

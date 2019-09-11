@@ -1,18 +1,14 @@
 <template>
   <div class="tree" v-show="treeState">
-    <!--
-        <li @click="parent(); get();">
-          ..
-        </li>
-        <img :src="src">
-    -->
+    A{{foldername}}A
     <div class="folders">
       <ul>
-        <li @click="back()" v-show="!isRoot && !loading">..</li>
+        <li @click="back()" v-show="!isRoot" :class="{ loading: foldername == '' && loading }">..</li>
         <li
           v-for="folder in folders"
           :key="folder.name"
-          @click="goto(folder.name);"
+          @click="gotoFolder(folder.name);"
+          :class="{ loading: foldername == folder.name }"
         >{{ folder.name }}</li>
       </ul>
     </div>
@@ -26,7 +22,6 @@
         >{{ file.name }}</li>
       </ul>
     </div>
-    {{ isRoot }}
     <footer v-if="filename != ''">
       <div class="alt">
         <input type="text" spellcheck="false" @keyup="setAlt($event)" placeholder="Alt text" />
@@ -34,7 +29,9 @@
       <div class="code">
         <div tabindex="0" spellcheck="false">![{{ alt }}]({{ trail }})</div>
       </div>
-      <div class="preview"></div>
+      <div class="preview">
+        <img :src="imageUrl" />
+      </div>
     </footer>
   </div>
 </template>
@@ -57,6 +54,9 @@ export default {
     filename() {
       return this.$store.state["field/markdown/tree"].filename;
     },
+    foldername() {
+      return this.$store.state["field/markdown/tree"].foldername;
+    },
     alt() {
       return this.$store.state["field/markdown/tree"].alt;
     },
@@ -72,21 +72,17 @@ export default {
     trail() {
       return this.$store.getters["field/markdown/tree/trail"];
     },
+    imageUrl() {
+      return "/fields/markdown/get/image/?path=" + encodeURI(this.trail);
+    },
     isRoot() {
-      const trail = this.$store.getters["field/markdown/tree/trail"];
-      const level = trail.split("/").length - 1;
-      return level == 0;
+      return this.$store.state["field/markdown/tree"].breadcrumbs == null;
     }
   },
   methods: {
     load() {
       this.$store.commit("field/markdown/tree/loading", true);
-
       const uri = "/fields/markdown/browse";
-
-      //uri = base + "server/api/fields/markdown/browse/?uri=/";
-
-      console.log(this.uri);
 
       Axios.get(uri, {
         params: {
@@ -94,7 +90,6 @@ export default {
         }
       })
         .then(response => {
-          console.log(response);
           this.$store.commit("field/markdown/tree/files", response.data.files);
           this.$store.commit(
             "field/markdown/tree/folders",
@@ -106,8 +101,10 @@ export default {
               ? response.data.current.name
               : "";
           this.$store.commit("field/markdown/tree/filename", filename);
-          //console.log(response);
-          console.log(this.$store.state);
+          this.$store.commit(
+            "field/markdown/tree/breadcrumbs",
+            response.data.breadcrumbs
+          );
 
           this.$store.commit("field/markdown/tree/loading", false);
         })
@@ -125,13 +122,18 @@ export default {
     setAlt(e) {
       this.$store.commit("field/markdown/tree/alt", e.target.value);
     },
+    setFoldername(name) {
+      this.$store.commit("field/markdown/tree/foldername", name);
+    },
     back() {
       if (this.loading) return;
       this.$store.dispatch("field/markdown/tree/back");
       this.load();
     },
-    goto(name) {
+    gotoFolder(name) {
       if (this.loading) return;
+
+      this.setFoldername(name);
 
       this.setUri(name);
       this.load();
@@ -140,7 +142,6 @@ export default {
       if (this.loading) return;
 
       this.setFilename(name);
-      //this.load();
     }
   }
 };
@@ -155,13 +156,14 @@ export default {
   flex-direction: column;
   overflow: auto;
   font-family: roboto;
+  position: relative;
 
   ul {
     list-style: none;
 
     li {
       padding: 0.5rem 1rem;
-      padding-left: calc(16px + 1rem);
+      //padding-left: calc(16px + 1rem);
 
       display: flex;
       color: #333;
@@ -173,6 +175,16 @@ export default {
 
       user-select: none;
 
+      &:before {
+        content: "";
+        width: 1rem;
+        height: 1rem;
+
+        background-repeat: no-repeat;
+        background-size: 16px;
+        margin-right: 0.5rem;
+      }
+
       &:hover {
         background-color: #ddd;
       }
@@ -181,13 +193,25 @@ export default {
 
   .folders {
     li {
-      background-image: url("../../../assets/icomoon/048-folder.svg");
+      &:before {
+        background-image: url("../../../assets/icomoon/048-folder.svg");
+      }
+
+      &.loading {
+        &:before {
+          background-image: url("../../../assets/icomoon/131-spinner9.svg");
+          opacity: 1;
+          animation: spin 2s linear infinite;
+        }
+      }
     }
   }
 
   .files {
     li {
-      background-image: url("../../../assets/icomoon/035-file-text.svg");
+      &:before {
+        background-image: url("../../../assets/icomoon/035-file-text.svg");
+      }
 
       &.active {
         background-color: #ccc;
@@ -241,6 +265,30 @@ export default {
         box-sizing: border-box;
       }
     }
+  }
+}
+
+.indicator {
+  height: 8px;
+  width: 8px;
+  background: black;
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  margin: 0;
+  border-radius: 100vh;
+
+  &.spinning {
+    background-color: transparent;
+    background-image: url("../../../assets/icomoon/131-spinner9.svg");
+    opacity: 1;
+    animation: spin 2s linear infinite;
+  }
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
   }
 }
 </style>

@@ -30,9 +30,6 @@ class FileBrowserServer {
     $this->data['uri'] = str_replace('\\', '/', $this->data['uri']);
     $this->data['uri'] = trim($this->data['uri'], '/');
     $this->options['root'] = trim($this->options['root'], '/');
-
-    /*echo $this->options['root'];
-    die;*/
   }
 
   // Path
@@ -42,8 +39,8 @@ class FileBrowserServer {
 
   // Breadcrumbs
   private function breadcrumbs() {
+    if(empty($this->data['uri'])) return;
     $exploded = explode('/', $this->data['uri']);
-    //array_filter($exploded);
     return $exploded;
   }
 

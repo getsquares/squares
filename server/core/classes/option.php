@@ -48,3 +48,16 @@ class Option {
     return ($this->isAllowedDb() && $this->isAllowedTable());
   }
 }
+
+class settings {
+  // Load
+  public function load() {
+    return json_decode(file_get_contents(__DIR__ . '/../../../options.json'), true);
+  }
+
+  // Credentials
+  public function credentials($db_name, $options) {
+    $options['db'][$db_name]['name'] = $db_name;
+    return $options['db'][$db_name];
+  }
+}

@@ -3,11 +3,13 @@ export default {
 	state: {
 		showTree: false,
 		loading: false,
+		foldername: null,
 		folders: [],
 		files: [],
 		filename: '',
 		uri: '',
-		alt: ''
+		alt: '',
+		breadcrumbs: []
 	},
 	mutations: {
 		setTreeState(state, value) {
@@ -28,8 +30,14 @@ export default {
 		loading(state, value) {
 			state.loading = value;
 		},
+		breadcrumbs(state, value) {
+			state.breadcrumbs = value;
+		},
 		filename(state, value) {
 			state.filename = value;
+		},
+		foldername(state, value) {
+			state.foldername = value;
 		},
 		uri(state, name) {
 			state.uri = state.uri == '' ? name : state.uri + '/' + name;
@@ -54,6 +62,7 @@ export default {
 
 			context.commit('backFolder');
 			context.commit('filename', '');
+			context.commit('foldername', '');
 		}
 	}
 };

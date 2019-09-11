@@ -119,3 +119,45 @@ class DB {
     return $this->conn;
   }
 }
+
+class database {
+  // Connect
+  public static function connect($args) {
+    $charset = (isset($args['charset'])) ? $args['charset'] : 'utf8mb4';
+    $db = new PDO(
+      sprintf(
+        'mysql:host=%s;dbname=%s;charset=%s',
+        $args['host'],
+        $args['name'],
+        $charset
+      ),
+      $args['user'],
+      $args['pass']
+    );
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+    $db->setAttribute(PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
+
+    return $db;
+  }
+
+  // Update
+  public static function update($db, $sql, $value) {
+    $stmt = $db->prepare($sql);
+    $stmt->bindParam(':value', $value);
+    $stmt->execute();
+  }
+
+  // Validate
+  public static function validate($db, $sql, $column, $cell_value) {
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    $value = $row[$column];
+
+    if($value !== $cell_value) {
+      http_response_code(500);
+      die('Could not save value correctly to database');
+    }
+  }
+}
