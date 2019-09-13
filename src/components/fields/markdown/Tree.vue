@@ -109,7 +109,7 @@ export default {
           this.$store.commit("field/markdown/tree/loading", false);
         })
         .catch(error => {
-          console.log(error);
+          //console.log(error);
         })
         .finally(() => {});
     },
@@ -163,7 +163,6 @@ export default {
 
     li {
       padding: 0.5rem 1rem;
-      //padding-left: calc(16px + 1rem);
 
       display: flex;
       color: #333;

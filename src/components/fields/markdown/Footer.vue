@@ -55,6 +55,7 @@ export default {
     &.warning,
     &.danger,
     &.success {
+      color: #fff;
       strong,
       span {
         color: #fff;

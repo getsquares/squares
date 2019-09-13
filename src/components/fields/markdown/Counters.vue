@@ -1,7 +1,7 @@
 <template>
-  <div class="counters">
-    <strong>Counters:</strong>
-    {{ countWords }} words, {{ countChars }} chars
+  <div class="counters" :class="stateClass">
+    <strong>Word Count:</strong>
+    {{ wordcount }} words
   </div>
 </template>
 
@@ -14,19 +14,36 @@ export default {
     input() {
       return this.$store.state["field/markdown/editor"].input;
     },
-    sanitized() {
-      let markdown = Marked(this.input);
-      return markdown.replace(/(\r\n|\n|\r)/gm, " ");
+    wordcount() {
+      return this.$store.state["field/markdown/editor"].wordcount;
     },
-    countWords() {
-      let code = this.sanitized;
+    options() {
+      return this.$store.state["field/markdown/editor"].options;
+    },
+    stateClass() {
+      let match = "none";
+      let stateClass = {};
 
-      return code.split(" ").filter(function(n) {
-        return n != "";
-      }).length;
-    },
-    countChars() {
-      return this.sanitized.length;
+      for (let option in this.options.words) {
+        let words = this.options.words[option];
+
+        if (this.wordcount > words.min) {
+          if (!("max" in this.options.words[option])) {
+            match = option;
+          } else if (this.wordcount < words.max) {
+            match = option;
+          }
+        }
+      }
+      console.log(match);
+      if (match == "warning") {
+        stateClass = { warning: true };
+      } else if (match == "danger") {
+        stateClass = { danger: true };
+      } else if (match == "success") {
+        stateClass = { success: true };
+      }
+      return stateClass;
     }
   }
 };

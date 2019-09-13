@@ -17,8 +17,11 @@ module.exports = {
 				changeOrigin: true
 			},
 			'/fields/markdown/save': {
-				// Not implemented yet
 				target: process.env.VUE_APP_ROOT_API + '/api/fields/markdown/save/index.php',
+				changeOrigin: true
+			},
+			'/fields/markdown/get/options': {
+				target: process.env.VUE_APP_ROOT_API + '/api/fields/markdown/get/options/index.php',
 				changeOrigin: true
 			}
 		}

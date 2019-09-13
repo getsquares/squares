@@ -3,7 +3,7 @@
     <button class="close" @click="close()">
       <img src="../../../assets/icomoon/272-cross.svg" />
     </button>
-    <div class="preview" v-html="input"></div>
+    <div v-html="input" class="preview" :class="previewClass"></div>
     <MarkdownIndicator></MarkdownIndicator>
   </div>
 </template>
@@ -40,6 +40,19 @@ export default {
       });
 
       return marked;
+    },
+    options() {
+      return this.$store.state["field/markdown/editor"].options;
+    },
+    css() {
+      if (!("preview" in this.$store.state["field/markdown/editor"].options))
+        return;
+      return this.$store.state["field/markdown/editor"].options.preview.css;
+    },
+    previewClass() {
+      return {
+        default: !this.css
+      };
     }
   },
   methods: {
@@ -51,11 +64,13 @@ export default {
 </script>
 
 <style lang="scss">
+@import "https://example.com/css";
+
 .fieldMarkdown {
   .sheet {
     overflow-x: auto;
   }
-  .preview {
+  .preview.default {
     font-size: 17px;
     font-family: roboto;
     color: #333;

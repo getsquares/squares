@@ -19,18 +19,16 @@ export default {
 
 				vue.$store.commit('field/markdown/editor/input', response.data.value);
 				vue.$store.commit('field/markdown/editor/buffer', response.data.value);
+				vue.$store.commit('field/markdown/editor/wordcount');
 				vue.$store.commit('field/markdown/limit/max', response.data.length);
-
-				console.log(vue.$store.state);
-
 				vue.$store.commit('field/markdown/timer/timerReset');
 				vue.$store.commit('field/markdown/timer/durationReset');
-				console.log('SUCCESS');
-				console.log(response);
+				//console.log('SUCCESS');
+				//console.log(response);
 			})
 			.catch((error) => {
-				console.log('ERROR');
-				console.log(error);
+				//console.log('ERROR');
+				//console.log(error);
 			})
 			.finally(() => {
 				//this.resetTimer();

@@ -8,12 +8,24 @@
 </template>
 
 <script>
-//import Marked from "marked";
-
 export default {
   name: "MarkdownLimit",
-  components: {
-    //Marked
+  created() {
+    this.$store.registerModule("field/markdown/limit", {
+      namespaced: true,
+      state: {
+        overflow: false,
+        max: 0
+      },
+      mutations: {
+        overflow(state, value) {
+          state.overflow = value;
+        },
+        max(state, value) {
+          state.max = value;
+        }
+      }
+    });
   },
   computed: {
     limit() {
@@ -24,7 +36,6 @@ export default {
       return this.$store.state["field/markdown/editor"].input;
     },
     overflow() {
-      console.log(this.$store.state["field/markdown/limit"]);
       return this.$store.state["field/markdown/limit"].overflow;
     },
     warningClass() {

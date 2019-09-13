@@ -6,6 +6,8 @@
       @input="update"
       spellcheck="false"
       @keydown.ctrl.83.prevent="save()"
+      @keydown.tab.shift.prevent
+      @keydown.tab.exact.prevent="tabRight($event)"
     ></textarea>
     <button class="tree" @click="toggleTree()">
       <img src="../../../assets/icomoon/040-file-picture.svg" />
@@ -16,20 +18,20 @@
 
 <script>
 import MethodsSave from "@/components/fields/markdown/methods/save.js";
-import MethodsLoad from "@/components/fields/markdown/methods/load.js";
 
 export default {
   components: {},
   mounted() {
     this.$refs.input.focus();
-    MethodsLoad.load(this);
-    MethodsSave.saveWatch(this);
+    /*MethodsLoad.load(this);
+    MethodsSave.saveWatch(this);*/
   },
   methods: {
     update(e) {
       this.$store.commit("field/markdown/editor/input", e.target.value);
       this.overflow();
       this.indicate();
+      this.wordcount();
     },
     indicate() {
       if (this.$store.state["field/markdown/limit"].overflow) {
@@ -49,6 +51,23 @@ export default {
     },
     toggleTree() {
       this.$store.commit("field/markdown/tree/setTreeState", !this.showTree);
+    },
+    wordcount() {
+      this.$store.commit("field/markdown/editor/wordcount");
+    },
+    tabRight(event) {
+      let text = this.input,
+        originalSelectionStart = event.target.selectionStart,
+        textStart = text.slice(0, originalSelectionStart),
+        textEnd = text.slice(originalSelectionStart);
+
+      this.$store.commit(
+        "field/markdown/editor/input",
+        `${textStart}\t${textEnd}`
+      );
+      event.target.value = this.input; // required to make the cursor stay in place.
+      event.target.selectionEnd = event.target.selectionStart =
+        originalSelectionStart + 1;
     }
   },
   computed: {
