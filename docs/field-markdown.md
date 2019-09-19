@@ -83,3 +83,11 @@ The options is placed under fields/markdown like below.
   }
 }
 ```
+
+## Markdown docs
+
+I throw in some guides on how to write markdown.
+
+- https://www.markdownguide.org/basic-syntax/
+- https://guides.github.com/features/mastering-markdown/
+- https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet

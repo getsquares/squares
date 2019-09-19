@@ -3,8 +3,8 @@ import Vuex from 'vuex';
 
 // Browser
 import Browser from './components/fields/markdown/modules/browser/browser';
-import Files from './components/fields/markdown/modules/browser/files';
-import Folders from './components/fields/markdown/modules/browser/folders';
+//import Files from './components/fields/markdown/modules/browser/files';
+//import Folders from './components/fields/markdown/modules/browser/folders';
 
 import Editor from './components/fields/markdown/modules/editor';
 
@@ -19,8 +19,8 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
 	modules: {
-		'field/markdown/files': Files,
-		'field/markdown/folders': Folders,
+		//'field/markdown/files': Files,
+		//'field/markdown/folders': Folders,
 		'field/markdown/browser': Browser,
 		'field/markdown/editor': Editor,
 		'field/markdown/limit': Limit,

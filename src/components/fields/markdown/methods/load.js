@@ -16,6 +16,7 @@ export default {
 				vue.$store.commit('field/markdown/editor/input', response.data.value);
 				vue.$store.commit('field/markdown/editor/buffer', response.data.value);
 				vue.$store.commit('field/markdown/editor/html');
+				vue.$store.commit('field/markdown/editor/sanitize', vue.$store.state['field/markdown/editor'].html);
 
 				let html = vue.$store.state['field/markdown/editor'].html;
 

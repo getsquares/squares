@@ -1,5 +1,5 @@
 <template>
-  <div class="tree" v-show="treeState">
+  <div class="tree" v-show="browserState" @click="focus()">
     <BrowserFolders></BrowserFolders>
     <BrowserFiles></BrowserFiles>
     <footer v-if="filename != ''">
@@ -26,15 +26,24 @@ export default {
     BrowserFiles,
     BrowserFolders
   },
+  updated: function() {
+    this.$nextTick(function() {
+      this.$store.commit("field/markdown/editor/large");
+    });
+  },
   computed: {
-    treeState() {
-      return this.$store.state["field/markdown/browser"].showTree;
+    browserState() {
+      return this.$store.state["field/markdown/browser"].browserState;
     },
     filename() {
-      return this.$store.state["field/markdown/files"].filename;
+      return this.$store.state["field/markdown/browser"].filename;
     }
   },
-  methods: {}
+  methods: {
+    focus() {
+      this.$store.commit("field/markdown/editor/focus", "browser");
+    }
+  }
 };
 </script>
 

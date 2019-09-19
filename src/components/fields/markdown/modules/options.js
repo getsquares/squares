@@ -8,7 +8,7 @@ export default {
 			},
 			editor: {
 				spellcheck: false,
-				width: '900px'
+				width: 900
 			},
 			revisions: {
 				path: 'revisions/markdown',

@@ -45,7 +45,7 @@ export default {
         },
         editor: {
           spellcheck: false,
-          width: "900px"
+          width: 900
         },
         revisions: {
           path: "revisions/markdown",
@@ -132,12 +132,16 @@ export default {
       right: 0;
       border: none;
       padding: calc(2rem - 8px);
+      padding-right: calc(2rem - 8px - 17px);
       background: transparent;
       opacity: 0.25;
       font-size: 17px;
       display: flex;
       outline: none;
       width: 64px;
+      margin-right: 17px;
+      display: flex;
+      justify-content: center;
 
       &:hover {
         opacity: 1;

@@ -18,7 +18,7 @@
 				"custom": "test"
 			},
 			"editor": {
-				"spellcheck": true
+				"spellcheck": false
 			},
 			"revisions": {
 				"path": "revisions/markdown",

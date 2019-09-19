@@ -1,11 +1,14 @@
 <template>
   <nav class="footer">
-    <MarkdownLocation v-show="!treeState"></MarkdownLocation>
-    <Breadcrumbs v-show="treeState"></Breadcrumbs>
-    <MarkdownTimer></MarkdownTimer>
-    <MarkdownWordcount></MarkdownWordcount>
-    <MarkdownImages></MarkdownImages>
-    <MarkdownLimit></MarkdownLimit>
+    <Breadcrumbs v-if="focus == 'browser'"></Breadcrumbs>
+    <template v-if="focus == 'editor'">
+      <MarkdownLocation></MarkdownLocation>
+      <MarkdownTimer></MarkdownTimer>
+      <MarkdownWordcount></MarkdownWordcount>
+      <Chars></Chars>
+      <MarkdownImages></MarkdownImages>
+      <MarkdownLimit></MarkdownLimit>
+    </template>
   </nav>
 </template>
 
@@ -16,6 +19,7 @@ import MarkdownWordcount from "@/components/fields/markdown/footer/Words.vue";
 import MarkdownImages from "@/components/fields/markdown/footer/Images.vue";
 import MarkdownLimit from "@/components/fields/markdown/footer/Limit.vue";
 import Breadcrumbs from "@/components/fields/markdown/footer/Breadcrumbs.vue";
+import Chars from "@/components/fields/markdown/footer/Chars.vue";
 
 export default {
   name: "MarkdownFooter",
@@ -25,11 +29,15 @@ export default {
     MarkdownTimer,
     MarkdownLocation,
     MarkdownLimit,
-    Breadcrumbs
+    Breadcrumbs,
+    Chars
   },
   computed: {
-    treeState() {
-      return this.$store.state["field/markdown/browser"].showTree;
+    browserState() {
+      return this.$store.state["field/markdown/browser"].browserState;
+    },
+    focus() {
+      return this.$store.state["field/markdown/editor"].focus;
     }
   }
 };
@@ -54,6 +62,7 @@ export default {
     padding: 0.5rem 0.75rem;
     margin: 0 0.5rem;
     border-radius: 3px;
+    user-select: none;
 
     &.warning,
     &.danger,

@@ -21,10 +21,10 @@ export default {
   },
   computed: {
     folders() {
-      return this.$store.state["field/markdown/folders"].folders;
+      return this.$store.state["field/markdown/browser"].folders;
     },
     foldername() {
-      return this.$store.state["field/markdown/folders"].foldername;
+      return this.$store.state["field/markdown/browser"].foldername;
     },
     isRoot() {
       return this.$store.state["field/markdown/browser"].breadcrumbs == null;
@@ -47,9 +47,12 @@ export default {
         }
       })
         .then(response => {
-          this.$store.commit("field/markdown/files/files", response.data.files);
           this.$store.commit(
-            "field/markdown/folders/folders",
+            "field/markdown/browser/files",
+            response.data.files
+          );
+          this.$store.commit(
+            "field/markdown/browser/folders",
             response.data.folders
           );
 
@@ -57,7 +60,7 @@ export default {
             response.data.current.type == "file"
               ? response.data.current.name
               : "";
-          this.$store.commit("field/markdown/files/filename", filename);
+          this.$store.commit("field/markdown/browser/filename", filename);
           this.$store.commit(
             "field/markdown/browser/breadcrumbs",
             response.data.breadcrumbs
@@ -73,8 +76,8 @@ export default {
 
       if (this.$store.state["field/markdown/browser"].uri == "") return;
 
-      this.$store.commit("field/markdown/files/filename", "");
-      this.$store.commit("field/markdown/folders/foldername", "");
+      this.$store.commit("field/markdown/browser/filename", "");
+      this.$store.commit("field/markdown/browser/foldername", "");
       this.$store.commit("field/markdown/browser/back");
       this.load();
     },
@@ -82,12 +85,12 @@ export default {
       if (this.loading) return;
 
       this.setFoldername(name);
-
       this.setUri(name);
+      this.$store.commit("field/markdown/editor/focus", "browser");
       this.load();
     },
     setFoldername(name) {
-      this.$store.commit("field/markdown/folders/foldername", name);
+      this.$store.commit("field/markdown/browser/foldername", name);
     },
     setUri(name) {
       this.$store.commit("field/markdown/browser/uri", name);

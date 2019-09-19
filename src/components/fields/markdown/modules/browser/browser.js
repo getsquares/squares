@@ -1,19 +1,35 @@
 export default {
 	namespaced: true,
 	state: {
-		showTree: false,
+		browserState: false,
 		loading: false,
 		uri: '',
 		alt: '',
 		trail: '',
-		breadcrumbs: []
+		breadcrumbs: [],
+		files: [],
+		filename: '',
+		foldername: null,
+		folders: []
 	},
 	mutations: {
+		folders(state, value) {
+			state.folders = value;
+		},
+		foldername(state, value) {
+			state.foldername = value;
+		},
+		files(state, value) {
+			state.files = value;
+		},
+		filename(state, value) {
+			state.filename = value;
+		},
 		alt(state, value) {
 			state.alt = value;
 		},
-		setTreeState(state, value) {
-			state.showTree = value;
+		browserState(state, value) {
+			state.browserState = value;
 		},
 		loading(state, value) {
 			state.loading = value;
@@ -35,11 +51,10 @@ export default {
 
 			state.uri = parent;
 		}
-	}
-	/*getters: {
-		trail: (state, filename) => {
-			const slash = state.uri == '' ? '' : '/';
-			return state.uri + slash + filename;
+	},
+	getters: {
+		trail(state) {
+			return state.uri + (state.uri == '' ? '' : '/') + state.filename;
 		}
-	}*/
+	}
 };

@@ -16,10 +16,10 @@ export default {
   name: "BrowserFiles",
   computed: {
     files() {
-      return this.$store.state["field/markdown/files"].files;
+      return this.$store.state["field/markdown/browser"].files;
     },
     filename() {
-      return this.$store.state["field/markdown/files"].filename;
+      return this.$store.state["field/markdown/browser"].filename;
     },
     loading() {
       return this.$store.state["field/markdown/browser"].loading;
@@ -32,7 +32,7 @@ export default {
       this.setFilename(name);
     },
     setFilename(name) {
-      this.$store.commit("field/markdown/files/filename", name);
+      this.$store.commit("field/markdown/browser/filename", name);
     }
   }
 };

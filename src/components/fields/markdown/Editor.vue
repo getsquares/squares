@@ -8,11 +8,12 @@
       @keydown.ctrl.83.prevent="save()"
       @keydown.tab.shift.prevent
       @keydown.tab.exact.prevent="tabRight($event)"
+      @focus="setFocus"
+      :class="editorClass"
     ></textarea>
     <button class="tree" @click="toggleTree()">
       <img src="../../../assets/icomoon/040-file-picture.svg" />
     </button>
-    {{ showTree }}
   </div>
 </template>
 
@@ -22,13 +23,18 @@ import MethodsSave from "@/components/fields/markdown/methods/save.js";
 export default {
   mounted() {
     this.$refs.input.focus();
-    /*MethodsLoad.load(this);
-    MethodsSave.saveWatch(this);*/
+    window.addEventListener("resize", () => {
+      this.$store.commit("field/markdown/editor/large");
+    });
+
+    this.$store.commit("field/markdown/editor/large");
   },
+
   methods: {
     update(e) {
       this.$store.commit("field/markdown/editor/input", e.target.value);
       this.$store.commit("field/markdown/editor/html");
+      this.$store.commit("field/markdown/editor/sanitize", this.html);
       this.overflow();
       this.indicate();
       this.wordcount();
@@ -52,12 +58,17 @@ export default {
       MethodsSave.saveNow(this);
     },
     toggleTree() {
-      this.$store.commit("field/markdown/browser/setTreeState", !this.showTree);
+      this.$store.commit(
+        "field/markdown/browser/browserState",
+        !this.browserState
+      );
     },
     wordcount() {
-      this.$store.commit("field/markdown/words/wordcount", this.html);
+      this.$store.commit("field/markdown/words/wordcount");
     },
-
+    setFocus() {
+      this.$store.commit("field/markdown/editor/focus", "editor");
+    },
     tabRight(event) {
       let text = this.input,
         originalSelectionStart = event.target.selectionStart,
@@ -74,12 +85,16 @@ export default {
     }
   },
   computed: {
+    editorClass() {
+      return {
+        large: this.$store.state["field/markdown/editor"].large
+      };
+    },
     spellcheck() {
-      if (!this.$store.state["field/markdown"]) return;
-
-      if (!("editor" in this.$store.state["field/markdown"])) return;
-      return this.$store.state["field/markdown/options"].options.editor
-        .spellcheck;
+      return this.options.editor.spellcheck;
+    },
+    options() {
+      return this.$store.state["field/markdown/options"].options;
     },
     input() {
       return this.$store.state["field/markdown/editor"].input;
@@ -87,8 +102,8 @@ export default {
     html() {
       return this.$store.state["field/markdown/editor"].html;
     },
-    showTree() {
-      return this.$store.state["field/markdown/browser"].showTree;
+    browserState() {
+      return this.$store.state["field/markdown/browser"].browserState;
     },
     limit() {
       return this.$store.state["field/markdown/limit"].max;
@@ -103,6 +118,7 @@ export default {
     resize: none;
     border: none;
     outline: none;
+    overflow-y: auto;
 
     width: 100%;
     height: 100%;
@@ -112,8 +128,11 @@ export default {
 
     background: #f7f7f7;
     padding: 4rem;
-    padding-right: calc(100% - 900px - 4rem);
     box-sizing: border-box;
+
+    &.large {
+      padding-right: calc(100% - 900px - 4rem);
+    }
   }
 }
 </style>
