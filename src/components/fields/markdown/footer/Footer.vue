@@ -3,22 +3,25 @@
     <MarkdownLocation v-show="!treeState"></MarkdownLocation>
     <Breadcrumbs v-show="treeState"></Breadcrumbs>
     <MarkdownTimer></MarkdownTimer>
-    <MarkdownCounters></MarkdownCounters>
+    <MarkdownWordcount></MarkdownWordcount>
+    <MarkdownImages></MarkdownImages>
     <MarkdownLimit></MarkdownLimit>
   </nav>
 </template>
 
 <script>
-import MarkdownLocation from "@/components/fields/markdown/Location.vue";
-import MarkdownTimer from "@/components/fields/markdown/Timer.vue";
-import MarkdownCounters from "@/components/fields/markdown/Counters.vue";
-import MarkdownLimit from "@/components/fields/markdown/Limit.vue";
-import Breadcrumbs from "@/components/fields/markdown/Breadcrumbs.vue";
+import MarkdownLocation from "@/components/fields/markdown/footer/Location.vue";
+import MarkdownTimer from "@/components/fields/markdown/footer/Timer.vue";
+import MarkdownWordcount from "@/components/fields/markdown/footer/Words.vue";
+import MarkdownImages from "@/components/fields/markdown/footer/Images.vue";
+import MarkdownLimit from "@/components/fields/markdown/footer/Limit.vue";
+import Breadcrumbs from "@/components/fields/markdown/footer/Breadcrumbs.vue";
 
 export default {
   name: "MarkdownFooter",
   components: {
-    MarkdownCounters,
+    MarkdownWordcount,
+    MarkdownImages,
     MarkdownTimer,
     MarkdownLocation,
     MarkdownLimit,
@@ -26,7 +29,7 @@ export default {
   },
   computed: {
     treeState() {
-      return this.$store.state["field/markdown/tree"].showTree;
+      return this.$store.state["field/markdown/browser"].showTree;
     }
   }
 };

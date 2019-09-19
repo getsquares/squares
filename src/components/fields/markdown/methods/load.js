@@ -13,26 +13,20 @@ export default {
 			}
 		})
 			.then((response) => {
-				/*this.input = response.data;
-          this.buffer = this.input;
-          */
-
 				vue.$store.commit('field/markdown/editor/input', response.data.value);
 				vue.$store.commit('field/markdown/editor/buffer', response.data.value);
-				vue.$store.commit('field/markdown/editor/wordcount');
+				vue.$store.commit('field/markdown/editor/html');
+
+				let html = vue.$store.state['field/markdown/editor'].html;
+
+				vue.$store.commit('field/markdown/words/wordcount', html);
 				vue.$store.commit('field/markdown/limit/max', response.data.length);
 				vue.$store.commit('field/markdown/timer/timerReset');
 				vue.$store.commit('field/markdown/timer/durationReset');
-				//console.log('SUCCESS');
-				//console.log(response);
+				vue.$store.commit('field/markdown/editor/html');
 			})
-			.catch((error) => {
-				//console.log('ERROR');
-				//console.log(error);
-			})
-			.finally(() => {
-				//this.resetTimer();
-			});
+			.catch((error) => {})
+			.finally(() => {});
 	}
 };
 

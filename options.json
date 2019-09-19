@@ -17,6 +17,9 @@
 			"preview": {
 				"custom": "test"
 			},
+			"editor": {
+				"spellcheck": true
+			},
 			"revisions": {
 				"path": "revisions/markdown",
 				"limit": 5

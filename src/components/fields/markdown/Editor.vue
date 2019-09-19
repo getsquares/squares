@@ -4,7 +4,7 @@
       ref="input"
       :value="input"
       @input="update"
-      spellcheck="false"
+      :spellcheck="spellcheck"
       @keydown.ctrl.83.prevent="save()"
       @keydown.tab.shift.prevent
       @keydown.tab.exact.prevent="tabRight($event)"
@@ -20,7 +20,6 @@
 import MethodsSave from "@/components/fields/markdown/methods/save.js";
 
 export default {
-  components: {},
   mounted() {
     this.$refs.input.focus();
     /*MethodsLoad.load(this);
@@ -29,6 +28,7 @@ export default {
   methods: {
     update(e) {
       this.$store.commit("field/markdown/editor/input", e.target.value);
+      this.$store.commit("field/markdown/editor/html");
       this.overflow();
       this.indicate();
       this.wordcount();
@@ -37,9 +37,11 @@ export default {
       if (this.$store.state["field/markdown/limit"].overflow) {
         this.$store.commit("field/markdown/indicator/setType", "warning");
       } else {
-        const pending = this.$store.getters["field/markdown/editor/pending"];
-        const value = pending ? "pending" : "success";
-        this.$store.commit("field/markdown/indicator/setType", value);
+        if (this.$store.state["field/markdown/editor"].input) {
+          const pending = this.$store.getters["field/markdown/editor/pending"];
+          const value = pending ? "pending" : "success";
+          this.$store.commit("field/markdown/indicator/setType", value);
+        }
       }
     },
     overflow() {
@@ -50,11 +52,12 @@ export default {
       MethodsSave.saveNow(this);
     },
     toggleTree() {
-      this.$store.commit("field/markdown/tree/setTreeState", !this.showTree);
+      this.$store.commit("field/markdown/browser/setTreeState", !this.showTree);
     },
     wordcount() {
-      this.$store.commit("field/markdown/editor/wordcount");
+      this.$store.commit("field/markdown/words/wordcount", this.html);
     },
+
     tabRight(event) {
       let text = this.input,
         originalSelectionStart = event.target.selectionStart,
@@ -71,11 +74,21 @@ export default {
     }
   },
   computed: {
+    spellcheck() {
+      if (!this.$store.state["field/markdown"]) return;
+
+      if (!("editor" in this.$store.state["field/markdown"])) return;
+      return this.$store.state["field/markdown/options"].options.editor
+        .spellcheck;
+    },
     input() {
       return this.$store.state["field/markdown/editor"].input;
     },
+    html() {
+      return this.$store.state["field/markdown/editor"].html;
+    },
     showTree() {
-      return this.$store.state["field/markdown/tree"].showTree;
+      return this.$store.state["field/markdown/browser"].showTree;
     },
     limit() {
       return this.$store.state["field/markdown/limit"].max;
@@ -99,6 +112,7 @@ export default {
 
     background: #f7f7f7;
     padding: 4rem;
+    padding-right: calc(100% - 900px - 4rem);
     box-sizing: border-box;
   }
 }

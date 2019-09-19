@@ -1,32 +1,15 @@
 <template>
   <div class="limit" :title="title" :class="warningClass">
-    <strong>Limit:</strong>
+    <strong>Bytes:</strong>
     <span
       title="If this is turning red, increase the length to this field in your database."
-    >{{ input.length }} / {{ limit }} bytes</span>
+    >{{ input.length }} / {{ limit }}</span>
   </div>
 </template>
 
 <script>
 export default {
   name: "MarkdownLimit",
-  created() {
-    this.$store.registerModule("field/markdown/limit", {
-      namespaced: true,
-      state: {
-        overflow: false,
-        max: 0
-      },
-      mutations: {
-        overflow(state, value) {
-          state.overflow = value;
-        },
-        max(state, value) {
-          state.max = value;
-        }
-      }
-    });
-  },
   computed: {
     limit() {
       return 255;

@@ -7,22 +7,8 @@ import MethodsSave from "@/components/fields/markdown/methods/save.js";
 
 export default {
   name: "MarkdownIndicator",
-  created() {
-    this.$store.registerModule("field/markdown/indicator", {
-      namespaced: true,
-      state: {
-        type: "success"
-      },
-      mutations: {
-        setType(state, type) {
-          state.type = type;
-        }
-      }
-    });
-  },
   computed: {
     indicatorClass() {
-      //console.log(this.$store.state["field/markdown/indicator"]);
       return this.$store.state["field/markdown/indicator"].type;
     }
   },

@@ -1,26 +1,25 @@
 <template>
   <div class="counters" :class="stateClass">
-    <strong>Word Count:</strong>
-    {{ wordcount }} words
+    <strong>Words:</strong>
+    {{ wordcount }}
   </div>
 </template>
 
 <script>
-import Marked from "marked";
-
 export default {
-  name: "MarkdownCounters",
+  name: "MarkdownWordcount",
   computed: {
     input() {
       return this.$store.state["field/markdown/editor"].input;
     },
     wordcount() {
-      return this.$store.state["field/markdown/editor"].wordcount;
+      return this.$store.state["field/markdown/words"].wordcount;
     },
     options() {
-      return this.$store.state["field/markdown/editor"].options;
+      return this.$store.state["field/markdown/options"].options;
     },
     stateClass() {
+      if (!this.options) return;
       let match = "none";
       let stateClass = {};
 
@@ -35,7 +34,7 @@ export default {
           }
         }
       }
-      console.log(match);
+
       if (match == "warning") {
         stateClass = { warning: true };
       } else if (match == "danger") {

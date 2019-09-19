@@ -1,4 +1,5 @@
 <?php
+/*
 header("Access-Control-Allow-Origin: *");
 header('Content-Type: application/json');
 
@@ -49,3 +50,6 @@ $data = [
   'options' => $options
 ];
 echo json_encode($data);
+*/
+
+include __DIR__ . '/../../../get/value/index.php';

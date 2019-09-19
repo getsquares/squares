@@ -8,49 +8,12 @@
 <script>
 export default {
   name: "MarkdownTimer",
-  created() {
-    this.$store.registerModule("field/markdown/timer", {
-      namespaced: true,
-      state: {
-        timeObject: null,
-        durationObject: null,
-        timer: 0,
-        duration: 0
-      },
-      mutations: {
-        timerSet(state) {
-          clearInterval(state.timeObject);
-          state.timeObject = setInterval(() => {
-            state.timer++;
-          }, 1000);
-        },
-        timerApppend(state) {
-          state.timer++;
-        },
-        timerReset(state) {
-          state.timer = 0;
-        },
-        durationSet(state) {
-          clearInterval(state.durationObject);
-          state.durationObject = setInterval(() => {
-            state.duration++;
-          }, 1000);
-        },
-        durationAppend(state) {
-          state.duration++;
-        },
-        durationReset(state) {
-          state.duration = 0;
-        }
-      }
-    });
-  },
   mounted() {
     this.set();
   },
   computed: {
     warningClass() {
-      if (!("autosave" in this.options)) return;
+      if (!this.options || !("autosave" in this.options)) return;
 
       let class_obj = "";
 
@@ -63,7 +26,8 @@ export default {
       return class_obj;
     },
     options() {
-      return this.$store.state["field/markdown/editor"].options;
+      if (!this.$store.state["field/markdown/editor"]) return;
+      return this.$store.state["field/markdown/options"].options;
     },
     state() {
       return this.$store.state["field/markdown/timer"];

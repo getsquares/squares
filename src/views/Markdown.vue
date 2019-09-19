@@ -13,10 +13,10 @@
 <script>
 import Axios from "axios";
 
-import MarkdownTree from "@/components/fields/markdown/Tree.vue";
+import MarkdownTree from "@/components/fields/markdown/browser/Browser.vue";
 import MarkdownSheet from "@/components/fields/markdown/Sheet.vue";
 import MarkdownEditor from "@/components/fields/markdown/Editor.vue";
-import MarkdownFooter from "@/components/fields/markdown/Footer.vue";
+import MarkdownFooter from "@/components/fields/markdown/footer/Footer.vue";
 
 import MethodsSave from "@/components/fields/markdown/methods/save.js";
 import MethodsLoad from "@/components/fields/markdown/methods/load.js";
@@ -43,12 +43,17 @@ export default {
           delay: 300,
           css: null
         },
+        editor: {
+          spellcheck: false,
+          width: "900px"
+        },
         revisions: {
           path: "revisions/markdown",
           limit: 5
         },
         media: {
           path: "server-media",
+          trim: null,
           folder: null
         },
         autosave: {
@@ -73,51 +78,6 @@ export default {
       }
     };
   },
-  created() {
-    // eslint-disable-next-line
-    //console.log(process.env.VUE_APP_ROOT_API);
-
-    this.$store.registerModule("myModule", {
-      namespaced: true,
-      state: {
-        one: "first",
-        two: "second"
-      },
-      mutations: {
-        test(state) {
-          state.one = "okk";
-        }
-      }
-    });
-
-    this.$store.registerModule("myModule", {
-      namespaced: true,
-      state: {
-        one: "first",
-        two: "second"
-      },
-      mutations: {
-        test2(state) {
-          state.one = "okk";
-        }
-      }
-    });
-
-    //console.log(this.$store);
-
-    this.$store.registerModule("fieldMarkdown", {
-      state: {
-        well: "fine",
-        lastSaveText: "init",
-        saving: false,
-        error: false,
-        tree: false,
-        filename: "",
-        uri: "",
-        params: []
-      }
-    });
-  },
   methods: {
     optionsWithFallbacks(object, fallback) {
       Object.entries(fallback).forEach(([key, value]) => {
@@ -134,21 +94,14 @@ export default {
     getOptions() {
       const uri = "/fields/markdown/get/options";
 
-      console.log("asda");
-
       Axios.get(uri)
         .then(response => {
           this.obj = response.data;
           this.optionsWithFallbacks(this.obj, this.defaults);
-          this.$store.commit("field/markdown/editor/options", this.obj);
+          this.$store.commit("field/markdown/options/options", this.obj);
         })
-        .catch(error => {
-          //console.log("ERROR OPTIONS");
-          //console.log(error);
-        })
-        .finally(() => {
-          //this.resetTimer();
-        });
+        .catch(error => {})
+        .finally(() => {});
     }
   }
 };
@@ -184,6 +137,7 @@ export default {
       font-size: 17px;
       display: flex;
       outline: none;
+      width: 64px;
 
       &:hover {
         opacity: 1;

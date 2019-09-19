@@ -9,7 +9,7 @@
 export default {
   computed: {
     trail() {
-      return this.$store.getters["field/markdown/tree/trail"];
+      return this.$store.getters["field/markdown/browser/trail"];
     }
   }
 };

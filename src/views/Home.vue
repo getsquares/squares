@@ -22,8 +22,6 @@ export default {
   methods: {
     test() {
       this.$store.state.boom = "world";
-      //console.log(window.parent);
-      //console.log(window.location.href);
     }
   }
 };

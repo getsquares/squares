@@ -3,7 +3,9 @@
     <button class="close" @click="close()">
       <img src="../../../assets/icomoon/272-cross.svg" />
     </button>
-    <div v-html="input" class="preview" :class="previewClass"></div>
+    <div class="preview-wrap">
+      <div v-html="html" class="preview" :class="previewClass"></div>
+    </div>
     <MarkdownIndicator></MarkdownIndicator>
   </div>
 </template>
@@ -18,6 +20,9 @@ export default {
     MarkdownIndicator
   },
   computed: {
+    html() {
+      return this.$store.state["field/markdown/editor"].html;
+    },
     input() {
       const renderer = new Marked.Renderer();
       const baseUrl = "/fields/markdown/get/image?path=";
@@ -42,12 +47,14 @@ export default {
       return marked;
     },
     options() {
-      return this.$store.state["field/markdown/editor"].options;
+      return this.$store.state["field/markdown/options"].options;
     },
     css() {
-      if (!("preview" in this.$store.state["field/markdown/editor"].options))
+      if (!this.$store.state["field/markdown/editor"]) return;
+      if (!("options" in this.$store.state["field/markdown/editor"])) return;
+      if (!("preview" in this.$store.state["field/markdown/options"].options))
         return;
-      return this.$store.state["field/markdown/editor"].options.preview.css;
+      return this.$store.state["field/markdown/options"].options.preview.css;
     },
     previewClass() {
       return {
@@ -64,11 +71,18 @@ export default {
 </script>
 
 <style lang="scss">
-@import "https://example.com/css";
-
 .fieldMarkdown {
   .sheet {
     overflow-x: auto;
+  }
+  .preview-wrap {
+    height: 100%;
+    overflow-y: auto;
+    height: calc(100% - 8rem);
+    padding: 4rem;
+  }
+  .preview.custom {
+    @import "https://example.com/css";
   }
   .preview.default {
     font-size: 17px;
@@ -77,9 +91,7 @@ export default {
     box-sizing: border-box;
     line-height: 1.5;
     overflow-wrap: break-word;
-    padding: 4rem;
-    height: 100%;
-    overflow-y: auto;
+    max-width: 900px;
 
     img {
       max-width: 100%;
