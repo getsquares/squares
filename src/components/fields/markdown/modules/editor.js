@@ -69,7 +69,7 @@ export default {
 			return state.input != state.buffer;
 		},
 		chars: (state) => {
-			return 10;
+			return state.sanitized.length;
 		}
 	}
 };

@@ -16,8 +16,22 @@ import Axios from "axios";
 
 export default {
   name: "BrowserFolders",
+  /*created() {
+    const folder = this.$store.state["field/markdown/options"].options.media
+      .folder;
+    if (folder && folder != "" && folder != "/") {
+      this.$store.commit("field/markdown/browser/uri", folder);
+    }
+  },*/
   mounted() {
-    this.load();
+    this.$store.watch(
+      () => this.$store.state["field/markdown/options"].loading,
+      loading => {
+        if (loading) return;
+
+        this.load();
+      }
+    );
   },
   computed: {
     folders() {

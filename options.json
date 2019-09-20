@@ -18,7 +18,8 @@
 				"custom": "test"
 			},
 			"editor": {
-				"spellcheck": false
+				"spellcheck": false,
+				"width": 700
 			},
 			"revisions": {
 				"path": "revisions/markdown",
@@ -26,7 +27,7 @@
 			},
 			"media": {
 				"path": "server-media",
-				"folder": null
+				"folder": "folder1/subfolder1"
 			},
 			"autosave": {
 				"save": 15,

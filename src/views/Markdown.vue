@@ -37,8 +37,8 @@ export default {
   data: function() {
     return {
       input: "",
-      obj: {},
-      defaults: {
+      obj: {}
+      /*defaults: {
         preview: {
           delay: 300,
           css: null
@@ -75,7 +75,7 @@ export default {
             min: 2000
           }
         }
-      }
+      }*/
     };
   },
   methods: {
@@ -97,8 +97,24 @@ export default {
       Axios.get(uri)
         .then(response => {
           this.obj = response.data;
-          this.optionsWithFallbacks(this.obj, this.defaults);
+          const defaults = this.$store.state["field/markdown/options"].options;
+
+          this.optionsWithFallbacks(this.obj, defaults);
           this.$store.commit("field/markdown/options/options", this.obj);
+
+          const folder = this.$store.state["field/markdown/options"].options
+            .media.folder;
+          if (folder && folder != "" && folder != "/") {
+            this.$store.commit("field/markdown/browser/uri", folder);
+          }
+
+          this.$store.commit("field/markdown/options/loading", false);
+
+          document.documentElement.style.setProperty(
+            "--markdown-editor-width",
+            this.$store.state["field/markdown/options"].options.editor.width +
+              "px"
+          );
         })
         .catch(error => {})
         .finally(() => {});

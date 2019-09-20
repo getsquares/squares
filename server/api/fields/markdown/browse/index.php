@@ -9,9 +9,13 @@ include __DIR__ . '/browser.php';
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$options_data = file_get_contents($root . '/options.json');
-$options = json_decode($options_data, true)['fields']['markdown'];
+$options_array = json_decode(file_get_contents($root . '/options.json'), true);
+$defaults_array = json_decode(file_get_contents($root . '/src/components/fields/markdown/defaults.json'), true);
+$options = $defaults_array;
 
+if(isset($options_array['fields']['markdown'])) {
+  $options = array_replace_recursive ($defaults_array, $options_array['fields']['markdown']);
+}
 
 $options = [
   'root' => $root . '/' . $options['media']['path']

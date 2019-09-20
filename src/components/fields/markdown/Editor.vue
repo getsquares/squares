@@ -131,7 +131,7 @@ export default {
     box-sizing: border-box;
 
     &.large {
-      padding-right: calc(100% - 900px - 4rem);
+      padding-right: calc(100% - var(--markdown-editor-width));
     }
   }
 }

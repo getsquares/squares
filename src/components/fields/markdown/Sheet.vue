@@ -91,7 +91,7 @@ export default {
     box-sizing: border-box;
     line-height: 1.5;
     overflow-wrap: break-word;
-    max-width: 900px;
+    max-width: var(--markdown-editor-width);
 
     img {
       max-width: 100%;
