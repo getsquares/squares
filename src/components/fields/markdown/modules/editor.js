@@ -1,4 +1,6 @@
 import Marked from 'marked';
+import ReadingTime from '@/components/fields/markdown/methods/readingtime.js';
+import formatter from '@/components/fields/markdown/methods/formatter.js';
 
 export default {
 	namespaced: true,
@@ -8,46 +10,32 @@ export default {
 		html: '',
 		sanitized: '',
 		imagecount: 0,
+		wordcount: 0,
 		focus: 'editor',
 		large: false,
-		width: 0
+		width: 0,
+		readingtime: null,
+		indicator: 'success',
+		timeObject: null,
+		durationObject: null,
+		timer: 0,
+		duration: 0,
+		limit: null
 	},
 	mutations: {
 		input(state, value) {
 			state.input = value;
 		},
 		html(state) {
-			const renderer = new Marked.Renderer();
-			const baseUrl = '/fields/markdown/get/image?path=';
+			const trim = this.state['field/markdown/options'].options.media.trim;
+			console.log(trim);
+			const renderer = formatter.render(state.input, trim);
 
-			const originalRendererLink = renderer.link.bind(renderer);
-			const originalRendererImage = renderer.image.bind(renderer);
-
-			let image_count = 0;
-
-			renderer.link = (href, title, text) => {
-				href = baseUrl + href;
-				return originalRendererLink(href, title, text);
-			};
-
-			renderer.image = (href, title, text) => {
-				href = baseUrl + href;
-				image_count++;
-				return originalRendererImage(href, title, text);
-			};
-
-			let marked = Marked(state.input, {
-				renderer
-			});
-
-			state.imagecount = image_count;
-			state.html = marked;
+			state.imagecount = renderer.imageCount;
+			state.html = renderer.html;
 		},
 		sanitize(state, html) {
-			let div = document.createElement('div');
-			div.innerHTML = html;
-			let text = div.textContent || div.innerText || '';
-			state.sanitized = text.replace(/(\r\n|\n|\r)/gm, ' ');
+			state.sanitized = formatter.toWords(html);
 		},
 		buffer(state, value) {
 			state.buffer = value;
@@ -62,11 +50,53 @@ export default {
 
 			state.width = width;
 			state.large = diff;
+		},
+		readingtime(state) {
+			const rt = new ReadingTime(200);
+			rt.set(state.wordcount);
+
+			state.readingtime = rt.time;
+		},
+		wordcount(state) {
+			state.wordcount = formatter.wordCount(state.sanitized);
+		},
+		indicator(state, value) {
+			state.indicator = value;
+		},
+		timerSet(state) {
+			clearInterval(state.timeObject);
+			state.timeObject = setInterval(() => {
+				state.timer++;
+			}, 1000);
+		},
+		timerApppend(state) {
+			state.timer++;
+		},
+		timerReset(state) {
+			state.timer = 0;
+		},
+		durationSet(state) {
+			clearInterval(state.durationObject);
+			state.durationObject = setInterval(() => {
+				state.duration++;
+			}, 1000);
+		},
+		durationAppend(state) {
+			state.duration++;
+		},
+		durationReset(state) {
+			state.duration = 0;
+		},
+		limit(state, value) {
+			state.limit = value;
 		}
 	},
 	getters: {
 		pending: (state) => {
 			return state.input != state.buffer;
+		},
+		overflow: (state) => {
+			return state.input.length > state.limit;
 		},
 		chars: (state) => {
 			return state.sanitized.length;

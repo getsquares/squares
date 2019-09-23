@@ -13,7 +13,7 @@ export default {
       return this.$store.state["field/markdown/editor"].input;
     },
     wordcount() {
-      return this.$store.state["field/markdown/words"].wordcount;
+      return this.$store.state["field/markdown/editor"].wordcount;
     },
     options() {
       return this.$store.state["field/markdown/options"].options;

@@ -20,13 +20,14 @@ export default {
 
 				let html = vue.$store.state['field/markdown/editor'].html;
 
-				vue.$store.commit('field/markdown/words/wordcount', html);
-				vue.$store.commit('field/markdown/limit/max', response.data.length);
-				vue.$store.commit('field/markdown/timer/timerReset');
-				vue.$store.commit('field/markdown/timer/durationReset');
+				vue.$store.commit('field/markdown/editor/wordcount', html);
+				vue.$store.commit('field/markdown/editor/limit', response.data.length);
+				vue.$store.commit('field/markdown/editor/timerReset');
+				vue.$store.commit('field/markdown/editor/durationReset');
 				vue.$store.commit('field/markdown/editor/html');
+				vue.$store.commit('field/markdown/editor/readingtime');
 			})
-			.catch((error) => {})
+			.catch()
 			.finally(() => {});
 	}
 };

@@ -1,6 +1,6 @@
 <template>
   <div class="sheet">
-    <button class="close" @click="close()">
+    <button class="action-close" @click="close()">
       <img src="../../../assets/icomoon/272-cross.svg" />
     </button>
     <div class="preview-wrap">

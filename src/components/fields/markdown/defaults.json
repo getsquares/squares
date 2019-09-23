@@ -14,7 +14,7 @@
 	},
 	"media": {
 		"path": "server-media",
-		"trim": null,
+		"trim": "",
 		"folder": null
 	},
 	"autosave": {

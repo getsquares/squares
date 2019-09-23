@@ -18,11 +18,11 @@ export default {
         return trail;
       } else {
         // If not in the beginning of the string
-        if (trail.indexOf(this.replacement) == 0) return trail;
-        trail = trail.slice(
+        if (trail.indexOf(this.replacement) !== 0) return trail;
+
+        return trail.slice(
           trail.indexOf(this.replacement) + this.replacement.length
         );
-        return trail;
       }
     },
     replacement() {

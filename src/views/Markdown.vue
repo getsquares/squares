@@ -116,7 +116,7 @@ export default {
               "px"
           );
         })
-        .catch(error => {})
+        .catch()
         .finally(() => {});
     }
   }
@@ -141,8 +141,9 @@ export default {
 <style lang="scss">
 .fieldMarkdown {
   button {
-    &.close,
-    &.tree {
+    &.action-close,
+    &.action-browser,
+    &.action-rows {
       position: absolute;
       top: 0;
       right: 0;
@@ -162,6 +163,10 @@ export default {
       &:hover {
         opacity: 1;
       }
+    }
+
+    &.action-rows {
+      top: 4rem;
     }
   }
   .sheet,

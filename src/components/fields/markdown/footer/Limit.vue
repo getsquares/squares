@@ -12,14 +12,13 @@ export default {
   name: "MarkdownLimit",
   computed: {
     limit() {
-      return 255;
-      // Change later
+      return this.$store.state["field/markdown/editor"].limit;
     },
     input() {
       return this.$store.state["field/markdown/editor"].input;
     },
     overflow() {
-      return this.$store.state["field/markdown/limit"].overflow;
+      return this.$store.getters["field/markdown/editor/overflow"];
     },
     warningClass() {
       return { danger: this.overflow };
@@ -33,15 +32,3 @@ export default {
   }
 };
 </script>
-
-<style lang="scss" scoped>
-.limit {
-  cursor: default;
-  user-select: none;
-  span {
-    &:before {
-      content: " ";
-    }
-  }
-}
-</style>

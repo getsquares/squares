@@ -11,8 +11,12 @@
       @focus="setFocus"
       :class="editorClass"
     ></textarea>
-    <button class="tree" @click="toggleTree()">
+    <button class="action-browser" @click="toggleTree()">
       <img src="../../../assets/icomoon/040-file-picture.svg" />
+    </button>
+
+    <button class="action-rows" @click="toggleTree()">
+      <img src="../../../assets/icomoon/101-database.svg" />
     </button>
   </div>
 </template>
@@ -29,30 +33,35 @@ export default {
 
     this.$store.commit("field/markdown/editor/large");
   },
-
+  data: function() {
+    return {
+      canMove: true
+    };
+  },
   methods: {
     update(e) {
+      if (!this.canMove) return;
+      this.canMove = false;
+      setTimeout(() => {
+        this.canMove = true;
+      }, this.options.preview.delay);
+
       this.$store.commit("field/markdown/editor/input", e.target.value);
       this.$store.commit("field/markdown/editor/html");
       this.$store.commit("field/markdown/editor/sanitize", this.html);
-      this.overflow();
       this.indicate();
       this.wordcount();
     },
     indicate() {
-      if (this.$store.state["field/markdown/limit"].overflow) {
-        this.$store.commit("field/markdown/indicator/setType", "warning");
+      if (this.$store.state["field/markdown/editor"].overflow) {
+        this.$store.commit("field/markdown/editor/indicator", "warning");
       } else {
         if (this.$store.state["field/markdown/editor"].input) {
           const pending = this.$store.getters["field/markdown/editor/pending"];
           const value = pending ? "pending" : "success";
-          this.$store.commit("field/markdown/indicator/setType", value);
+          this.$store.commit("field/markdown/editor/indicator", value);
         }
       }
-    },
-    overflow() {
-      const value = this.limit < this.input.length;
-      this.$store.commit("field/markdown/limit/overflow", value);
     },
     save() {
       MethodsSave.saveNow(this);
@@ -64,7 +73,7 @@ export default {
       );
     },
     wordcount() {
-      this.$store.commit("field/markdown/words/wordcount");
+      this.$store.commit("field/markdown/editor/wordcount");
     },
     setFocus() {
       this.$store.commit("field/markdown/editor/focus", "editor");
@@ -106,7 +115,7 @@ export default {
       return this.$store.state["field/markdown/browser"].browserState;
     },
     limit() {
-      return this.$store.state["field/markdown/limit"].max;
+      return this.$store.state["field/markdown/editor"].limit;
     }
   }
 };

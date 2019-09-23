@@ -15,7 +15,8 @@
 	"fields": {
 		"markdown": {
 			"preview": {
-				"custom": "test"
+				"custom": "test",
+				"delay": 500
 			},
 			"editor": {
 				"spellcheck": false,
@@ -27,7 +28,8 @@
 			},
 			"media": {
 				"path": "server-media",
-				"folder": "folder1/subfolder1"
+				"folder": "folder1/subfolder1",
+				"trim": "folder1/"
 			},
 			"autosave": {
 				"save": 15,

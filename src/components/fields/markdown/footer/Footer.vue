@@ -8,6 +8,7 @@
       <Chars></Chars>
       <MarkdownImages></MarkdownImages>
       <MarkdownLimit></MarkdownLimit>
+      <ReadingTime></ReadingTime>
     </template>
   </nav>
 </template>
@@ -20,6 +21,7 @@ import MarkdownImages from "@/components/fields/markdown/footer/Images.vue";
 import MarkdownLimit from "@/components/fields/markdown/footer/Limit.vue";
 import Breadcrumbs from "@/components/fields/markdown/footer/Breadcrumbs.vue";
 import Chars from "@/components/fields/markdown/footer/Chars.vue";
+import ReadingTime from "@/components/fields/markdown/footer/ReadingTime.vue";
 
 export default {
   name: "MarkdownFooter",
@@ -30,7 +32,8 @@ export default {
     MarkdownLocation,
     MarkdownLimit,
     Breadcrumbs,
-    Chars
+    Chars,
+    ReadingTime
   },
   computed: {
     browserState() {
@@ -63,6 +66,12 @@ export default {
     margin: 0 0.5rem;
     border-radius: 3px;
     user-select: none;
+
+    span {
+      &:before {
+        content: " ";
+      }
+    }
 
     &.warning,
     &.danger,

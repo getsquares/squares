@@ -9,7 +9,7 @@ export default {
   name: "MarkdownIndicator",
   computed: {
     indicatorClass() {
-      return this.$store.state["field/markdown/indicator"].type;
+      return this.$store.state["field/markdown/editor"].indicator;
     }
   },
   methods: {

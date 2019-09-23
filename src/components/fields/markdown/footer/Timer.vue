@@ -29,14 +29,11 @@ export default {
       if (!this.$store.state["field/markdown/editor"]) return;
       return this.$store.state["field/markdown/options"].options;
     },
-    state() {
-      return this.$store.state["field/markdown/timer"];
-    },
     timer() {
-      return this.state.timer;
+      return this.$store.state["field/markdown/editor"].timer;
     },
     duration() {
-      return this.$store.state["field/markdown/timer"].duration;
+      return this.$store.state["field/markdown/editor"].duration;
     },
     /*ticking() {
       return this.state.ticking;
@@ -68,8 +65,8 @@ export default {
   },
   methods: {
     set() {
-      this.$store.commit("field/markdown/timer/timerSet");
-      this.$store.commit("field/markdown/timer/durationSet");
+      this.$store.commit("field/markdown/editor/timerSet");
+      this.$store.commit("field/markdown/editor/durationSet");
     }
   }
 };
