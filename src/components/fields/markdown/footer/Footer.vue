@@ -2,7 +2,14 @@
   <nav class="footer">
     <Breadcrumbs v-if="focus == 'browser'"></Breadcrumbs>
     <template v-if="focus == 'editor'">
-      <MarkdownLocation></MarkdownLocation>
+      <div class="location">
+        <strong>Row:</strong>
+        {{ $route.params.id }}
+      </div>
+      <div class="column">
+        <strong>Column:</strong>
+        {{ $route.params.column }}
+      </div>
       <MarkdownTimer></MarkdownTimer>
       <MarkdownWordcount></MarkdownWordcount>
       <Chars></Chars>
@@ -14,7 +21,6 @@
 </template>
 
 <script>
-import MarkdownLocation from "@/components/fields/markdown/footer/Location.vue";
 import MarkdownTimer from "@/components/fields/markdown/footer/Timer.vue";
 import MarkdownWordcount from "@/components/fields/markdown/footer/Words.vue";
 import MarkdownImages from "@/components/fields/markdown/footer/Images.vue";
@@ -29,7 +35,6 @@ export default {
     MarkdownWordcount,
     MarkdownImages,
     MarkdownTimer,
-    MarkdownLocation,
     MarkdownLimit,
     Breadcrumbs,
     Chars,

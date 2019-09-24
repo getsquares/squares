@@ -1,4 +1,3 @@
-import Marked from 'marked';
 import ReadingTime from '@/components/fields/markdown/methods/readingtime.js';
 import formatter from '@/components/fields/markdown/methods/formatter.js';
 
@@ -9,6 +8,10 @@ export default {
 		buffer: '',
 		html: '',
 		sanitized: '',
+		count: {
+			images: 0,
+			links: 0
+		},
 		imagecount: 0,
 		wordcount: 0,
 		focus: 'editor',
@@ -20,18 +23,26 @@ export default {
 		durationObject: null,
 		timer: 0,
 		duration: 0,
-		limit: null
+		limit: null,
+		sidebar: null
 	},
 	mutations: {
+		sidebarToggle(state, value) {
+			if (value == state.sidebar) {
+				state.sidebar = null;
+			} else {
+				state.sidebar = value;
+			}
+		},
 		input(state, value) {
 			state.input = value;
 		},
 		html(state) {
 			const trim = this.state['field/markdown/options'].options.media.trim;
-			console.log(trim);
 			const renderer = formatter.render(state.input, trim);
 
-			state.imagecount = renderer.imageCount;
+			state.count.images = renderer.count.images;
+			state.count.links = renderer.count.links;
 			state.html = renderer.html;
 		},
 		sanitize(state, html) {

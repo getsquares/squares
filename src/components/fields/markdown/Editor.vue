@@ -11,12 +11,16 @@
       @focus="setFocus"
       :class="editorClass"
     ></textarea>
-    <button class="action-browser" @click="toggleTree()">
+    <button class="action-browser" @click="toggleSidebar('browser')" title="Image file browser">
       <img src="../../../assets/icomoon/040-file-picture.svg" />
     </button>
 
-    <button class="action-rows" @click="toggleTree()">
+    <button class="action-rows" @click="toggleSidebar('selector')" title="Select row">
       <img src="../../../assets/icomoon/101-database.svg" />
+    </button>
+
+    <button class="action-stats" @click="toggleSidebar('stats')" title="Statistics">
+      <img src="../../../assets/icomoon/156-stats-dots.svg" />
     </button>
   </div>
 </template>
@@ -66,11 +70,24 @@ export default {
     save() {
       MethodsSave.saveNow(this);
     },
-    toggleTree() {
+    /*toggleTree() {
+      this.$store.commit("field/markdown/selector/selectorState", false);
+
       this.$store.commit(
         "field/markdown/browser/browserState",
         !this.browserState
       );
+    },
+    toggleSelector() {
+      this.$store.commit("field/markdown/browser/browserState", false);
+
+      this.$store.commit(
+        "field/markdown/selector/selectorState",
+        !this.selectorState
+      );
+    },*/
+    toggleSidebar(value) {
+      this.$store.commit("field/markdown/editor/sidebarToggle", value);
     },
     wordcount() {
       this.$store.commit("field/markdown/editor/wordcount");
@@ -113,6 +130,9 @@ export default {
     },
     browserState() {
       return this.$store.state["field/markdown/browser"].browserState;
+    },
+    selectorState() {
+      return this.$store.state["field/markdown/selector"].selectorState;
     },
     limit() {
       return this.$store.state["field/markdown/editor"].limit;

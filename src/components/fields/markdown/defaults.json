@@ -23,6 +23,9 @@
 		"warning": 300,
 		"danger": 900
 	},
+	"rows": {
+		"template": "ID: {{id}}"
+	},
 	"words": {
 		"danger": {
 			"min": 0,

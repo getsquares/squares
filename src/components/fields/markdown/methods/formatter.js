@@ -18,12 +18,19 @@ export default class {
 
 		const originalRendererLink = renderer.link.bind(renderer);
 		const originalRendererImage = renderer.image.bind(renderer);
+		const originalRendererBlockquote = renderer.blockquote.bind(renderer);
 
 		let image_count = 0;
+		let link_count = 0;
+		let blockquote_count = 0;
+		let heading_count = 0;
+		let list_count = 0;
+		let paragraph_count = 0;
+		let table_count = 0;
 
 		renderer.link = (href, title, text) => {
-			console.log(href);
 			href = baseUrl + trim + href;
+			link_count++;
 			return originalRendererLink(href, title, text);
 		};
 
@@ -33,13 +40,22 @@ export default class {
 			return originalRendererImage(href, title, text);
 		};
 
+		renderer.blockquote = (blockquote) => {
+			blockquote_count++;
+			return originalRendererBlockquote(blockquote);
+		};
+
 		let marked = Marked(content, {
 			renderer
 		});
 
 		return {
 			html: marked,
-			imageCount: image_count
+			//imageCount: image_count,
+			count: {
+				images: image_count,
+				links: link_count
+			}
 		};
 	}
 }

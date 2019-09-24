@@ -1,5 +1,5 @@
 <template>
-  <div class="tree" v-show="browserState" @click="focus()">
+  <div class="tree" v-show="isSidebar" @click="focus()">
     <BrowserFolders></BrowserFolders>
     <BrowserFiles></BrowserFiles>
     <footer v-if="filename != ''">
@@ -32,8 +32,8 @@ export default {
     });
   },
   computed: {
-    browserState() {
-      return this.$store.state["field/markdown/browser"].browserState;
+    isSidebar() {
+      return this.$store.state["field/markdown/editor"].sidebar == "browser";
     },
     filename() {
       return this.$store.state["field/markdown/browser"].filename;

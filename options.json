@@ -35,6 +35,9 @@
 				"save": 15,
 				"retry": 45
 			},
+			"rows": {
+				"template": "{{id}} - {{slug}}"
+			},
 			"words": {
 				"danger": {
 					"min": 0,

@@ -160,4 +160,43 @@ class database {
       die('Could not save value correctly to database');
     }
   }
+
+  public function rows($db, $sql) {
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $results = [];
+    foreach($rows as $index => $row) {
+      $results[(int)$index] = [
+        'row' => (string)$row['id'],
+      ];
+      foreach($row as $colKey => $item) {
+        $results[(int)$index]['items'][] = [
+          'col' => $colKey,
+          'presentation' => $item
+        ];
+        
+      }
+    }
+    return $results;
+  }
+
+  public function columns($db, $table_name) {
+    $sql = "
+    SHOW columns FROM $table_name";
+    $stmt = $db->prepare($sql);
+    $stmt->execute();
+    $column_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach($column_data as $item) {
+      preg_match('/\d+/', $item['Type'], $len);
+
+      $columns[$item['Field']]['type'] = $item['Type'];
+      if($len) {
+        $columns[$item['Field']]['limit'] = $len[0];
+      } else {
+        $columns[$item['Field']]['limit'] = 0;
+      }
+    }
+    return $columns;
+  }
 }

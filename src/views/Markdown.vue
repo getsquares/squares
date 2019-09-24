@@ -1,7 +1,9 @@
 <template>
   <div class="fieldMarkdown view">
     <main>
+      <Selector></Selector>
       <MarkdownTree></MarkdownTree>
+      <Stats></Stats>
       <MarkdownEditor></MarkdownEditor>
       <MarkdownSheet></MarkdownSheet>
     </main>
@@ -17,6 +19,8 @@ import MarkdownTree from "@/components/fields/markdown/browser/Browser.vue";
 import MarkdownSheet from "@/components/fields/markdown/Sheet.vue";
 import MarkdownEditor from "@/components/fields/markdown/Editor.vue";
 import MarkdownFooter from "@/components/fields/markdown/footer/Footer.vue";
+import Selector from "@/components/fields/markdown/Selector.vue";
+import Stats from "@/components/fields/markdown/Stats.vue";
 
 import MethodsSave from "@/components/fields/markdown/methods/save.js";
 import MethodsLoad from "@/components/fields/markdown/methods/load.js";
@@ -27,7 +31,16 @@ export default {
     MarkdownSheet,
     MarkdownEditor,
     MarkdownFooter,
-    MarkdownTree
+    MarkdownTree,
+    Selector,
+    Stats
+  },
+  watch: {
+    $route(to, from) {
+      console.log("changed");
+      //MethodsLoad.load(this);
+      MethodsLoad.load(this);
+    }
   },
   mounted() {
     MethodsLoad.load(this);
@@ -143,7 +156,8 @@ export default {
   button {
     &.action-close,
     &.action-browser,
-    &.action-rows {
+    &.action-rows,
+    &.action-stats {
       position: absolute;
       top: 0;
       right: 0;
@@ -155,7 +169,7 @@ export default {
       font-size: 17px;
       display: flex;
       outline: none;
-      width: 64px;
+      width: calc(64px - 17px);
       margin-right: 17px;
       display: flex;
       justify-content: center;
@@ -167,6 +181,9 @@ export default {
 
     &.action-rows {
       top: 4rem;
+    }
+    &.action-stats {
+      top: 8rem;
     }
   }
   .sheet,

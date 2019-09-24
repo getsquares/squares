@@ -23,6 +23,10 @@ module.exports = {
 			'/fields/markdown/get/options': {
 				target: process.env.VUE_APP_ROOT_API + '/api/fields/markdown/get/options/index.php',
 				changeOrigin: true
+			},
+			'/fields/markdown/get/rows': {
+				target: process.env.VUE_APP_ROOT_API + '/api/fields/markdown/get/rows/index.php',
+				changeOrigin: true
 			}
 		}
 	}
