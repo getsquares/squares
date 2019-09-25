@@ -24,8 +24,7 @@ export default {
 				vue.$store.commit('field/markdown/editor/limit', response.data.length);
 				vue.$store.commit('field/markdown/editor/timerReset');
 				vue.$store.commit('field/markdown/editor/durationReset');
-				vue.$store.commit('field/markdown/editor/html');
-				vue.$store.commit('field/markdown/editor/readingtime');
+				//vue.$store.commit('field/markdown/editor/readingtime');
 			})
 			.catch()
 			.finally(() => {});

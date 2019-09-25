@@ -12,10 +12,7 @@
       </div>
       <MarkdownTimer></MarkdownTimer>
       <MarkdownWordcount></MarkdownWordcount>
-      <Chars></Chars>
-      <MarkdownImages></MarkdownImages>
       <MarkdownLimit></MarkdownLimit>
-      <ReadingTime></ReadingTime>
     </template>
   </nav>
 </template>
@@ -23,22 +20,16 @@
 <script>
 import MarkdownTimer from "@/components/fields/markdown/footer/Timer.vue";
 import MarkdownWordcount from "@/components/fields/markdown/footer/Words.vue";
-import MarkdownImages from "@/components/fields/markdown/footer/Images.vue";
 import MarkdownLimit from "@/components/fields/markdown/footer/Limit.vue";
 import Breadcrumbs from "@/components/fields/markdown/footer/Breadcrumbs.vue";
-import Chars from "@/components/fields/markdown/footer/Chars.vue";
-import ReadingTime from "@/components/fields/markdown/footer/ReadingTime.vue";
 
 export default {
   name: "MarkdownFooter",
   components: {
     MarkdownWordcount,
-    MarkdownImages,
     MarkdownTimer,
     MarkdownLimit,
-    Breadcrumbs,
-    Chars,
-    ReadingTime
+    Breadcrumbs
   },
   computed: {
     browserState() {

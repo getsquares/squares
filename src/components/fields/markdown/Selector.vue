@@ -113,6 +113,7 @@ export default {
 .selector {
   width: 300px;
   background: #eee;
+  background: #252525;
   font-size: 14px;
   display: flex;
   flex-direction: column;
@@ -124,38 +125,41 @@ export default {
     list-style: none;
 
     li {
-      &.active {
-        background-color: #ccc;
-      }
-    }
+      a {
+        padding: 0.25rem 1.5rem;
 
-    li a {
-      padding: 0.5rem 1rem;
-
-      display: flex;
-      color: #333;
-      text-decoration: none;
-
-      background-repeat: no-repeat;
-      background-size: 16px;
-      background-position: 0.5rem center;
-
-      user-select: none;
-
-      &:before {
-        content: "";
-        width: 1rem;
-        height: 1rem;
+        display: flex;
+        color: #ccc;
+        text-decoration: none;
 
         background-repeat: no-repeat;
         background-size: 16px;
-        margin-right: 0.5rem;
+        background-position: 0.5rem center;
 
-        background-image: url("../../../assets/icomoon/370-table2.svg");
+        user-select: none;
+        font-size: 13px;
+
+        &:before {
+          content: "";
+          width: 1rem;
+          height: 1rem;
+
+          background-repeat: no-repeat;
+          background-size: 16px;
+          margin-right: 0.5rem;
+
+          background-image: url("../../../assets/icomoon/colored/370-table2.svg");
+        }
+
+        &:hover {
+          background-color: #2d2d2d;
+        }
       }
 
-      &:hover {
-        background-color: #ddd;
+      &.active {
+        a {
+          background-color: #373737;
+        }
       }
     }
   }

@@ -11,17 +11,6 @@
       @focus="setFocus"
       :class="editorClass"
     ></textarea>
-    <button class="action-browser" @click="toggleSidebar('browser')" title="Image file browser">
-      <img src="../../../assets/icomoon/040-file-picture.svg" />
-    </button>
-
-    <button class="action-rows" @click="toggleSidebar('selector')" title="Select row">
-      <img src="../../../assets/icomoon/101-database.svg" />
-    </button>
-
-    <button class="action-stats" @click="toggleSidebar('stats')" title="Statistics">
-      <img src="../../../assets/icomoon/156-stats-dots.svg" />
-    </button>
   </div>
 </template>
 
@@ -44,11 +33,11 @@ export default {
   },
   methods: {
     update(e) {
-      if (!this.canMove) return;
+      /*if (!this.canMove) return;
       this.canMove = false;
       setTimeout(() => {
         this.canMove = true;
-      }, this.options.preview.delay);
+      }, this.options.preview.delay);*/
 
       this.$store.commit("field/markdown/editor/input", e.target.value);
       this.$store.commit("field/markdown/editor/html");
@@ -86,9 +75,7 @@ export default {
         !this.selectorState
       );
     },*/
-    toggleSidebar(value) {
-      this.$store.commit("field/markdown/editor/sidebarToggle", value);
-    },
+
     wordcount() {
       this.$store.commit("field/markdown/editor/wordcount");
     },

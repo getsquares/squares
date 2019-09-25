@@ -1,6 +1,7 @@
 <template>
   <div class="fieldMarkdown view">
     <main>
+      <Pane></Pane>
       <Selector></Selector>
       <MarkdownTree></MarkdownTree>
       <Stats></Stats>
@@ -21,6 +22,7 @@ import MarkdownEditor from "@/components/fields/markdown/Editor.vue";
 import MarkdownFooter from "@/components/fields/markdown/footer/Footer.vue";
 import Selector from "@/components/fields/markdown/Selector.vue";
 import Stats from "@/components/fields/markdown/Stats.vue";
+import Pane from "@/components/fields/markdown/Pane.vue";
 
 import MethodsSave from "@/components/fields/markdown/methods/save.js";
 import MethodsLoad from "@/components/fields/markdown/methods/load.js";
@@ -33,7 +35,8 @@ export default {
     MarkdownFooter,
     MarkdownTree,
     Selector,
-    Stats
+    Stats,
+    Pane
   },
   watch: {
     $route(to, from) {
@@ -153,7 +156,7 @@ export default {
 
 <style lang="scss">
 .fieldMarkdown {
-  button {
+  /*button {
     &.action-close,
     &.action-browser,
     &.action-rows,
@@ -185,7 +188,7 @@ export default {
     &.action-stats {
       top: 8rem;
     }
-  }
+  }*/
   .sheet,
   .editor {
     flex: 1;

@@ -1,4 +1,3 @@
-import ReadingTime from '@/components/fields/markdown/methods/readingtime.js';
 import formatter from '@/components/fields/markdown/methods/formatter.js';
 
 export default {
@@ -8,16 +7,12 @@ export default {
 		buffer: '',
 		html: '',
 		sanitized: '',
-		count: {
-			images: 0,
-			links: 0
-		},
-		imagecount: 0,
+		count: {},
 		wordcount: 0,
 		focus: 'editor',
 		large: false,
 		width: 0,
-		readingtime: null,
+		//readingtime: null,
 		indicator: 'success',
 		timeObject: null,
 		durationObject: null,
@@ -41,8 +36,7 @@ export default {
 			const trim = this.state['field/markdown/options'].options.media.trim;
 			const renderer = formatter.render(state.input, trim);
 
-			state.count.images = renderer.count.images;
-			state.count.links = renderer.count.links;
+			state.count = renderer.count;
 			state.html = renderer.html;
 		},
 		sanitize(state, html) {
@@ -62,12 +56,13 @@ export default {
 			state.width = width;
 			state.large = diff;
 		},
-		readingtime(state) {
+		// MOVE
+		/*readingtime(state) {
 			const rt = new ReadingTime(200);
 			rt.set(state.wordcount);
 
 			state.readingtime = rt.time;
-		},
+		},*/
 		wordcount(state) {
 			state.wordcount = formatter.wordCount(state.sanitized);
 		},
@@ -108,9 +103,6 @@ export default {
 		},
 		overflow: (state) => {
 			return state.input.length > state.limit;
-		},
-		chars: (state) => {
-			return state.sanitized.length;
 		}
 	}
 };
