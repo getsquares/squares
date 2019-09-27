@@ -1,6 +1,6 @@
 <template>
   <div class="alt">
-    <input type="text" spellcheck="false" @keyup="setAlt($event)" placeholder="Alt text" />
+    <input type="text" spellcheck="false" @keyup="setAlt($event)" placeholder="Add an image alt text..." />
   </div>
 </template>
       
@@ -30,6 +30,8 @@ export default {
     box-sizing: border-box;
     outline: none;
     width: 100%;
+    background: #333;
+    color: #ccc;    
   }
 }
 </style>

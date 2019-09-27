@@ -1,7 +1,7 @@
 <template>
-  <nav class="footer">
-    <Breadcrumbs v-if="focus == 'browser'"></Breadcrumbs>
-    <template v-if="focus == 'editor'">
+  <nav class="footer" :class="{ dark: sidebar != null }">
+    <Breadcrumbs v-if="sidebar == 'browser' && focus == 'browser'"></Breadcrumbs>
+    <template v-else>
       <div class="location">
         <strong>Row:</strong>
         {{ $route.params.id }}
@@ -37,6 +37,9 @@ export default {
     },
     focus() {
       return this.$store.state["field/markdown/editor"].focus;
+    },
+    sidebar() {
+      return this.$store.state["field/markdown/editor"].sidebar;
     }
   }
 };
@@ -56,6 +59,12 @@ export default {
   align-items: center;
   border-top: 1px solid #ddd;
   box-sizing: border-box;
+
+  &.dark {
+    background: #373737;
+    border-top: 1px solid transparent;
+    color: #ccc;
+  }
 
   > * {
     padding: 0.5rem 0.75rem;

@@ -1,5 +1,5 @@
 <template>
-  <div class="pane">
+  <div class="pane" :class="{ dark: sidebar != null }">
     <button :class="{ active: sidebar == 'browser' }" @click="toggleSidebar('browser')">
       <img src="../../../assets/icomoon/040-file-picture.svg" />
     </button>
@@ -8,6 +8,12 @@
     </button>
     <button :class="{ active: sidebar == 'stats' }" @click="toggleSidebar('stats')">
       <img src="../../../assets/icomoon/156-stats-dots.svg" />
+    </button>
+    <button :class="{ active: sidebar == 'toc' }" @click="toggleSidebar('toc')">
+      <img src="../../../assets/icomoon/035-file-text.svg" />
+    </button>
+    <button :class="{ active: sidebar == 'density' }" @click="toggleSidebar('density')">
+      <img src="../../../assets/icomoon/186-list-numbered.svg" />
     </button>
   </div>
 </template>
@@ -30,9 +36,16 @@ export default {
 <style lang="scss" scoped>
 .pane {
   background: #ddd;
-  background: #323232;
   width: 4rem;
   z-index: 1;
+
+  &.dark {
+    background: #323232;
+
+    button {
+      filter: invert(1);
+    }
+  }
 
   button {
     border: none;
@@ -44,7 +57,11 @@ export default {
     width: 4rem;
     display: flex;
     justify-content: center;
-    filter: invert(1);
+    
+
+    &:hover {
+      opacity: 0.5;
+    }
 
     &.active {
       opacity: 1;

@@ -5,6 +5,8 @@
       <Selector></Selector>
       <MarkdownTree></MarkdownTree>
       <Stats></Stats>
+      <Toc></Toc>
+      <KeywordDensity></KeywordDensity>
       <MarkdownEditor></MarkdownEditor>
       <MarkdownSheet></MarkdownSheet>
     </main>
@@ -23,6 +25,8 @@ import MarkdownFooter from "@/components/fields/markdown/footer/Footer.vue";
 import Selector from "@/components/fields/markdown/Selector.vue";
 import Stats from "@/components/fields/markdown/Stats.vue";
 import Pane from "@/components/fields/markdown/Pane.vue";
+import Toc from "@/components/fields/markdown/Toc.vue";
+import KeywordDensity from "@/components/fields/markdown/sidebars/KeywordDensity.vue";
 
 import MethodsSave from "@/components/fields/markdown/methods/save.js";
 import MethodsLoad from "@/components/fields/markdown/methods/load.js";
@@ -36,11 +40,13 @@ export default {
     MarkdownTree,
     Selector,
     Stats,
-    Pane
+    Pane,
+    Toc,
+    KeywordDensity
   },
   watch: {
     $route(to, from) {
-      console.log("changed");
+      //console.log("changed");
       //MethodsLoad.load(this);
       MethodsLoad.load(this);
     }
@@ -156,11 +162,8 @@ export default {
 
 <style lang="scss">
 .fieldMarkdown {
-  /*button {
-    &.action-close,
-    &.action-browser,
-    &.action-rows,
-    &.action-stats {
+  button {
+    &.action-close {
       position: absolute;
       top: 0;
       right: 0;
@@ -181,14 +184,7 @@ export default {
         opacity: 1;
       }
     }
-
-    &.action-rows {
-      top: 4rem;
-    }
-    &.action-stats {
-      top: 8rem;
-    }
-  }*/
+  }
   .sheet,
   .editor {
     flex: 1;

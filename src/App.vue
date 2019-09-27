@@ -20,6 +20,8 @@
   --color-focus: #ffffcc;
   --color-border: #ddd;
   --color-bright: #f7f7f7;
+  --color-darkest: #252525;
+  --color-dark-hover: #2d2d2d;
 
   --color-danger: #d32f2f;
   --color-danger-inverterd: #d32f2f;

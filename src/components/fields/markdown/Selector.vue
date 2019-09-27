@@ -1,6 +1,10 @@
 <template>
   <div class="selector" v-show="isSidebar">
+    <h3>Select row</h3>
     <ul>
+      <li v-show="loading" class="loading">
+        <div class="a">&nbsp;</div>
+      </li>
       <li v-for="(row, id) in rows" :key="id" :class="activeClass(id)">
         <router-link :to="{ name: 'cell', params: { id: id } }">
           <span @click="visit($event)">{{ row }}</span>
@@ -35,6 +39,9 @@ export default {
     },
     rows() {
       return this.$store.state["field/markdown/selector"].rows;
+    },
+    loading() {
+      return this.$store.state["field/markdown/selector"].loading;
     }
   },
   methods: {
@@ -80,6 +87,7 @@ export default {
       })
         .then(response => {
           this.$store.commit("field/markdown/selector/rows", response.data);
+          this.$store.commit("field/markdown/selector/loading", false);
           /*this.$store.commit(
             "field/markdown/browser/files",
             response.data.files
@@ -112,21 +120,28 @@ export default {
 <style lang="scss" scoped>
 .selector {
   width: 300px;
-  background: #eee;
-  background: #252525;
+  background: var(--color-darkest);
   font-size: 14px;
   display: flex;
   flex-direction: column;
   overflow: auto;
   font-family: roboto;
   position: relative;
+  padding: 1rem 0;
+  color: #ccc;
+
+  h3 {
+    margin-bottom: .75rem;
+    padding: 0 1rem;
+  }
 
   ul {
     list-style: none;
 
     li {
-      a {
-        padding: 0.25rem 1.5rem;
+      a,
+      .a {
+        padding: 0.25rem 1rem;
 
         display: flex;
         color: #ccc;
@@ -153,6 +168,14 @@ export default {
 
         &:hover {
           background-color: #2d2d2d;
+        }
+      }
+
+      .a {
+        &:before {
+          background-image: url("../../../assets/icomoon/colored/131-spinner9.svg");
+          opacity: 1;
+          animation: spin 2s linear infinite;
         }
       }
 

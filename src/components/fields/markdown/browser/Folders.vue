@@ -117,12 +117,12 @@ export default {
 .folders {
   li {
     &:before {
-      background-image: url("../../../../assets/icomoon/048-folder.svg");
+      background-image: url("../../../../assets/icomoon/colored/048-folder.svg");
     }
 
     &.loading {
       &:before {
-        background-image: url("../../../../assets/icomoon/131-spinner9.svg");
+        background-image: url("../../../../assets/icomoon/colored/131-spinner9.svg");
         opacity: 1;
         animation: spin 2s linear infinite;
       }

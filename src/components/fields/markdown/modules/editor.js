@@ -19,7 +19,8 @@ export default {
 		timer: 0,
 		duration: 0,
 		limit: null,
-		sidebar: null
+		sidebar: null,
+		toc: []
 	},
 	mutations: {
 		sidebarToggle(state, value) {
@@ -38,6 +39,11 @@ export default {
 
 			state.count = renderer.count;
 			state.html = renderer.html;
+			state.toc = renderer.toc;
+
+			/*if (!state.toc) {
+        Vue.set(state.table.data, pos.y, [])
+      }*/
 		},
 		sanitize(state, html) {
 			state.sanitized = formatter.toWords(html);

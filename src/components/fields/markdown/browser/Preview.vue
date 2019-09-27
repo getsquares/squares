@@ -28,7 +28,6 @@ export default {
   img {
     max-width: 100%;
     max-height: 200px;
-    border: 2px solid #ddd;
     box-sizing: border-box;
   }
 }

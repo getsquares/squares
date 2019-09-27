@@ -58,6 +58,7 @@ export default {
     overflow: auto;
     font-family: roboto;
     position: relative;
+    background: var(--color-darkest);
 
     ul {
       list-style: none;
@@ -67,6 +68,7 @@ export default {
 
         display: flex;
         color: #333;
+        color: #ccc;
         text-decoration: none;
 
         background-repeat: no-repeat;
@@ -86,7 +88,7 @@ export default {
         }
 
         &:hover {
-          background-color: #ddd;
+          background-color: var(--color-dark-hover);
         }
       }
     }

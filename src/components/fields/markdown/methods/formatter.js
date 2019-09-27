@@ -37,6 +37,8 @@ export default class {
 			alt: 0
 		};
 
+		let toc = [];
+
 		renderer.blockquote = (blockquote) => {
 			counters.blockquotes++;
 			return r.blockquote(blockquote);
@@ -56,6 +58,12 @@ export default class {
 				counters.h1 = raw.length;
 			}
 			counters.headlines++;
+
+			toc.push({
+				level: level,
+				text: text
+			});
+
 			return r.heading(text, level, raw, slugger);
 		};
 
@@ -86,7 +94,8 @@ export default class {
 
 		return {
 			html: html,
-			count: counters
+			count: counters,
+			toc: toc
 		};
 	}
 }

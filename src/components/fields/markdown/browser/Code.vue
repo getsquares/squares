@@ -45,8 +45,9 @@ export default {
     user-select: all;
     padding: 0.5rem;
     box-sizing: border-box;
-    background: transparent;
-    border: 2px solid #ddd;
+    background: #ccc;
+    background: #444;
+    color: #aaa;
     display: block;
     outline: none;
   }
