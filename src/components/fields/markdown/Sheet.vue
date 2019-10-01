@@ -165,6 +165,10 @@ export default {
       margin-bottom: 2rem;
     }
 
+    mark {
+      background: #ffec8f;
+    }
+
     > *:last-child {
       margin-bottom: 0;
     }
