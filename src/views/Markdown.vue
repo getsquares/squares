@@ -3,29 +3,31 @@
     <main>
       <Pane></Pane>
       <Selector></Selector>
-      <MarkdownTree></MarkdownTree>
+      <Browser></Browser>
       <Stats></Stats>
       <Toc></Toc>
-      <KeywordDensity></KeywordDensity>
-      <MarkdownEditor></MarkdownEditor>
-      <MarkdownSheet></MarkdownSheet>
+      <KeywordDensity v-if="sidebar == 'density'"></KeywordDensity>
+      <Editor></Editor>
+      <Sheet></Sheet>
     </main>
 
-    <MarkdownFooter></MarkdownFooter>
+    <Footer></Footer>
   </div>
 </template>
 
 <script>
 import Axios from "axios";
 
-import MarkdownTree from "@/components/fields/markdown/browser/Browser.vue";
-import MarkdownSheet from "@/components/fields/markdown/Sheet.vue";
-import MarkdownEditor from "@/components/fields/markdown/Editor.vue";
-import MarkdownFooter from "@/components/fields/markdown/footer/Footer.vue";
-import Selector from "@/components/fields/markdown/Selector.vue";
-import Stats from "@/components/fields/markdown/Stats.vue";
+import Sheet from "@/components/fields/markdown/Sheet.vue";
+import Editor from "@/components/fields/markdown/Editor.vue";
+import Footer from "@/components/fields/markdown/footer/Footer.vue";
+
 import Pane from "@/components/fields/markdown/Pane.vue";
-import Toc from "@/components/fields/markdown/Toc.vue";
+
+import Toc from "@/components/fields/markdown/sidebars/Toc.vue";
+import Stats from "@/components/fields/markdown/sidebars/Stats.vue";
+import Selector from "@/components/fields/markdown/sidebars/Selector.vue";
+import Browser from "@/components/fields/markdown/sidebars/Browser.vue";
 import KeywordDensity from "@/components/fields/markdown/sidebars/KeywordDensity.vue";
 
 import MethodsSave from "@/components/fields/markdown/methods/save.js";
@@ -34,10 +36,10 @@ import MethodsLoad from "@/components/fields/markdown/methods/load.js";
 export default {
   name: "markdown",
   components: {
-    MarkdownSheet,
-    MarkdownEditor,
-    MarkdownFooter,
-    MarkdownTree,
+    Sheet,
+    Editor,
+    Footer,
+    Browser,
     Selector,
     Stats,
     Pane,
@@ -58,47 +60,13 @@ export default {
   },
   data: function() {
     return {
-      input: "",
       obj: {}
-      /*defaults: {
-        preview: {
-          delay: 300,
-          css: null
-        },
-        editor: {
-          spellcheck: false,
-          width: 900
-        },
-        revisions: {
-          path: "revisions/markdown",
-          limit: 5
-        },
-        media: {
-          path: "server-media",
-          trim: null,
-          folder: null
-        },
-        autosave: {
-          save: 15,
-          retry: 45,
-          warning: 300,
-          danger: 900
-        },
-        words: {
-          danger: {
-            min: 0,
-            max: 799
-          },
-          warning: {
-            min: 800,
-            max: 1999
-          },
-          success: {
-            min: 2000
-          }
-        }
-      }*/
     };
+  },
+  computed: {
+    sidebar() {
+      return this.$store.state["field/markdown/editor"].sidebar;
+    }
   },
   methods: {
     optionsWithFallbacks(object, fallback) {

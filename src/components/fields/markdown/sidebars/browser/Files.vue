@@ -42,7 +42,7 @@ export default {
 .files {
   li {
     &:before {
-      background-image: url("../../../../assets/icomoon/colored/035-file-text.svg");
+      background-image: url("../../../../../assets/icomoon/colored/035-file-text.svg");
     }
 
     &.active,

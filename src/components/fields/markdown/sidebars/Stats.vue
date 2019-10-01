@@ -5,22 +5,22 @@
       <section class="two">
         <div>Blockquote</div>
         <div>{{ counters.blockquotes }}</div>
-      
+
         <div>Images</div>
         <div>{{ counters.images }}</div>
-      
+
         <div>Headlines</div>
         <div>{{ counters.headlines }}</div>
-      
+
         <div>Links</div>
         <div>{{ counters.links }}</div>
-      
+
         <div>Lists</div>
         <div>{{ counters.lists }}</div>
-      
+
         <div>Paragraphs</div>
         <div>{{ counters.paragraphs }}</div>
-      
+
         <div>Tables</div>
         <div>{{ counters.tables }}</div>
       </section>
@@ -33,21 +33,21 @@
         <div>
           <img
             v-show="missingAlt != 0"
-            src="../../../assets/icomoon/colored/264-warning.svg"
+            src="../../../../assets/icomoon/colored/264-warning.svg"
             title="Add alt tags on all images"
           />
         </div>
-    
+
         <div>Bytes</div>
         <div>{{ bytes }}</div>
         <div>
           <img
             v-show="bytes > limit"
-            src="../../../assets/icomoon/colored/264-warning.svg"
+            src="../../../../assets/icomoon/colored/264-warning.svg"
             :title="'Max field length: ' + limit + ' bytes'"
           />
         </div>
-    
+
         <div>Characters</div>
         <div>{{ chars }}</div>
         <div></div>
@@ -55,7 +55,7 @@
         <div>Characters h1</div>
         <div>{{ counters.h1 }}</div>
         <div></div>
-    
+
         <div>Lines</div>
         <div>{{ lines }}</div>
         <div></div>
@@ -156,15 +156,15 @@ export default {
       grid-template-columns: 1fr 1fr min-content;
 
       div {
-        &:nth-child(3n+1) {
+        &:nth-child(3n + 1) {
           font-weight: bold;
         }
 
-        &:nth-child(3n+3) {
-          padding: .5rem 0;
+        &:nth-child(3n + 3) {
+          padding: 0.5rem 0;
 
           img {
-            padding: 0 .5rem;
+            padding: 0 0.5rem;
           }
         }
       }
@@ -174,7 +174,7 @@ export default {
       grid-template-columns: 1fr 1fr;
 
       div {
-        &:nth-child(2n+1) {
+        &:nth-child(2n + 1) {
           font-weight: bold;
         }
       }

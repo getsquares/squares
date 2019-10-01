@@ -131,7 +131,7 @@ export default {
   color: #ccc;
 
   h3 {
-    margin-bottom: .75rem;
+    margin-bottom: 0.75rem;
     padding: 0 1rem;
   }
 
@@ -163,7 +163,7 @@ export default {
           background-size: 16px;
           margin-right: 0.5rem;
 
-          background-image: url("../../../assets/icomoon/colored/370-table2.svg");
+          background-image: url("../../../../assets/icomoon/colored/370-table2.svg");
         }
 
         &:hover {
@@ -173,7 +173,7 @@ export default {
 
       .a {
         &:before {
-          background-image: url("../../../assets/icomoon/colored/131-spinner9.svg");
+          background-image: url("../../../../assets/icomoon/colored/131-spinner9.svg");
           opacity: 1;
           animation: spin 2s linear infinite;
         }

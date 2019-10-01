@@ -11,11 +11,11 @@
 </template>
 
 <script>
-import BrowserCode from "@/components/fields/markdown/browser/Code.vue";
-import BrowserAlt from "@/components/fields/markdown/browser/Alt.vue";
-import BrowserPreview from "@/components/fields/markdown/browser/Preview.vue";
-import BrowserFiles from "@/components/fields/markdown/browser/Files.vue";
-import BrowserFolders from "@/components/fields/markdown/browser/Folders.vue";
+import BrowserCode from "@/components/fields/markdown/sidebars/browser/Code.vue";
+import BrowserAlt from "@/components/fields/markdown/sidebars/browser/Alt.vue";
+import BrowserPreview from "@/components/fields/markdown/sidebars/browser/Preview.vue";
+import BrowserFiles from "@/components/fields/markdown/sidebars/browser/Files.vue";
+import BrowserFolders from "@/components/fields/markdown/sidebars/browser/Folders.vue";
 
 export default {
   name: "MarkdownTree",
