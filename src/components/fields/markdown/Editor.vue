@@ -41,7 +41,7 @@ export default {
 
       this.$store.commit("field/markdown/editor/input", e.target.value);
       this.$store.commit("field/markdown/editor/html");
-      this.$store.commit("field/markdown/editor/sanitize", this.html);
+      this.$store.commit("field/markdown/editor/words", this.html);
       this.indicate();
       this.wordcount();
     },

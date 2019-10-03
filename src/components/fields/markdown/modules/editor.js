@@ -7,7 +7,8 @@ export default {
 		input: '',
 		buffer: '',
 		html: '',
-		sanitized: '',
+		words: '',
+		stripped: '',
 		count: {},
 		wordcount: 0,
 		focus: 'editor',
@@ -46,10 +47,11 @@ export default {
 			state.count = renderer.count;
 			state.html = html;
 			state.toc = renderer.toc;
-			console.log(state.html);
+			//console.log(state.html);
 		},
-		sanitize(state, html) {
-			state.sanitized = formatter.toWords(html);
+		words(state, html) {
+			state.stripped = formatter.stripped(html);
+			state.words = formatter.toWords(state.stripped);
 		},
 		buffer(state, value) {
 			state.buffer = value;
@@ -76,7 +78,7 @@ export default {
 			}
 		},
 		wordcount(state) {
-			state.wordcount = formatter.wordCount(state.sanitized);
+			state.wordcount = formatter.wordCount(state.words);
 		},
 		indicator(state, value) {
 			state.indicator = value;

@@ -1,19 +1,42 @@
 <template>
   <div class="pane" :class="{ dark: sidebar != null }">
-    <button :class="{ active: sidebar == 'browser' }" @click="toggleSidebar('browser')">
+    <button
+      :class="{ active: sidebar == 'browser' }"
+      @click="toggleSidebar('browser')"
+      title="Image Browser"
+    >
       <img src="../../../assets/icomoon/040-file-picture.svg" />
     </button>
-    <button :class="{ active: sidebar == 'selector' }" @click="toggleSidebar('selector')">
+    <button
+      :class="{ active: sidebar == 'selector' }"
+      @click="toggleSidebar('selector')"
+      title="Select row"
+    >
       <img src="../../../assets/icomoon/101-database.svg" />
     </button>
-    <button :class="{ active: sidebar == 'stats' }" @click="toggleSidebar('stats')">
+    <button
+      :class="{ active: sidebar == 'stats' }"
+      @click="toggleSidebar('stats')"
+      title="Statistics"
+    >
       <img src="../../../assets/icomoon/156-stats-dots.svg" />
     </button>
-    <button :class="{ active: sidebar == 'toc' }" @click="toggleSidebar('toc')">
-      <img src="../../../assets/icomoon/035-file-text.svg" />
+    <button
+      :class="{ active: sidebar == 'toc' }"
+      @click="toggleSidebar('toc')"
+      title="Table of Contents"
+    >
+      <img src="../../../assets/icomoon/354-font-size.svg" />
     </button>
-    <button :class="{ active: sidebar == 'density' }" @click="toggleSidebar('density')">
-      <img src="../../../assets/icomoon/186-list-numbered.svg" />
+    <button
+      :class="{ active: sidebar == 'density' }"
+      @click="toggleSidebar('density')"
+      title="Keyword Density"
+    >
+      <img src="../../../assets/icomoon/334-sort-amount-desc.svg" />
+    </button>
+    <button :class="{ active: sidebar == 'links' }" @click="toggleSidebar('links')" title="Links">
+      <img src="../../../assets/icomoon/204-link.svg" />
     </button>
   </div>
 </template>
@@ -57,7 +80,6 @@ export default {
     width: 4rem;
     display: flex;
     justify-content: center;
-    
 
     &:hover {
       opacity: 0.5;

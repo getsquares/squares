@@ -13,6 +13,7 @@
       <MarkdownTimer></MarkdownTimer>
       <MarkdownWordcount></MarkdownWordcount>
       <MarkdownLimit></MarkdownLimit>
+      <Alt></Alt>
     </template>
   </nav>
 </template>
@@ -22,6 +23,7 @@ import MarkdownTimer from "@/components/fields/markdown/footer/Timer.vue";
 import MarkdownWordcount from "@/components/fields/markdown/footer/Words.vue";
 import MarkdownLimit from "@/components/fields/markdown/footer/Limit.vue";
 import Breadcrumbs from "@/components/fields/markdown/footer/Breadcrumbs.vue";
+import Alt from "@/components/fields/markdown/footer/Alt.vue";
 
 export default {
   name: "MarkdownFooter",
@@ -29,7 +31,8 @@ export default {
     MarkdownWordcount,
     MarkdownTimer,
     MarkdownLimit,
-    Breadcrumbs
+    Breadcrumbs,
+    Alt
   },
   computed: {
     browserState() {

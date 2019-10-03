@@ -108,7 +108,7 @@ export default {
           );
 
           this.$store.commit("field/markdown/browser/loading", false);*/
-          console.log(response);
+          //console.log(response);
         })
         .catch()
         .finally(() => {});

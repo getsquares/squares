@@ -1,17 +1,44 @@
 <template>
-  <div class="density">
-    <h3>Word density</h3>
-    <section class="marked">
-      <h3>Marked words</h3>
-      <template v-for="keyword in keywords">
-        <div>{{ keyword }}</div>
+  <div class="density" v-show="isSidebar">
+    <h2>Keyword density</h2>
+    <section class="custom">
+      <h3>Custom keywords</h3>
+      <div class="custom-keywords">
+        <input type="text" placeholder="Add keyword" />
+        <button></button>
+      </div>
+    </section>
+
+    <!--
+    <section class="marked" v-show="keywords.length > 0">
+      <template v-for="item in keywords">
+        <div class="count" :key="'count-' + item.word">{{ item.count }}</div>
+        <div class="word" :key="'word-' + item.word">{{ item.word }}</div>
+        <div class="del" :key="'del-' + item.word" @click="del(item.word)"></div>
       </template>
     </section>
+    -->
+
+    <section class="unmarked">
+      <template v-for="item in density.sorted">
+        <template v-if="filtered(item.word)">
+          <div class="count" :key="'count-' + item.word">{{ item.count }}</div>
+          <div
+            class="word"
+            :key="'word-' + item.word"
+            :class="activeClass(item.word)"
+          >{{ item.word }}</div>
+
+          <div class="add" :key="'add-' + item.word" @click="toggleSelected(item.word)"></div>
+        </template>
+      </template>
+    </section>
+
     <div class="options">
       <label for="words">Words</label>
       <div class="words">
-        <input type="range" min="1" max="10" class="slider" id="words" v-model="words" />
-        <input type="text" v-model="words" />
+        <input type="range" min="1" max="10" class="slider" id="words" v-model="wordsEachRow" />
+        <input type="text" v-model="wordsEachRow" />
       </div>
       <label for="characters">Characters</label>
       <div class="characters">
@@ -19,20 +46,10 @@
         <input type="text" v-model="characters" />
       </div>
       <div class="filter">
-        <input type="text" placeholder="Filter" />
+        <label for="filter">Filter</label>
+        <input type="text" placeholder="Filter words" v-model="filter" id="filter" />
       </div>
     </div>
-    <section class="unselected">
-      <template v-for="item in density">
-        <div
-          @click="toggleSelected(item.word)"
-          class="word"
-          :key="'word-' + item.word"
-          :class="activeClass(item.word)"
-        >{{ item.word }}</div>
-        <div class="count" :key="'count-' + item.word">{{ item.count }}</div>
-      </template>
-    </section>
   </div>
 </template>
 
@@ -43,42 +60,78 @@ import KeywordDensity from "@/components/fields/markdown/methods/density.js";
 export default {
   data: function() {
     return {
-      words: 1,
+      filter: "",
+      wordsEachRow: 1,
       characters: 0
     };
   },
   destroyed() {
-    console.log("destroyed");
+    //console.log("destroyed");
     this.resetKeywords();
   },
   computed: {
     isSidebar() {
       return this.$store.state["field/markdown/editor"].sidebar == "density";
     },
-    sanitized() {
-      return this.$store.state["field/markdown/editor"].sanitized;
+    words() {
+      return this.$store.state["field/markdown/editor"].words;
     },
     density() {
       let kd = new KeywordDensity({
-        words: this.words,
+        words: this.wordsEachRow,
         characters: this.characters
       });
-      kd.add(this.sanitized);
+      kd.add(this.words);
       kd.toLowercase();
       kd.toAlphanumeric();
       kd.stipWhitespace();
       kd.process();
 
-      return kd.get();
+      return {
+        sorted: kd.get(),
+        unsorted: kd.getUnsorted()
+      };
     },
     html() {
       return this.$store.state["field/markdown/editor"].html;
     },
     keywords() {
-      return this.$store.state["field/markdown/editor"].densityKeywords;
+      return [];
+      const keywords = this.$store.state["field/markdown/editor"]
+        .densityKeywords;
+
+      console.log(keywords);
+
+      keywords.forEach(keyword => {
+        console.log("JT");
+        console.log(this.words);
+        let count = this.words.split(keyword).length - 1;
+        console.log(count);
+      });
+      /*let i = 0;
+      let array_results = [];
+
+      keywords.forEach(keyword => {
+        console.log(keyword);
+        console.log(this.density.unsorted[keyword]);
+
+        array_results[i] = {
+          count: this.density.unsorted[keyword],
+          word: keyword
+        };
+        i++;
+      });
+
+      console.log(array_results);
+      array_results.sort((a, b) => b.count - a.count);
+      return array_results;
+      return this.$store.state["field/markdown/editor"].densityKeywords;*/
     }
   },
   methods: {
+    filtered(word) {
+      return word.includes(this.filter);
+    },
     resetKeywords() {
       this.$store.commit("field/markdown/editor/densityKeywordsSet", []);
       this.$store.commit("field/markdown/editor/html");
@@ -88,6 +141,7 @@ export default {
         active: this.keywords.includes(word)
       };
     },
+    del() {},
     toggleSelected(word) {
       this.$store.commit("field/markdown/editor/densityKeywordToggle", word);
       this.$store.commit("field/markdown/editor/html");
@@ -109,15 +163,26 @@ export default {
   box-sizing: border-box;
   color: #ccc;
 
+  h2,
   h3 {
     padding: 1rem;
   }
 
-  section.unselected {
+  h2 {
+    padding-bottom: 0;
+  }
+
+  .custom {
+    margin-bottom: 1rem;
+    flex: 1;
+  }
+
+  section.marked,
+  section.unmarked {
     display: grid;
-    grid-template-columns: 1fr min-content;
+    grid-template-columns: min-content 1fr min-content;
     grid-gap: 1px;
-    background: #333;
+    background-color: #333;
     border-top: 1px solid #333;
     border-bottom: 1px solid #333;
 
@@ -127,23 +192,64 @@ export default {
       padding: 0.5rem 1rem;
       cursor: default;
 
+      &.add {
+        background-image: url("../../../../assets/icomoon/colored/267-plus.svg");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-position: center 0.5rem;
+
+        &:hover {
+          background-color: #333;
+        }
+      }
+
       &.word.active,
       &.word.active + div {
-        background: rgba(25, 118, 210, 0.5);
+        background-color: rgba(25, 118, 210, 0.5);
         color: #fff;
       }
     }
   }
+
+  section.marked {
+    background-color: transparent;
+    margin-bottom: 1rem;
+    border: none;
+    overflow-y: auto;
+
+    > div {
+      background: #111;
+    }
+  }
+
+  section.unmarked {
+    max-height: 339px;
+    overflow-y: auto;
+  }
+}
+
+.filter input {
+  border: none;
+  padding: 0.5rem;
+  box-sizing: border-box;
+  outline: none;
+  width: 100%;
+  background: #333;
+  color: #ccc;
+  margin-bottom: 1rem;
 }
 
 .options {
   padding: 0 1rem;
+  padding-top: 1rem;
 
   label {
     display: block;
     margin-bottom: 1rem;
+    font-weight: bold;
   }
-  > * {
+  .words,
+  .characters {
     display: flex;
     margin-bottom: 1rem;
     align-items: center;

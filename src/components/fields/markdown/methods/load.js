@@ -16,11 +16,11 @@ export default {
 				vue.$store.commit('field/markdown/editor/input', response.data.value);
 				vue.$store.commit('field/markdown/editor/buffer', response.data.value);
 				vue.$store.commit('field/markdown/editor/html');
-				vue.$store.commit('field/markdown/editor/sanitize', vue.$store.state['field/markdown/editor'].html);
+				vue.$store.commit('field/markdown/editor/words', vue.$store.state['field/markdown/editor'].html);
 
 				let html = vue.$store.state['field/markdown/editor'].html;
 
-				vue.$store.commit('field/markdown/editor/wordcount', html);
+				vue.$store.commit('field/markdown/editor/wordcount');
 				vue.$store.commit('field/markdown/editor/limit', response.data.length);
 				vue.$store.commit('field/markdown/editor/timerReset');
 				vue.$store.commit('field/markdown/editor/durationReset');

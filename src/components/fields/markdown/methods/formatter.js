@@ -1,11 +1,30 @@
 import marked from 'marked';
 
 export default class {
-	static toWords(html) {
+	static stripped(html) {
 		let div = document.createElement('div');
 		div.innerHTML = html;
+		return div.textContent || div.innerText || '';
+	}
+	static toWords(stripped) {
+		let div = document.createElement('div');
+		div.innerHTML = stripped;
 		let text = div.textContent || div.innerText || '';
-		return text.replace(/(\r\n|\n|\r)/gm, ' ');
+
+		text = this.toAlphanumeric(text);
+		text = this.stripWhitespace(text);
+		text = this.toLowercase(text);
+
+		return text;
+	}
+	static toLowercase(text) {
+		return text.toLowerCase();
+	}
+	static toAlphanumeric(text) {
+		return text.replace(/[^a-zA-Z0-9À-ž\s]/g, '');
+	}
+	static stripWhitespace(text) {
+		return text.replace(/\s+/g, ' ').trim();
 	}
 	static wordCount(words) {
 		return words.split(' ').filter(function(n) {
@@ -54,9 +73,9 @@ export default class {
 		};
 
 		renderer.heading = (text, level, raw, slugger) => {
-			if (level == 1 && counters.headlines == 0) {
+			/*if (level == 1 && counters.headlines == 0) {
 				counters.h1 = raw.length;
-			}
+			}*/
 			counters.headlines++;
 
 			toc.push({

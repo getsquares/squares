@@ -6,7 +6,8 @@
       <Browser></Browser>
       <Stats></Stats>
       <Toc></Toc>
-      <KeywordDensity v-if="sidebar == 'density'"></KeywordDensity>
+      <Density></Density>
+      <Links></Links>
       <Editor></Editor>
       <Sheet></Sheet>
     </main>
@@ -28,7 +29,8 @@ import Toc from "@/components/fields/markdown/sidebars/Toc.vue";
 import Stats from "@/components/fields/markdown/sidebars/Stats.vue";
 import Selector from "@/components/fields/markdown/sidebars/Selector.vue";
 import Browser from "@/components/fields/markdown/sidebars/Browser.vue";
-import KeywordDensity from "@/components/fields/markdown/sidebars/KeywordDensity.vue";
+import Density from "@/components/fields/markdown/sidebars/Density.vue";
+import Links from "@/components/fields/markdown/sidebars/Links.vue";
 
 import MethodsSave from "@/components/fields/markdown/methods/save.js";
 import MethodsLoad from "@/components/fields/markdown/methods/load.js";
@@ -44,7 +46,8 @@ export default {
     Stats,
     Pane,
     Toc,
-    KeywordDensity
+    Density,
+    Links
   },
   watch: {
     $route(to, from) {

@@ -18,7 +18,10 @@ export default class {
 		this.process();
 	}
 	get() {
-		return this.results;
+		return this.sorted;
+	}
+	getUnsorted() {
+		return this.unsorted;
 	}
 	process() {
 		let array = this.content.split(' ');
@@ -57,7 +60,8 @@ export default class {
 
 		// Sort array by occurrences
 		array_results.sort((a, b) => b.count - a.count);
-		this.results = array_results;
+		this.sorted = array_results;
+		this.unsorted = object_unsorted;
 	}
 	add(content) {
 		this.content = content;
