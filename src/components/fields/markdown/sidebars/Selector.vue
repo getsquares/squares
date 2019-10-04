@@ -1,6 +1,6 @@
 <template>
-  <div class="selector" v-show="isSidebar">
-    <h3>Select row</h3>
+  <div class="selector" v-if="isSidebar">
+    <h2>Select row</h2>
     <ul>
       <li v-show="loading" class="loading">
         <div class="a">&nbsp;</div>
@@ -130,9 +130,9 @@ export default {
   padding: 1rem 0;
   color: #ccc;
 
-  h3 {
-    margin-bottom: 0.75rem;
+  h2 {
     padding: 0 1rem;
+    padding-bottom: 0.75rem;
   }
 
   ul {

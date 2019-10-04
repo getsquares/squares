@@ -1,5 +1,5 @@
 <template>
-  <div class="links" v-show="isSidebar">
+  <div class="links" v-if="isSidebar">
     <h2>Links</h2>
     <ul>
       <li v-for="option in options.links" :key="option.url">

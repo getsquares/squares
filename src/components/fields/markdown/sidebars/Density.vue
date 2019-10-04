@@ -1,11 +1,11 @@
 <template>
-  <div class="density" v-show="isSidebar">
+  <div class="density" v-if="isSidebar">
     <h2>Keyword density</h2>
     <section class="custom">
       <h3>Custom keywords</h3>
       <div class="custom-keywords">
-        <input type="text" placeholder="Add keyword" />
-        <button></button>
+        <input type="text" placeholder="Add keyword" spellcheck="false" />
+        <button class="add"></button>
       </div>
     </section>
 
@@ -163,8 +163,7 @@ export default {
   box-sizing: border-box;
   color: #ccc;
 
-  h2,
-  h3 {
+  h2 {
     padding: 1rem;
   }
 
@@ -175,6 +174,42 @@ export default {
   .custom {
     margin-bottom: 1rem;
     flex: 1;
+    padding: 1rem;
+
+    h3 {
+      margin-bottom: 1rem;
+    }
+
+    .custom-keywords {
+      display: flex;
+
+      button {
+        background-image: url("../../../../assets/icomoon/colored/267-plus.svg");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-position: center;
+        padding: 0.5rem 1rem;
+        background-color: transparent;
+        border: none;
+        border: 1px solid #333;
+
+        &:hover {
+          background-color: #000;
+        }
+      }
+    }
+
+    input[type="text"] {
+      box-sizing: border-box;
+      border: none;
+      padding: 0.5rem;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      outline: none;
+      width: 100%;
+      background: #333;
+      color: #ccc;
+    }
   }
 
   section.marked,
@@ -199,7 +234,7 @@ export default {
         background-position: center 0.5rem;
 
         &:hover {
-          background-color: #333;
+          background-color: #000;
         }
       }
 

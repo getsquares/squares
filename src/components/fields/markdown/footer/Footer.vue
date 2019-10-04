@@ -75,8 +75,8 @@ export default {
     border-radius: 3px;
     user-select: none;
 
-    span {
-      &:before {
+    strong {
+      &:after {
         content: " ";
       }
     }

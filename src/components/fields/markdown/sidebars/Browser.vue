@@ -1,5 +1,6 @@
 <template>
-  <div class="tree" v-show="isSidebar" @click="focus()">
+  <div class="tree" v-if="isSidebar" @click="focus()">
+    <h2>File browser</h2>
     <BrowserFolders></BrowserFolders>
     <BrowserFiles></BrowserFiles>
     <footer v-if="filename != ''">
@@ -59,6 +60,12 @@ export default {
     font-family: roboto;
     position: relative;
     background: var(--color-darkest);
+
+    h2 {
+      color: #ccc;
+      padding: 1rem;
+      padding-bottom: 0.5rem;
+    }
 
     ul {
       list-style: none;
