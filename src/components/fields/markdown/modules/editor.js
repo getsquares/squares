@@ -1,3 +1,4 @@
+import Vue from 'vue';
 import formatter from '@/components/fields/markdown/methods/formatter.js';
 import keywords from '@/components/fields/markdown/methods/keywords.js';
 
@@ -22,7 +23,7 @@ export default {
 		limit: null,
 		sidebar: null,
 		toc: [],
-		densityKeywords: []
+		keywords: []
 	},
 	mutations: {
 		sidebarToggle(state, value) {
@@ -40,14 +41,11 @@ export default {
 			const renderer = formatter.render(state.input, trim);
 			let html = renderer.html;
 
-			if (state.sidebar == 'density') {
-				html = keywords.populate(state.densityKeywords, renderer.html);
-			}
+			html = keywords.populate(state.keywords, renderer.html);
 
 			state.count = renderer.count;
 			state.html = html;
 			state.toc = renderer.toc;
-			//console.log(state.html);
 		},
 		words(state, html) {
 			state.stripped = formatter.stripped(html);
@@ -67,14 +65,17 @@ export default {
 			state.width = width;
 			state.large = diff;
 		},
-		densityKeywordsSet(state, words) {
-			state.densityKeywords = words;
+		keywordAdd(state, keyword) {
+			if (state.keywords.includes(keyword)) return;
+			let current = [ ...state.keywords ];
+			current.push(keyword);
+
+			Vue.set(state, 'keywords', [ ...current ]);
+			state.html = keywords.populate(state.keywords, state.html);
 		},
-		densityKeywordToggle(state, word) {
-			if (!state.densityKeywords.includes(word)) {
-				state.densityKeywords.push(word);
-			} else {
-				state.densityKeywords = state.densityKeywords.filter((item) => item !== word);
+		keywordDelete(state, keyword) {
+			if (state.keywords.includes(keyword)) {
+				state.keywords = state.keywords.filter((item) => item !== keyword);
 			}
 		},
 		wordcount(state) {

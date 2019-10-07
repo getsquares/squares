@@ -1,35 +1,39 @@
 <template>
   <div class="density" v-if="isSidebar">
-    <h2>Keyword density</h2>
-    <section class="custom">
-      <h3>Custom keywords</h3>
-      <div class="custom-keywords">
-        <input type="text" placeholder="Add keyword" spellcheck="false" />
-        <button class="add"></button>
-      </div>
-    </section>
+    <h2>Keyword &amp; Density</h2>
+    <div class="flex1">
+      <section class="custom">
+        <h3>Keywords</h3>
+        <div class="custom-keywords">
+          <input
+            type="text"
+            placeholder="Add keyword"
+            spellcheck="false"
+            :value="keyword"
+            @keyup.enter="addKeyword()"
+            @input="bufferKeyword"
+          />
+          <button class="add" @click="addKeyword()"></button>
+        </div>
+      </section>
 
-    <!--
-    <section class="marked" v-show="keywords.length > 0">
-      <template v-for="item in keywords">
-        <div class="count" :key="'count-' + item.word">{{ item.count }}</div>
-        <div class="word" :key="'word-' + item.word">{{ item.word }}</div>
-        <div class="del" :key="'del-' + item.word" @click="del(item.word)"></div>
-      </template>
-    </section>
-    -->
+      <section class="marked">
+        <template v-for="item in test">
+          <div class="count" :key="'count-' + item.word">{{ item.count }}</div>
+          <div class="word" :key="'word-' + item.word">{{ item.word }}</div>
+          <div class="delete" :key="'delete-' + item.word" @click="keywordDelete(item.word)"></div>
+        </template>
+      </section>
+    </div>
 
+    <h3 class="h3">Density</h3>
     <section class="unmarked">
       <template v-for="item in density.sorted">
         <template v-if="filtered(item.word)">
           <div class="count" :key="'count-' + item.word">{{ item.count }}</div>
-          <div
-            class="word"
-            :key="'word-' + item.word"
-            :class="activeClass(item.word)"
-          >{{ item.word }}</div>
+          <div class="word" :key="'word-' + item.word">{{ item.word }}</div>
 
-          <div class="add" :key="'add-' + item.word" @click="toggleSelected(item.word)"></div>
+          <div class="add" :key="'add-' + item.word" @click="addKeyword(item.word)"></div>
         </template>
       </template>
     </section>
@@ -54,20 +58,18 @@
 </template>
 
 <script>
-import Mark from "mark.js";
+import formatter from "@/components/fields/markdown/methods/formatter.js";
 import KeywordDensity from "@/components/fields/markdown/methods/density.js";
 
 export default {
   data: function() {
     return {
+      keyword: "",
+      keywordsDensity: [],
       filter: "",
       wordsEachRow: 1,
       characters: 0
     };
-  },
-  destroyed() {
-    //console.log("destroyed");
-    this.resetKeywords();
   },
   computed: {
     isSidebar() {
@@ -77,71 +79,58 @@ export default {
       return this.$store.state["field/markdown/editor"].words;
     },
     density() {
-      let kd = new KeywordDensity({
+      const options = {
         words: this.wordsEachRow,
-        characters: this.characters
-      });
-      kd.add(this.words);
-      kd.toLowercase();
-      kd.toAlphanumeric();
-      kd.stipWhitespace();
-      kd.process();
+        characters: this.characters,
+        filter: [""]
+      };
 
       return {
-        sorted: kd.get(),
-        unsorted: kd.getUnsorted()
+        sorted: KeywordDensity.getSorted(this.words, options)
       };
     },
     html() {
       return this.$store.state["field/markdown/editor"].html;
     },
     keywords() {
-      return [];
-      const keywords = this.$store.state["field/markdown/editor"]
-        .densityKeywords;
+      return this.$store.state["field/markdown/editor"].keywords;
+    },
+    test() {
+      if (this.keywords.length == 0) return;
 
-      console.log(keywords);
+      const options = {
+        selected: this.keywords
+      };
 
-      keywords.forEach(keyword => {
-        console.log("JT");
-        console.log(this.words);
-        let count = this.words.split(keyword).length - 1;
-        console.log(count);
-      });
-      /*let i = 0;
-      let array_results = [];
-
-      keywords.forEach(keyword => {
-        console.log(keyword);
-        console.log(this.density.unsorted[keyword]);
-
-        array_results[i] = {
-          count: this.density.unsorted[keyword],
-          word: keyword
-        };
-        i++;
-      });
-
-      console.log(array_results);
-      array_results.sort((a, b) => b.count - a.count);
-      return array_results;
-      return this.$store.state["field/markdown/editor"].densityKeywords;*/
+      return KeywordDensity.getSorted(this.words, options);
     }
   },
   methods: {
+    bufferKeyword(e) {
+      this.keyword = e.target.value;
+    },
+    addKeyword(keyword = "") {
+      const hasKeyword = keyword !== "";
+
+      if (!hasKeyword) {
+        keyword = this.keyword;
+        this.keyword = "";
+      }
+
+      keyword = formatter.toAlphanumeric(keyword);
+      keyword = formatter.toLowercase(keyword);
+      keyword = formatter.stripWhitespace(keyword);
+
+      if (keyword == "") return;
+
+      this.$store.commit("field/markdown/editor/keywordAdd", keyword);
+    },
+    keywordDelete(keyword) {
+      this.$store.commit("field/markdown/editor/keywordDelete", keyword);
+    },
     filtered(word) {
       return word.includes(this.filter);
     },
-    resetKeywords() {
-      this.$store.commit("field/markdown/editor/densityKeywordsSet", []);
-      this.$store.commit("field/markdown/editor/html");
-    },
-    activeClass(word) {
-      return {
-        active: this.keywords.includes(word)
-      };
-    },
-    del() {},
     toggleSelected(word) {
       this.$store.commit("field/markdown/editor/densityKeywordToggle", word);
       this.$store.commit("field/markdown/editor/html");
@@ -171,8 +160,19 @@ export default {
     padding-bottom: 0;
   }
 
+  .h3 {
+    padding: 1rem;
+    padding-top: 0;
+  }
+
+  .flex1 {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
   .custom {
-    margin-bottom: 1rem;
+    //margin-bottom: 1rem;
     flex: 1;
     padding: 1rem;
 
@@ -227,8 +227,8 @@ export default {
       padding: 0.5rem 1rem;
       cursor: default;
 
-      &.add {
-        background-image: url("../../../../assets/icomoon/colored/267-plus.svg");
+      &.add,
+      &.delete {
         background-repeat: no-repeat;
         background-position: center;
         background-position: center 0.5rem;
@@ -236,6 +236,14 @@ export default {
         &:hover {
           background-color: #000;
         }
+      }
+
+      &.add {
+        background-image: url("../../../../assets/icomoon/colored/267-plus.svg");
+      }
+
+      &.delete {
+        background-image: url("../../../../assets/icomoon/colored/268-minus.svg");
       }
 
       &.word.active,

@@ -6,8 +6,6 @@
       @input="update"
       :spellcheck="spellcheck"
       @keydown.ctrl.83.prevent="save()"
-      @keydown.tab.shift.prevent
-      @keydown.tab.exact.prevent="tabRight($event)"
       @focus="setFocus"
       :class="editorClass"
     ></textarea>
@@ -81,8 +79,8 @@ export default {
     },
     setFocus() {
       this.$store.commit("field/markdown/editor/focus", "editor");
-    },
-    tabRight(event) {
+    }
+    /*tabRight(event) {
       let text = this.input,
         originalSelectionStart = event.target.selectionStart,
         textStart = text.slice(0, originalSelectionStart),
@@ -95,7 +93,7 @@ export default {
       event.target.value = this.input; // required to make the cursor stay in place.
       event.target.selectionEnd = event.target.selectionStart =
         originalSelectionStart + 1;
-    }
+    }*/
   },
   computed: {
     editorClass() {

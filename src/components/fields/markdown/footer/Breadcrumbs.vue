@@ -14,13 +14,13 @@ export default {
   },
   methods: {
     // Creates trail for future uri trigger
-    buffer(index) {
+    /*buffer(index) {
       let buffer = "";
       for (let i = 0; i <= index; i++) {
         buffer += "/" + this.trail[i];
       }
       buffer = buffer.substr(1, buffer.length);
-    }
+    }*/
   }
 };
 </script>

@@ -4,7 +4,7 @@
       <img src="../../../assets/icomoon/272-cross.svg" />
     </button>
     <div class="preview-wrap">
-      <div v-html="html" class="preview" :class="previewClass"></div>
+      <div v-html="html" class="preview" :class="previewClass" :key="keywords.length"></div>
     </div>
     <MarkdownIndicator></MarkdownIndicator>
   </div>
@@ -22,6 +22,9 @@ export default {
   computed: {
     html() {
       return this.$store.state["field/markdown/editor"].html;
+    },
+    keywords() {
+      return this.$store.state["field/markdown/editor"].keywords;
     },
     input() {
       const renderer = new Marked.Renderer();
