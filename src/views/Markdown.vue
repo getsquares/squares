@@ -51,8 +51,6 @@ export default {
   },
   watch: {
     $route(to, from) {
-      //console.log("changed");
-      //MethodsLoad.load(this);
       MethodsLoad.load(this);
     }
   },

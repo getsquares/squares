@@ -1,4 +1,5 @@
 import Axios from 'axios';
+import Chunks from '@/components/fields/markdown/methods/chunks.js';
 
 export default {
 	load(vue) {
@@ -18,13 +19,22 @@ export default {
 				vue.$store.commit('field/markdown/editor/html');
 				vue.$store.commit('field/markdown/editor/words', vue.$store.state['field/markdown/editor'].html);
 
-				let html = vue.$store.state['field/markdown/editor'].html;
-
 				vue.$store.commit('field/markdown/editor/wordcount');
 				vue.$store.commit('field/markdown/editor/limit', response.data.length);
 				vue.$store.commit('field/markdown/editor/timerReset');
 				vue.$store.commit('field/markdown/editor/durationReset');
-				//vue.$store.commit('field/markdown/editor/readingtime');
+
+				const parts = Chunks(vue.$store.state['field/markdown/editor'].input, '<!-- KEYWORDS: ', '-->');
+				if (!parts) return;
+
+				console.log(parts.match);
+
+				let snippet = parts.match.replace('<!-- KEYWORDS: ', '');
+				snippet = snippet.replace('-->', '');
+
+				let keywords = snippet.split(', ');
+				console.log(snippet);
+				console.log(keywords);
 			})
 			.catch()
 			.finally(() => {});

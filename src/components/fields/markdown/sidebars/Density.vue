@@ -1,30 +1,29 @@
 <template>
   <div class="density" v-if="isSidebar">
     <h2>Keyword &amp; Density</h2>
-    <div class="flex1">
-      <section class="custom">
-        <h3>Keywords</h3>
-        <div class="custom-keywords">
-          <input
-            type="text"
-            placeholder="Add keyword"
-            spellcheck="false"
-            :value="keyword"
-            @keyup.enter="addKeyword()"
-            @input="bufferKeyword"
-          />
-          <button class="add" @click="addKeyword()"></button>
-        </div>
-      </section>
 
-      <section class="marked">
-        <template v-for="item in test">
-          <div class="count" :key="'count-' + item.word">{{ item.count }}</div>
-          <div class="word" :key="'word-' + item.word">{{ item.word }}</div>
-          <div class="delete" :key="'delete-' + item.word" @click="keywordDelete(item.word)"></div>
-        </template>
-      </section>
-    </div>
+    <section class="custom">
+      <h3>Keywords</h3>
+      <div class="custom-keywords">
+        <input
+          type="text"
+          placeholder="Add keyword"
+          spellcheck="false"
+          :value="keyword"
+          @keyup.enter="addKeyword()"
+          @input="bufferKeyword"
+        />
+        <button class="add" @click="addKeyword()"></button>
+      </div>
+    </section>
+
+    <section class="marked">
+      <template v-for="item in test">
+        <div class="count" :key="'count-' + item.word">{{ item.count }}</div>
+        <div class="word" :key="'word-' + item.word">{{ item.word }}</div>
+        <div class="delete" :key="'delete-' + item.word" @click="keywordDelete(item.word)"></div>
+      </template>
+    </section>
 
     <h3 class="h3">Density</h3>
     <section class="unmarked">
@@ -60,12 +59,12 @@
 <script>
 import formatter from "@/components/fields/markdown/methods/formatter.js";
 import KeywordDensity from "@/components/fields/markdown/methods/density.js";
+import Chunks from "@/components/fields/markdown/methods/chunks.js";
 
 export default {
   data: function() {
     return {
       keyword: "",
-      keywordsDensity: [],
       filter: "",
       wordsEachRow: 1,
       characters: 0
@@ -91,6 +90,9 @@ export default {
     },
     html() {
       return this.$store.state["field/markdown/editor"].html;
+    },
+    input() {
+      return this.$store.state["field/markdown/editor"].input;
     },
     keywords() {
       return this.$store.state["field/markdown/editor"].keywords;
@@ -122,11 +124,30 @@ export default {
       keyword = formatter.stripWhitespace(keyword);
 
       if (keyword == "") return;
-
       this.$store.commit("field/markdown/editor/keywordAdd", keyword);
+
+      this.addKeywordsToInput();
+    },
+    addKeywordsToInput() {
+      let input = "";
+      const parts = Chunks(this.input, "\n\n<!-- KEYWORDS: ", "-->");
+      const keywordsStr = this.keywords.join(", ");
+      const snippet =
+        keywordsStr.length > 0
+          ? "\n\n<!-- KEYWORDS: " + keywordsStr + " -->"
+          : "";
+
+      if (!parts) {
+        input = this.input + snippet;
+      } else {
+        input = parts.before + snippet + parts.after;
+      }
+
+      this.$store.commit("field/markdown/editor/input", input);
     },
     keywordDelete(keyword) {
       this.$store.commit("field/markdown/editor/keywordDelete", keyword);
+      this.addKeywordsToInput();
     },
     filtered(word) {
       return word.includes(this.filter);
@@ -165,15 +186,7 @@ export default {
     padding-top: 0;
   }
 
-  .flex1 {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-  }
-
   .custom {
-    //margin-bottom: 1rem;
-    flex: 1;
     padding: 1rem;
 
     h3 {
@@ -186,7 +199,6 @@ export default {
       button {
         background-image: url("../../../../assets/icomoon/colored/267-plus.svg");
         background-repeat: no-repeat;
-        background-position: center;
         background-position: center;
         padding: 0.5rem 1rem;
         background-color: transparent;
@@ -258,16 +270,10 @@ export default {
     background-color: transparent;
     margin-bottom: 1rem;
     border: none;
-    overflow-y: auto;
 
     > div {
       background: #111;
     }
-  }
-
-  section.unmarked {
-    max-height: 339px;
-    overflow-y: auto;
   }
 }
 
@@ -297,41 +303,6 @@ export default {
     margin-bottom: 1rem;
     align-items: center;
 
-    .slider {
-      -webkit-appearance: none; /* Override default CSS styles */
-      appearance: none;
-      width: 100%; /* Full-width */
-      height: 0.5rem;
-      background: #555; /* Grey background */
-      outline: none; /* Remove outline */
-      opacity: 0.7; /* Set transparency (for mouse-over effects on hover) */
-      -webkit-transition: 0.2s; /* 0.2 seconds transition on hover */
-      transition: opacity 0.2s;
-    }
-
-    /* Mouse-over effects */
-    .slider:hover {
-      opacity: 1; /* Fully shown on mouse-over */
-    }
-
-    /* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
-    .slider::-webkit-slider-thumb {
-      -webkit-appearance: none; /* Override default look */
-      appearance: none;
-      width: 25px; /* Set a specific slider handle width */
-      height: 25px; /* Slider handle height */
-      background: #1976d2; /* Green background */
-      cursor: pointer; /* Cursor on hover */
-      border-radius: 100vh;
-    }
-
-    .slider::-moz-range-thumb {
-      width: 25px; /* Set a specific slider handle width */
-      height: 25px; /* Slider handle height */
-      background: #1976d2; /* Green background */
-      cursor: pointer; /* Cursor on hover */
-    }
-
     input[type="text"] {
       background: #333;
       border: none;
@@ -342,6 +313,39 @@ export default {
       margin-left: 1rem;
       padding: 0.25rem 0;
     }
+  }
+}
+
+// SLIDER
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 0.5rem;
+  background: #555;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: 0.2s;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 25px;
+    height: 25px;
+    background: var(--color-active);
+    cursor: pointer;
+    border-radius: 100vh;
+  }
+
+  &::-moz-range-thumb {
+    width: 25px;
+    height: 25px;
+    background: var(--color-active);
+    cursor: pointer;
   }
 }
 </style>

@@ -51,7 +51,6 @@ export default {
       };
     },
     visit(e) {
-      console.log(this.$store.state["field/markdown/editor"].indicator);
       if (
         this.$store.state["field/markdown/editor"].indicator !== "success" &&
         !confirm(
@@ -62,13 +61,13 @@ export default {
       } else {
         // LADDA
       }
-      //console.log(e);
+
       // OM EJ SUCCESS FRÅGA FÖRST
       //e.preventDefault();
-      /*console.log("visit");
+      /*
       let params = this.$route.params;
       params.id = 58;
-      console.log(params);
+      
       router.push({ name: "cell", params: params });
       */
     },
@@ -108,7 +107,6 @@ export default {
           );
 
           this.$store.commit("field/markdown/browser/loading", false);*/
-          //console.log(response);
         })
         .catch()
         .finally(() => {});

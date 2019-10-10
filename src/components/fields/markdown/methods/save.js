@@ -9,8 +9,6 @@ export default {
 				const options = vue.$store.state['field/markdown/options'].options;
 				const pending = vue.$store.getters['field/markdown/editor/pending'];
 
-				//console.log(options);
-
 				if (pending) {
 					if (duration == options.autosave.retry) {
 						this.saveNow(vue);

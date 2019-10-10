@@ -21,8 +21,6 @@ export default {
       return this.$store.state["field/markdown/editor"].sidebar;
     },
     toc() {
-      //console.log('change');
-      console.log("toc");
       return this.$store.state["field/markdown/editor"].toc;
     }
   }
