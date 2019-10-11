@@ -26,31 +26,13 @@ export default {
     },
     stateClass() {
       if (!this.options) return;
-      let match = "none";
+
       let stateClass = {};
 
-      for (let option in this.options.words) {
-        let words = this.options.words[option];
-
-        if (this.wordcount >= words.min) {
-          if (!("max" in this.options.words[option])) {
-            match = option;
-          } else if (this.wordcount < words.max) {
-            match = option;
-          }
-        }
-      }
-
-      switch (match) {
-        case "warning":
-          stateClass = { warning: true };
-          break;
-        case "danger":
-          stateClass = { danger: true };
-          break;
-        case "success":
-          stateClass = { success: true };
-          break;
+      if (this.wordcount < this.options.words.min) {
+        stateClass = {
+          warning: true
+        };
       }
 
       return stateClass;

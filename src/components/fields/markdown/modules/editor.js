@@ -78,6 +78,9 @@ export default {
 				state.keywords = state.keywords.filter((item) => item !== keyword);
 			}
 		},
+		keywordPopulate(state, keywords) {
+			state.keywords = keywords;
+		},
 		wordcount(state) {
 			state.wordcount = formatter.wordCount(state.words);
 		},

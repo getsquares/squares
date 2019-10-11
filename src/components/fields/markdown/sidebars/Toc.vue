@@ -4,7 +4,7 @@
     <div class="list" v-if="toc.length">
       <component
         class="h"
-        v-for="h, index in toc"
+        v-for="(h, index) in toc"
         :is="'h' + h.level"
         :key="index"
         :title="'h' + h.level"

@@ -27,14 +27,12 @@ export default {
 				const parts = Chunks(vue.$store.state['field/markdown/editor'].input, '<!-- KEYWORDS: ', '-->');
 				if (!parts) return;
 
-				console.log(parts.match);
-
 				let snippet = parts.match.replace('<!-- KEYWORDS: ', '');
 				snippet = snippet.replace('-->', '');
 
 				let keywords = snippet.split(', ');
-				console.log(snippet);
-				console.log(keywords);
+
+				vue.$store.commit('field/markdown/editor/keywordPopulate', keywords);
 			})
 			.catch()
 			.finally(() => {});

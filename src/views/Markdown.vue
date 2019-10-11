@@ -50,7 +50,7 @@ export default {
     Links
   },
   watch: {
-    $route(to, from) {
+    $route() {
       MethodsLoad.load(this);
     }
   },

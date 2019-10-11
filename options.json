@@ -49,17 +49,7 @@
 				"template": "{{id}} - {{slug}}"
 			},
 			"words": {
-				"danger": {
-					"min": 0,
-					"max": 799
-				},
-				"warning": {
-					"min": 800,
-					"max": 1999
-				},
-				"success": {
-					"min": 2000
-				}
+				"min": 2000
 			}
 		}
 	}

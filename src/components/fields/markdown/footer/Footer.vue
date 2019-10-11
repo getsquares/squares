@@ -10,27 +10,27 @@
         <strong>Column:</strong>
         {{ $route.params.column }}
       </div>
-      <MarkdownTimer></MarkdownTimer>
-      <MarkdownWordcount></MarkdownWordcount>
-      <MarkdownLimit></MarkdownLimit>
+      <Timer></Timer>
+      <Wordcount></Wordcount>
+      <Limit></Limit>
       <Alt></Alt>
     </template>
   </nav>
 </template>
 
 <script>
-import MarkdownTimer from "@/components/fields/markdown/footer/Timer.vue";
-import MarkdownWordcount from "@/components/fields/markdown/footer/Words.vue";
-import MarkdownLimit from "@/components/fields/markdown/footer/Limit.vue";
+import Timer from "@/components/fields/markdown/footer/Timer.vue";
+import Wordcount from "@/components/fields/markdown/footer/Words.vue";
+import Limit from "@/components/fields/markdown/footer/Limit.vue";
 import Breadcrumbs from "@/components/fields/markdown/footer/Breadcrumbs.vue";
 import Alt from "@/components/fields/markdown/footer/Alt.vue";
 
 export default {
   name: "MarkdownFooter",
   components: {
-    MarkdownWordcount,
-    MarkdownTimer,
-    MarkdownLimit,
+    Wordcount,
+    Timer,
+    Limit,
     Breadcrumbs,
     Alt
   },
