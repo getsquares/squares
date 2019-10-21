@@ -12,6 +12,9 @@ export default {
 		},
 		loading(state, value) {
 			state.loading = value;
+		},
+		layout(state, value) {
+			state.options.media.layout = value;
 		}
 	}
 };

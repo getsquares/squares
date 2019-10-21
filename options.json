@@ -39,7 +39,8 @@
 			"media": {
 				"path": "server-media",
 				"folder": "folder1/subfolder1",
-				"trim": "folder1/"
+				"trim": "folder1/",
+				"layout": "gallery"
 			},
 			"autosave": {
 				"save": 15,

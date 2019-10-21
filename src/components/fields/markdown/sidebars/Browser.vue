@@ -3,6 +3,16 @@
     <h2>File browser</h2>
     <BrowserFolders></BrowserFolders>
     <BrowserFiles></BrowserFiles>
+    <div class="layout-switch">
+      <div>
+        <input type="radio" name="gender" value="male" checked id="list" />
+        <label for="list" @click="setLayout('list')">List</label>
+      </div>
+      <div>
+        <input type="radio" name="gender" value="female" id="gallery" />
+        <label for="gallery" @click="setLayout('gallery')">Gallery</label>
+      </div>
+    </div>
     <footer v-if="filename != ''">
       <BrowserAlt></BrowserAlt>
       <BrowserCode></BrowserCode>
@@ -43,6 +53,9 @@ export default {
   methods: {
     focus() {
       this.$store.commit("field/markdown/editor/focus", "browser");
+    },
+    setLayout(layout) {
+      this.$store.commit("field/markdown/options/layout", layout);
     }
   }
 };
@@ -60,6 +73,34 @@ export default {
     font-family: roboto;
     position: relative;
     background: var(--color-darkest);
+
+    .layout-switch {
+      margin-top: auto;
+      display: flex;
+      margin: 0.5rem;
+      margin-top: auto;
+      margin-bottom: 0;
+
+      div {
+        flex: 1;
+        text-align: center;
+
+        label {
+          padding: 0.5rem 1rem;
+          display: block;
+          color: #ccc;
+        }
+
+        input[type="radio"] {
+          display: none;
+        }
+
+        input[type="radio"]:checked + label {
+          background: #000;
+          border-radius: 0.25rem;
+        }
+      }
+    }
 
     h2 {
       color: #ccc;
@@ -101,7 +142,7 @@ export default {
     }
 
     footer {
-      margin-top: auto;
+      //margin-top: auto;
     }
 
     .indicator {

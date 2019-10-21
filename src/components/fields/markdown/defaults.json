@@ -15,7 +15,8 @@
 	"media": {
 		"path": "server-media",
 		"trim": "",
-		"folder": null
+		"folder": null,
+		"layout": "list"
 	},
 	"autosave": {
 		"save": 15,
