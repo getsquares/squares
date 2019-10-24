@@ -12,6 +12,7 @@ export default {
 				if (pending) {
 					if (duration == options.autosave.retry) {
 						this.saveNow(vue);
+						this.saveRevision(vue);
 					}
 				} else {
 					vue.$store.commit('field/markdown/editor/timerReset');
@@ -49,6 +50,28 @@ export default {
 			})
 			.finally(() => {
 				vue.$store.commit('field/markdown/editor/durationReset');
+			});
+	},
+
+	saveRevision(vue) {
+		const uri = '/fields/markdown/add/revision';
+		const value = vue.$store.state['field/markdown/editor'].input;
+
+		Axios.post(uri, {
+			db: vue.$route.params.db,
+			table: vue.$route.params.table,
+			column: vue.$route.params.column,
+			id: vue.$route.params.id,
+			value: value
+		})
+			.then((response) => {
+				vue.$store.commit('field/markdown/editor/revisionCount', response.data);
+			})
+			.catch((error) => {
+				//vue.$store.commit('field/markdown/editor/indicator', 'warning');
+			})
+			.finally(() => {
+				//vue.$store.commit('field/markdown/editor/durationReset');
 			});
 	}
 };

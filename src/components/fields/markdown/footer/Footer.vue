@@ -14,6 +14,7 @@
       <Wordcount></Wordcount>
       <Limit></Limit>
       <Alt></Alt>
+      <Revisions></Revisions>
     </template>
   </nav>
 </template>
@@ -24,6 +25,7 @@ import Wordcount from "@/components/fields/markdown/footer/Words.vue";
 import Limit from "@/components/fields/markdown/footer/Limit.vue";
 import Breadcrumbs from "@/components/fields/markdown/footer/Breadcrumbs.vue";
 import Alt from "@/components/fields/markdown/footer/Alt.vue";
+import Revisions from "@/components/fields/markdown/footer/Revisions.vue";
 
 export default {
   name: "MarkdownFooter",
@@ -32,7 +34,8 @@ export default {
     Timer,
     Limit,
     Breadcrumbs,
-    Alt
+    Alt,
+    Revisions
   },
   computed: {
     browserState() {

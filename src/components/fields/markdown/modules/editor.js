@@ -12,6 +12,7 @@ export default {
 		stripped: '',
 		count: {},
 		wordcount: 0,
+		revisionCount: 0,
 		focus: 'editor',
 		large: false,
 		width: 0,
@@ -26,6 +27,9 @@ export default {
 		keywords: []
 	},
 	mutations: {
+		revisionCount(state, value) {
+			state.revisionCount = value;
+		},
 		sidebarToggle(state, value) {
 			if (value == state.sidebar) {
 				state.sidebar = null;

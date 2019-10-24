@@ -56,6 +56,7 @@ export default {
     },
     save() {
       MethodsSave.saveNow(this);
+      MethodsSave.saveRevision(this);
     },
     wordcount() {
       this.$store.commit("field/markdown/editor/wordcount");

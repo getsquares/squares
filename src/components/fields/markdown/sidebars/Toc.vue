@@ -8,6 +8,7 @@
         :is="'h' + h.level"
         :key="index"
         :title="'h' + h.level"
+        @click="goto(index)"
       >{{ h.text }}</component>
     </div>
     <div v-else>No headings found</div>
@@ -22,6 +23,14 @@ export default {
     },
     toc() {
       return this.$store.state["field/markdown/editor"].toc;
+    }
+  },
+  methods: {
+    goto(index) {
+      let h = document
+        .querySelector(".preview-wrap")
+        .querySelectorAll("h1, h2, h3, h4, h5, h6");
+      h[index].scrollIntoView();
     }
   }
 };

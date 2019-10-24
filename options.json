@@ -46,6 +46,7 @@
 				"save": 15,
 				"retry": 45
 			},
+			"css": "https://vardagsfinans.se/assets/css/style.min.css",
 			"rows": {
 				"template": "{{id}} - {{slug}}"
 			},
