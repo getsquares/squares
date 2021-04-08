@@ -1,14 +1,14 @@
-class CellOpen extends HTMLElement {
+class CellEdit extends HTMLElement {
   constructor() {
     super();
   }
 
   static get observedAttributes() {
-    return ["open"];
+    return ["active"];
   }
 
   connectedCallback() {
-    this.setAttribute("open", "false");
+    this.setAttribute("active", "false");
     this.classList.add(
       "z-20",
       "hidden",
@@ -25,7 +25,7 @@ class CellOpen extends HTMLElement {
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "open") return;
+    if (attr != "active") return;
     if (oldValue !== newValue) {
       if (newValue == "true") {
         this.classList.remove("hidden");
@@ -36,4 +36,4 @@ class CellOpen extends HTMLElement {
   }
 }
 
-customElements.define("cell-open", CellOpen);
+customElements.define("cell-edit", CellEdit);

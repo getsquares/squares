@@ -81,15 +81,22 @@
       <div class="m-8 bg-white border">
         <!-- Grid -->
         <div data-table class="grid grid-cols-3 gap-px ring-2 ring-gray-300">
-          <div class="contents">
-            <table-cell></table-cell>
-            <table-cell></table-cell>
-            <table-cell></table-cell>
+          <div data-headings class="contents">
+            <table-heading title="id"></table-heading>
+            <table-heading title="title"></table-heading>
+            <table-heading title="description"></table-heading>
           </div>
-          <div class="contents">
-            <table-cell></table-cell>
-            <table-cell></table-cell>
-            <table-cell></table-cell>
+          <div data-cells class="contents">
+            <div class="contents">
+              <table-cell></table-cell>
+              <table-cell></table-cell>
+              <table-cell></table-cell>
+            </div>
+            <div class="contents">
+              <table-cell></table-cell>
+              <table-cell></table-cell>
+              <table-cell></table-cell>
+            </div>
           </div>
         </div>
       </div>
@@ -97,16 +104,35 @@
 
     <script>
       var in_field = false;
+      var dom = {
+        current: null,
+        left: null,
+        right: null,
+        top: null,
+        down: null,
+      };
+
+      window.addEventListener("DOMContentLoaded", () => {
+        eventCellKeydown();
+        outsideClick();
+        eventCellClick();
+        eventCellDoubleclick();
+      });
     </script>
 
-    <script src="components/cell.js"></script>
-    <script src="components/cell-active.js"></script>
-    <script src="components/cell-open.js"></script>
+    <script src="components/table-cell.js"></script>
+    <script src="components/cell-ring.js"></script>
+    <script src="components/cell-edit.js"></script>
     <script src="components/cell-preview.js"></script>
+    <script src="components/table-heading.js"></script>
 
-    <script src="methods/cell-active-methods.js"></script>
-    <script src="methods/cell-edit-methods.js"></script>
     <script src="methods/helpers.js"></script>
+    <script src="methods/cell-events.js"></script>
+    <script src="methods/cell-handlers.js"></script>
+    <script src="methods/cell-dom.js"></script>
+    <script src="methods/message.js"></script>
+    <script src="methods/store.js"></script>
+    <script src="methods/field-helpers.js"></script>
 
     <script src="fields/text.js"></script>
   </body>

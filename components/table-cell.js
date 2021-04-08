@@ -10,8 +10,8 @@ class TableCell extends HTMLElement {
   connectedCallback() {
     this.classList.add("p-2", "relative");
     this.innerHTML = `
-      <cell-active state="default"></cell-active>
-      <cell-open></cell-open>
+      <cell-ring state="default"></cell-ring>
+      <cell-edit></cell-edit>
       <cell-preview active="true">
         ${this.value}
       </cell-preview>

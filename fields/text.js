@@ -15,8 +15,11 @@ class FieldText extends HTMLElement {
 
     this.onKeyup();
     this.onEnter();
+    this.onEscape();
 
     updatePreview(this.querySelector("input").value, this);
+
+    this.querySelector("input").select();
   }
 
   // On key up
@@ -29,9 +32,17 @@ class FieldText extends HTMLElement {
   onEnter() {
     this.querySelector("input").addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
-      console.log("leave");
       e.preventDefault();
       leaveEdit();
+      console.log("lvea");
+    });
+  }
+
+  onEscape() {
+    window.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      fieldClose();
     });
   }
 

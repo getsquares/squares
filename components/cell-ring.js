@@ -1,5 +1,4 @@
-// Byt namn till cellstate
-class CellActive extends HTMLElement {
+class CellRing extends HTMLElement {
   constructor() {
     super();
   }
@@ -49,4 +48,4 @@ class CellActive extends HTMLElement {
   }
 }
 
-customElements.define("cell-active", CellActive);
+customElements.define("cell-ring", CellRing);
