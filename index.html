@@ -6,81 +6,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
     <link rel="stylesheet" href="assets/css/tailwind.min.css" />
+
+    <link rel="preconnect" href="https://fonts.gstatic.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
-  <body class="flex h-full">
+  <body class="flex h-full text-gray-800 font-base">
     <!-- Sidebar -->
-    <div class="flex flex-col pb-4 bg-gray-800 w-80">
-      <h2 class="p-4 text-sm font-bold text-gray-200 uppercase">
-        Databases and tables
-      </h2>
-      <div>
-        <div
-          class="flex gap-2 px-4 py-1 text-gray-200 cursor-default select-none fill-current hover:bg-gray-700"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-          >
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path
-              d="M12 13.172l4.95-4.95 1.414 1.414L12 16 5.636 9.636 7.05 8.222z"
-            />
-          </svg>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-          >
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path
-              d="M5 12.5c0 .313.461.858 1.53 1.393C7.914 14.585 9.877 15 12 15c2.123 0 4.086-.415 5.47-1.107 1.069-.535 1.53-1.08 1.53-1.393v-2.171C17.35 11.349 14.827 12 12 12s-5.35-.652-7-1.671V12.5zm14 2.829C17.35 16.349 14.827 17 12 17s-5.35-.652-7-1.671V17.5c0 .313.461.858 1.53 1.393C7.914 19.585 9.877 20 12 20c2.123 0 4.086-.415 5.47-1.107 1.069-.535 1.53-1.08 1.53-1.393v-2.171zM3 17.5v-10C3 5.015 7.03 3 12 3s9 2.015 9 4.5v10c0 2.485-4.03 4.5-9 4.5s-9-2.015-9-4.5zm9-7.5c2.123 0 4.086-.415 5.47-1.107C18.539 8.358 19 7.813 19 7.5c0-.313-.461-.858-1.53-1.393C16.086 5.415 14.123 5 12 5c-2.123 0-4.086.415-5.47 1.107C5.461 6.642 5 7.187 5 7.5c0 .313.461.858 1.53 1.393C7.914 9.585 9.877 10 12 10z"
-            />
-          </svg>
-          <div class="flex-1">Low level</div>
+    <div
+      class="flex flex-col pb-4 overflow-auto text-gray-300 bg-gray-800 resize-x w-80"
+    >
+      <h2 class="p-4 text-sm font-bold uppercase">Databases and tables</h2>
+      <div class="flex flex-col gap-4">
+        <div>
+          <sidebar-database></sidebar-database>
+          <div data-tables>
+            <sidebar-table></sidebar-table>
+            <sidebar-table></sidebar-table>
+          </div>
         </div>
-        <div
-          class="flex gap-2 px-4 py-1 pl-12 text-gray-200 cursor-default select-none fill-current hover:bg-gray-700"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-          >
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path
-              d="M13 10v4h6v-4h-6zm-2 0H5v4h6v-4zm2 9h6v-3h-6v3zm-2 0v-3H5v3h6zm2-14v3h6V5h-6zm-2 0H5v3h6V5zM4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"
-            />
-          </svg>
-          <div class="flex-1">High level Component - table</div>
-        </div>
-        <div
-          class="flex gap-2 px-4 py-1 pl-12 text-gray-200 cursor-default select-none fill-current hover:bg-gray-700"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            width="24"
-            height="24"
-          >
-            <path fill="none" d="M0 0h24v24H0z" />
-            <path
-              d="M13 10v4h6v-4h-6zm-2 0H5v4h6v-4zm2 9h6v-3h-6v3zm-2 0v-3H5v3h6zm2-14v3h6V5h-6zm-2 0H5v3h6V5zM4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"
-            />
-          </svg>
-          <div class="flex-1">High level Component - table</div>
+        <div>
+          <sidebar-database></sidebar-database>
+          <div data-tables>
+            <sidebar-table></sidebar-table>
+            <sidebar-table></sidebar-table>
+          </div>
         </div>
       </div>
     </div>
     <!-- Main -->
-    <div class="flex-1 bg-gray-200">
+    <div class="flex flex-1 bg-gray-200">
       <!-- Table -->
-      <div class="m-8 bg-white border">
+      <div class="flex-1 m-8 overflow-auto">
         <!-- Grid -->
-        <div data-table class="grid grid-cols-3 gap-px ring-2 ring-gray-300">
+        <div
+          data-table
+          class="grid grid-cols-3 gap-px bg-gray-300"
+          style="margin: 2px; padding: 3px"
+        >
           <div data-headings class="contents">
             <table-heading title="id"></table-heading>
             <table-heading title="title"></table-heading>
@@ -125,6 +90,8 @@
     <script src="components/cell-edit.js"></script>
     <script src="components/cell-preview.js"></script>
     <script src="components/table-heading.js"></script>
+    <script src="components/sidebar/database.js"></script>
+    <script src="components/sidebar/table.js"></script>
 
     <script src="methods/helpers.js"></script>
     <script src="methods/cell-events.js"></script>

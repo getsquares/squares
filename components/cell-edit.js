@@ -16,7 +16,6 @@ class CellEdit extends HTMLElement {
       "absolute",
       "bg-gray-100",
       "shadow-md",
-      "rounded-b",
       "top-full",
       "p-4",
       "left-0",

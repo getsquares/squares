@@ -25,7 +25,7 @@ class CellRing extends HTMLElement {
         "ring-1",
         "ring-2",
         "ring-gray-200",
-        "ring-gray-600",
+        "ring-gray-500",
         "ring-blue-500",
         "z-10",
         "z-20"
@@ -35,7 +35,7 @@ class CellRing extends HTMLElement {
           this.classList.add("ring-1", "ring-gray-200", "z-10");
           break;
         case "active":
-          this.classList.add("ring-2", "ring-gray-600", "z-20");
+          this.classList.add("ring-2", "ring-gray-500", "z-20");
           break;
         case "changed":
           this.classList.add("ring-2", "ring-orange-500", "z-20");
