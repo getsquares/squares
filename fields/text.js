@@ -10,7 +10,7 @@ class FieldText extends HTMLElement {
   connectedCallback() {
     const value = "test";
     this.innerHTML = `
-      <input value="${value}" type="text" class="focus:outline-none p-2 w-80 border-2 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1 focus:ring-offset-gray-100">
+      <input value="${value}" type="text" class="focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
     `;
 
     this.onKeyup();

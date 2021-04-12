@@ -11,8 +11,14 @@ module.exports = {
       black: colors.black,
       white: colors.white,
       blue: colors.blue,
-      gray: colors.blueGray,
+      lightBlue: colors.lightBlue,
+      gray: colors.trueGray,
+      blueGray: colors.blueGray,
       yellow: colors.amber,
+      pink: colors.pink,
+      rose: colors.rose,
+      teal: colors.teal,
+      lime: colors.lime,
     },
     extend: {
       opacity: {
@@ -28,5 +34,5 @@ module.exports = {
       borderStyle: ["hover"],
     },
   },
-  plugins: [],
+  plugins: [require("@tailwindcss/forms")],
 };

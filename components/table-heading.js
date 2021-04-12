@@ -13,7 +13,10 @@ class TableHeading extends HTMLElement {
       "ring-1",
       "ring-gray-200",
       "bg-gray-100",
-      "font-bold"
+      "font-bold",
+      "sticky",
+      "top-0",
+      "z-50"
     );
     this.innerHTML = `
         ${this.title}
