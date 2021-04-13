@@ -14,7 +14,7 @@ class CellRing extends HTMLElement {
       "inset-0",
       "ring-1",
       "z-10",
-      "ring-gray-200"
+      "ring-gray-300"
     );
   }
 
@@ -24,7 +24,7 @@ class CellRing extends HTMLElement {
       this.classList.remove(
         "ring-1",
         "ring-2",
-        "ring-gray-200",
+        "ring-gray-300",
         "ring-gray-500",
         "ring-lightBlue-500",
         "z-10",
@@ -32,7 +32,7 @@ class CellRing extends HTMLElement {
       );
       switch (newValue) {
         case "default":
-          this.classList.add("ring-1", "ring-gray-200", "z-10");
+          this.classList.add("ring-1", "ring-gray-300", "z-10");
           break;
         case "active":
           this.classList.add("ring-2", "ring-gray-500", "z-50");

@@ -3,39 +3,49 @@ class ActionbarSort extends HTMLElement {
     super();
   }
 
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
   connectedCallback() {
     this.innerHTML = `
-      <div data-action>
-        <svg
-          class="w-5 h-5"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-        >
-          <path fill="none" d="M0 0h24v24H0z" />
-          <path
-            d="M11.95 7.95l-1.414 1.414L8 6.828 8 20H6V6.828L3.465 9.364 2.05 7.95 7 3l4.95 4.95zm10 8.1L17 21l-4.95-4.95 1.414-1.414 2.537 2.536L16 4h2v13.172l2.536-2.536 1.414 1.414z"
-          />
-        </svg>
-        <div>Sort</div>
-      </div>
+      <actionbar-icon
+        src="assets/icons/remixicon/arrow-up-down.svg"
+        title="Sort"
+      ></actionbar-icon>
     `;
+    this.onClick();
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
+  onClick() {
+    this.addEventListener("click", () => {
+      const icon = this.querySelector("actionbar-icon");
+
+      if (icon.isActive()) {
+        icon.deactivate();
       } else {
-        this.classList.add("hidden");
+        icon.activate("Sort", this.html());
       }
-    }
+    });
+  }
+
+  html() {
+    return `
+      <div class="flex gap-4">
+        <label class="flex select-none items-center gap-2">
+          <input
+            type="radio"
+            class="w-5 h-5 border border-gray-400 text-lightBlue-600 focus:ring-0 focus:ring-offset-0"
+            name="same"
+          />
+          Testing
+        </label>
+        <label class="flex select-none items-center gap-2">
+          <input
+            type="radio"
+            class="w-5 h-5 border border-gray-400 text-lightBlue-600 focus:ring-0 focus:ring-offset-0"
+            name="same"
+          />
+          Testing
+        </label>
+      </div>
+    `;
   }
 }
 

@@ -11,7 +11,7 @@ class TableHeading extends HTMLElement {
     this.classList.add(
       "p-2",
       "ring-1",
-      "ring-gray-200",
+      "ring-gray-300",
       "bg-gray-100",
       "font-bold",
       "sticky",
