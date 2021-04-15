@@ -7,11 +7,11 @@ class ActionbarDropdown extends HTMLElement {
     this.setAttribute("hidden", "");
     this.innerHTML = `
       <div class="gap-4 bg-gray-100 border-t flex">
-        <div class="flex flex-col gap-4 p-4 flex-1">
+        <div class="flex flex-col gap-4 p-6 flex-1">
           <div data-actionbar-title class="text-xs font-bold uppercase"></div>
           <div data-actionbar-dropdown-content></div>
         </div>
-        <div class="p-4">
+        <div class="p-2">
           <button class="focus:outline-none hover:bg-gray-200 p-2">
             <img-svg src="assets/icons/remixicon/close.svg"></img-svg>
           </button>

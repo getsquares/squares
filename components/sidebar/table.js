@@ -8,23 +8,14 @@ class SidebarTable extends HTMLElement {
   }
 
   connectedCallback() {
+    const title = this.getAttribute("title");
+    this.removeAttribute("title");
+
     this.innerHTML = `
       <div
-        class="flex gap-2 px-2 py-1 ml-9 mr-2 border border-transparent rounded cursor-default select-none fill-current hover:bg-blueGray-700"
+        class="flex gap-2 py-1 mx-2 px-2 border border-transparent cursor-default select-none fill-current hover:bg-gray-200"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-          class="w-5 h-5 text-blueGray-500"
-        >
-          <path fill="none" d="M0 0h24v24H0z" />
-          <path
-            d="M13 10v4h6v-4h-6zm-2 0H5v4h6v-4zm2 9h6v-3h-6v3zm-2 0v-3H5v3h6zm2-14v3h6V5h-6zm-2 0H5v3h6V5zM4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"
-          />
-        </svg>
-        <div class="flex-1 truncate text-sm" title="asdjasi">wp_term_relationships</div>
+        <div class="ml-8 flex-1 truncate text-sm text-gray-500" title="asdjasi">${title}</div>
       </div>
       `;
   }

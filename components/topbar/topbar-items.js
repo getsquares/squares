@@ -6,15 +6,10 @@ class TopbarItems extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <div class="flex gap-2 text-sm text-white">
-        ${this.itemHtml(
-          "info",
-          "assets/icons/remixicon/information.svg",
-          "Info"
-        )}
+        ${this.itemHtml("info", "assets/icons/remixicon/question-fill.svg")}
         ${this.itemHtml(
           "logout",
-          "assets/icons/remixicon/door-open-fill.svg",
-          "Logout"
+          "assets/icons/material-icons/logout_black_24dp.svg"
         )}
       </div>
     `;
@@ -26,7 +21,7 @@ class TopbarItems extends HTMLElement {
       <div data-action="${name}" class="flex items-center gap-1 fill-current px-2 py-1.5 select-none hover:bg-lightBlue-700 rounded"
       >
       <img-svg src="${src}"></img-svg>
-      ${title}
+      ${typeof title !== "undefined" ? title : ""}
     </div>
     `;
   }
@@ -41,7 +36,9 @@ class TopbarItems extends HTMLElement {
         console.log(name);
 
         if (["info", "logout"].includes(name)) {
-          console.log($("modal-box"));
+          $(
+            "[data-modal-content]"
+          ).innerHTML = `<modal-${name}></modal-${name}>`;
           $("modal-box").activate();
         }
       });

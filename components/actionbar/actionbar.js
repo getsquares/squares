@@ -26,24 +26,24 @@ class ActionbarItems extends HTMLElement {
             "Sort"
           )}
         </div>
-        <!--
         <div class="flex gap-4">
+          ${this.itemHtml("add", "assets/icons/remixicon/add.svg", "Add row")}
+          
+          <!--
           <actionbar-import></actionbar-import>
           <actionbar-export></actionbar-export>
+          -->
         </div>
-        -->
       </div>
     `;
 
     this.onClick();
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {}
-
   itemHtml(name, src, title) {
     return `
-      <div data-title="${title}" data-action="${name}" class="flex hover:bg-lightBlue-50 rounded cursor-default items-center px-2  py-1.5 select-none gap-2">
-        <img-svg classes="w-5 h-5" src="${src}"></img-svg>
+      <div data-title="${title}" data-action="${name}" class="flex hover:bg-gray-100 cursor-default items-center px-2 py-1.5 select-none gap-2">
+        <img-svg src="${src}"></img-svg>
         <div>${title}</div>
       </div>
     `;

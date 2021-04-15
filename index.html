@@ -13,171 +13,144 @@
       rel="stylesheet"
     />
   </head>
-  <body class="flex h-full text-gray-800 font-base">
-    <!-- Sidebar -->
-    <div
-      class="flex flex-col pb-4 overflow-auto resize-x text-blueGray-300 bg-blueGray-800 w-80"
-    >
-      <h2 class="p-4 text-sm font-bold uppercase">Databases and tables</h2>
-      <div class="flex flex-col gap-4">
-        <div>
-          <sidebar-database></sidebar-database>
-          <div data-tables>
-            <sidebar-table></sidebar-table>
-            <sidebar-table></sidebar-table>
-          </div>
+  <body class="flex flex-col h-full text-gray-800 font-base">
+    <!-- Topbar wrap -->
+    <topbar-wrap></topbar-wrap>
+    <!-- Sidebar main -->
+    <div class="flex" style="height: calc(100% - 52px)">
+      <!-- Sidebar -->
+      <sidebar-wrap></sidebar-wrap>
+      <!-- Main -->
+      <div class="flex flex-col flex-1 bg-gray-200">
+        <!-- Actionbar -->
+        <div class="bg-white border-b-2 border-gray-300">
+          <actionbar-items></actionbar-items>
+          <actionbar-dropdown></actionbar-dropdown>
         </div>
-        <div>
-          <sidebar-database></sidebar-database>
-          <div data-tables>
-            <sidebar-table></sidebar-table>
-            <sidebar-table></sidebar-table>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Main -->
-    <div class="flex flex-col flex-1 bg-gray-200">
-      <div
-        class="flex items-center justify-between py-2 pl-4 pr-2 text-gray-200 bg-lightBlue-600"
-      >
-        <div class="text-2xl text-white uppercase">
-          <img src="assets/icons/logo.svg" class="h-6" />
-        </div>
-        <topbar-items></topbar-items>
-      </div>
-      <!-- Actionbar -->
-      <div class="text-sm bg-white border-b-2 border-gray-300">
-        <actionbar-items></actionbar-items>
-        <actionbar-dropdown></actionbar-dropdown>
-      </div>
 
-      <!-- Table wrap -->
-      <div class="flex-1 overflow-auto text-sm bg-white">
-        <!-- Table -->
-        <style>
-          [data-table] {
-            grid-template-columns: auto 1fr 1fr 1fr;
-          }
-        </style>
+        <!-- Table wrap -->
+        <div class="flex-1 overflow-auto text-sm bg-white">
+          <!-- Table -->
+          <style>
+            [data-table] {
+              grid-template-columns: auto 1fr 1fr 1fr;
+            }
+          </style>
+          <div data-table class="grid gap-px bg-gray-300">
+            <div data-headings class="z-40 contents">
+              <table-heading title=""></table-heading>
+              <table-heading title="id"></table-heading>
+              <table-heading title="title"></table-heading>
+              <table-heading title="description"></table-heading>
+            </div>
+            <div data-cells class="contents">
+              <div class="contents">
+                <row-select></row-select>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+              </div>
+              <div class="contents">
+                <row-select></row-select>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+              </div>
+              <div class="contents">
+                <row-select></row-select>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+              </div>
+              <div class="contents">
+                <row-select></row-select>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+              </div>
+              <div class="contents">
+                <row-select></row-select>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+              </div>
+              <div class="contents">
+                <row-select></row-select>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+                <table-cell></table-cell>
+              </div>
+            </div>
+          </div>
+        </div>
         <div
-          data-table
-          class="grid gap-px bg-gray-300"
-          style="margin: 2px; margin-top: 0"
+          class="flex justify-between gap-2 p-2 text-sm bg-gray-100 border-t-2 border-gray-300"
         >
-          <div data-headings class="z-40 contents">
-            <table-heading title=""></table-heading>
-            <table-heading title="id"></table-heading>
-            <table-heading title="title"></table-heading>
-            <table-heading title="description"></table-heading>
+          <div class="flex gap-2">
+            <!-- Breadcrumbs -->
+            <div class="flex items-center">
+              <div
+                class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded"
+              >
+                Database
+              </div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                class="w-5 h-5 -mx-1 opacity-25"
+              >
+                <path fill="none" d="M0 0h24v24H0z" />
+                <path
+                  d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
+                />
+              </svg>
+              <div
+                class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded"
+              >
+                Table
+              </div>
+            </div>
+            <!-- Records -->
+            <div></div>
           </div>
-          <div data-cells class="contents">
-            <div class="contents">
-              <row-select></row-select>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-            </div>
-            <div class="contents">
-              <row-select></row-select>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-            </div>
-            <div class="contents">
-              <row-select></row-select>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-            </div>
-            <div class="contents">
-              <row-select></row-select>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-            </div>
-            <div class="contents">
-              <row-select></row-select>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-            </div>
-            <div class="contents">
-              <row-select></row-select>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-              <table-cell></table-cell>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div
-        class="flex justify-between gap-2 p-2 text-sm bg-gray-100 border-t-2 border-gray-300"
-      >
-        <div class="flex gap-2">
-          <!-- Breadcrumbs -->
-          <div class="flex items-center">
+          <!-- Pages -->
+          <div class="flex gap-4">
             <div
               class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded"
             >
-              Database
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+                class="w-5 h-5"
+              >
+                <path fill="none" d="M0 0h24v24H0z" />
+                <path
+                  d="M10.828 12l4.95 4.95-1.414 1.414L8 12l6.364-6.364 1.414 1.414z"
+                />
+              </svg>
+              Previous
             </div>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-              class="w-5 h-5 -mx-1 opacity-25"
-            >
-              <path fill="none" d="M0 0h24v24H0z" />
-              <path
-                d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
-              />
-            </svg>
             <div
               class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded"
             >
-              Table
+              Next
+              <svg
+                class="w-5 h-5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                width="24"
+                height="24"
+              >
+                <path fill="none" d="M0 0h24v24H0z" />
+                <path
+                  d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
+                />
+              </svg>
             </div>
-          </div>
-          <!-- Records -->
-          <div></div>
-        </div>
-        <!-- Pages -->
-        <div class="flex gap-4">
-          <div
-            class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-              class="w-5 h-5"
-            >
-              <path fill="none" d="M0 0h24v24H0z" />
-              <path
-                d="M10.828 12l4.95 4.95-1.414 1.414L8 12l6.364-6.364 1.414 1.414z"
-              />
-            </svg>
-            Previous
-          </div>
-          <div
-            class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded"
-          >
-            Next
-            <svg
-              class="w-5 h-5"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              width="24"
-              height="24"
-            >
-              <path fill="none" d="M0 0h24v24H0z" />
-              <path
-                d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
-              />
-            </svg>
           </div>
         </div>
       </div>
@@ -218,6 +191,7 @@
     <!-- Sidebar -->
     <script src="components/sidebar/database.js"></script>
     <script src="components/sidebar/table.js"></script>
+    <script src="components/sidebar/sidebar-wrap.js"></script>
 
     <!-- Actionbar -->
     <script src="components/actionbar/actionbar.js"></script>
@@ -232,15 +206,21 @@
     <script src="components/actionbar/items/refresh.js"></script>
 
     <script src="components/actionbar/content/columns.js"></script>
+    <script src="components/actionbar/content/sort.js"></script>
 
     <!-- Topbar -->
     <script src="components/topbar/info.js"></script>
     <script src="components/topbar/topbar-items.js"></script>
+    <script src="components/topbar/topbar-wrap.js"></script>
 
     <script src="components/modals/info.js"></script>
+    <script src="components/modals/logout.js"></script>
 
     <script src="components/img-svg.js"></script>
     <script src="components/modal-box.js"></script>
+    <script src="components/button-item.js"></script>
+    <script src="components/radio-item.js"></script>
+    <script src="components/checkbox-item.js"></script>
 
     <!-- Methods -->
     <script src="methods/helpers.js"></script>

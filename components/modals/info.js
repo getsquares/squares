@@ -6,10 +6,13 @@ class ModalInfo extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <div class="flex flex-col flex-1 gap-6">
-        <img-svg
-          src="assets/icons/logo.svg"
-          classes="h-8 text-lightBlue-600"
-        ></img-svg>
+        <div class="flex gap-3 items-center text-pink-600">
+          <img-svg src="assets/icons/remixicon/checkbox-multiple-blank.svg" classes="h-12 w-12"></img-svg>
+          <img-svg
+            src="assets/icons/logo.svg"
+            classes="h-10"
+          ></img-svg>
+        </div>
         we rjiweor jweior jweior jwer iowejrio wejrweiojr weiorj weiorj
         weiorj iowerj weiorj weiorjwe
 
@@ -79,28 +82,30 @@ class ModalInfo extends HTMLElement {
           </div>
           <div class="flex gap-2">
             <div>
-              <a
-                href=""
-                class="inline-flex items-center gap-2 px-5 py-3 text-white border-b-2 fill-current bg-lightBlue-600 border-lightBlue-700 hover:bg-lightBlue-700"
-              >
-                <img-svg
-                  src="assets/icons/remixicon/shopping-cart-fill.svg"
-                ></img-svg>
-                Purchase
-              </a>
+              <button-item title="Purchase" href="#" style="action"></button-item>
             </div>
             <div>
-              <a
-                href=""
-                class="inline-flex items-center gap-2 px-5 py-3 border-2 border-gray-200 fill-current"
-              >
-                Cancel
-              </a>
+              <button-item title="Cancel" style="ghost"></button-item>
             </div>
           </div>
         </div>
       </div>
     `;
+    this.onCancel();
+  }
+  /*onCancel() {
+    this.querySelector("button-item").addEventListener("click", () => {
+      $("modal-box").deactivate();
+    });
+  }*/
+
+  onCancel() {
+    this.querySelector(`button-item[style="ghost"]`).addEventListener(
+      "click",
+      () => {
+        $("modal-box").deactivate();
+      }
+    );
   }
 }
 

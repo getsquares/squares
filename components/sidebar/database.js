@@ -8,13 +8,18 @@ class SidebarDatabase extends HTMLElement {
   }
 
   connectedCallback() {
+    const title = this.getAttribute("title");
+    this.removeAttribute("title");
+
     this.innerHTML = `
       <div
-        class="flex gap-2 px-4 py-1 pl-2 mx-2 rounded cursor-default select-none fill-current hover:bg-blueGray-700 items-center text-blueGray-500"
+        class="flex gap-2 px-2 py-1 mx-2 cursor-default select-none fill-current hover:bg-gray-200 items-center"
       >
-        <icon-arrow-down classes="w-5 h-5 text-blueGray-500"></icon-arrow-down>
-        <icon-database-2 classes="w-5 h-5 text-blueGray-500"></icon-database-2>
-        <div class="flex-1 truncate text-xs uppercase font-bold">my_long_database_name_that_will_break</div>
+        <img-svg src="assets/icons/remixicon/database-2.svg"></img-svg>
+
+        <div class="flex-1 truncate font-bold">${title}</div>
+        
+        <img-svg src="assets/icons/remixicon/arrow-down-s.svg" classes="w-6 h-6"></img-svg> 
       </div>
       `;
   }

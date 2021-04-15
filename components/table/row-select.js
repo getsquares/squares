@@ -10,7 +10,7 @@ class RowSelect extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
     <label class="p-2 px-4 block bg-white relative">
-      <input type="checkbox" class="w-5 border h-5 focus:ring-2 text-lightBlue-500 focus:ring-yellow-500 border-gray-400">
+      <input type="checkbox" class="w-5 border h-5 focus:ring-2 text-lightBlue-500 focus:ring-yellow-500 border-gray-300">
       <div class="absolute block inset-0 ring-1 z-10 ring-gray-200"></div>
     </label>
     `;
