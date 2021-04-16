@@ -15,10 +15,8 @@ module.exports = {
       gray: colors.trueGray,
       blueGray: colors.blueGray,
       yellow: colors.amber,
-      pink: colors.pink,
-      rose: colors.rose,
-      teal: colors.teal,
-      lime: colors.lime,
+      green: colors.green,
+      red: colors.red,
     },
     extend: {
       opacity: {

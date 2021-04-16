@@ -8,7 +8,7 @@ class ActionbarDropdown extends HTMLElement {
     this.innerHTML = `
       <div class="gap-4 bg-gray-100 border-t flex">
         <div class="flex flex-col gap-4 p-6 flex-1">
-          <div data-actionbar-title class="text-xs font-bold uppercase"></div>
+          <div data-actionbar-title class="font-bold"></div>
           <div data-actionbar-dropdown-content></div>
         </div>
         <div class="p-2">

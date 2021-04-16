@@ -8,15 +8,12 @@ class CheckboxItem extends HTMLElement {
     const label = this.getAttribute("label");
     const checked = this.getAttribute("checked") == "true" ? " checked" : "";
 
+    console.log(label);
+
     this.innerHTML = `
       <label class="flex select-none items-center gap-2">
-        <input
-          type="checkbox"
-          class="w-5 h-5 border border-gray-300 text-gray-800 focus:ring-0 focus:ring-offset-0"
-          name="${name}"
-          ${checked}
-        />
-        ${label}
+        <input type="checkbox" class="w-5 h-5 rounded-sm text-white" name="${name}" ${checked} />
+        ${label ? label : ""}
       </label>
     `;
   }

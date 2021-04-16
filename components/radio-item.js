@@ -10,12 +10,7 @@ class RadioItem extends HTMLElement {
 
     this.innerHTML = `
       <label class="flex select-none items-center gap-2">
-        <input
-          type="radio"
-          class="w-5 h-5 border border-gray-300 text-gray-800 focus:ring-0 focus:ring-offset-0"
-          name="${name}"
-          ${checked}
-        />
+        <input type="radio" class="w-5 h-5 text-white" name="${name}" ${checked} />
         ${label}
       </label>
     `;

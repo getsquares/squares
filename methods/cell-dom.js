@@ -5,9 +5,9 @@ function getDomCellRings() {
 
 // Get dom cell prev
 function getDomCellLeft() {
-  let prev = dom.current.table_cell.previousElementSibling;
+  const prev = dom.current.table_cell.previousElementSibling;
 
-  if (prev) return prev;
+  if (prev && prev.tagName == "TABLE-CELL") return prev;
   return dom.current.table_cell.closest("div").lastElementChild;
 }
 
@@ -15,8 +15,8 @@ function getDomCellLeft() {
 function getDomCellRight() {
   const next = dom.current.table_cell.nextElementSibling;
 
-  if (next) return next;
-  return dom.current.table_cell.closest("div").firstElementChild;
+  if (next && next.tagName == "TABLE-CELL") return next;
+  return dom.current.table_cell.closest("div").querySelector("table-cell");
 }
 
 // Get dom cell down
