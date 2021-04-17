@@ -27,7 +27,11 @@ class ActionbarItems extends HTMLElement {
           )}
         </div>
         <div class="flex gap-4">
-          ${this.itemHtml("add", "assets/icons/remixicon/add.svg", "Add row")}
+          ${this.buttonHtml(
+            "add",
+            "assets/icons/remixicon/add-circle-fill.svg",
+            "Add row"
+          )}
           
           <!--
           <actionbar-import></actionbar-import>
@@ -40,9 +44,20 @@ class ActionbarItems extends HTMLElement {
     this.onClick();
   }
 
+  buttonHtml(name, src, title) {
+    return `
+    <div data-local-add class="border-transparent bg-green-600 hover:text-white text-green-100 flex pr-4 cursor-default items-center px-2 py-1.5 select-none gap-2 rounded-full border">
+      <img-svg src="${src}"></img-svg>
+      <div>${title}</div>
+    </div>
+  `;
+  }
+
   itemHtml(name, src, title) {
     return `
-      <div data-title="${title}" data-action="${name}" class="flex hover:bg-gray-100 cursor-default items-center px-2 py-1.5 select-none gap-2">
+      <div data-title="${title}" data-action="${name}" class="${hollowClassInactive().join(
+      " "
+    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded border">
         <img-svg src="${src}"></img-svg>
         <div>${title}</div>
       </div>
@@ -59,7 +74,7 @@ class ActionbarItems extends HTMLElement {
 
         this.deactivateAll();
 
-        if (is_active) {
+        if (!is_active) {
           this.activate(el);
         } else {
           this.deactivate(el);
@@ -68,7 +83,7 @@ class ActionbarItems extends HTMLElement {
         if (["columns", "sort"].includes(name)) {
           const title = el.getAttribute("data-title");
 
-          if (this.isActive(el)) {
+          if (is_active) {
             dropdown.deactivate();
           } else {
             const html = `<actionbar-${name}2></actionbar-${name}2>`;
@@ -83,17 +98,19 @@ class ActionbarItems extends HTMLElement {
   }
 
   isActive(el) {
-    return el.classList.contains("hover:bg-lightBlue-50");
+    return el.classList.contains("bg-blue-50");
   }
 
   activate(el) {
-    el.classList.add("bg-lightBlue-100");
-    el.classList.remove("hover:bg-lightBlue-50");
+    el.classList.add(...hollowClassActive());
+    el.classList.remove(...hollowClassInactive());
+
+    console.log(el);
   }
 
   deactivate(el) {
-    el.classList.add("hover:bg-lightBlue-50");
-    el.classList.remove("bg-lightBlue-100");
+    el.classList.add(...hollowClassInactive());
+    el.classList.remove(...hollowClassActive());
   }
 
   deactivateAll() {

@@ -22,6 +22,9 @@ module.exports = {
       opacity: {
         100: "1",
       },
+      margin: {
+        "2px": "2px",
+      },
     },
     fontFamily: {
       base: ["Roboto", "Arial", "sans-serif"],

@@ -15,7 +15,6 @@ class SidebarWrap extends HTMLElement {
         "w-80",
         "border-r",
         "border-gray-300",
-        "bg-gray-100",
       ]
     );
     this.innerHTML = `

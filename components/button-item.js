@@ -54,7 +54,7 @@ class ButtonItem extends HTMLElement {
       "inline-flex",
       "items-center",
       "gap-2",
-      "px-6",
+      "px-4",
       "py-2",
       "rounded",
       "fill-current",
@@ -75,9 +75,9 @@ class ButtonItem extends HTMLElement {
     return [
       "text-white",
       "border-2",
-      "bg-lightBlue-600",
-      "border-lightBlue-700",
-      "hover:bg-lightBlue-700",
+      "bg-blue-800",
+      "border-transparent",
+      "hover:bg-blue-900",
     ];
   }
 

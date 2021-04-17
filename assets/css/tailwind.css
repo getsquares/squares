@@ -27,4 +27,12 @@
   [type="radio"]:checked:focus {
     @apply border-gray-400;
   }
+
+  ::selection {
+    @apply text-white bg-blue-800;
+  }
+
+  [hidden] {
+    display: none !important;
+  }
 }

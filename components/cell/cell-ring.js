@@ -26,22 +26,22 @@ class CellRing extends HTMLElement {
         "ring-2",
         "ring-gray-300",
         "ring-gray-500",
-        "ring-lightBlue-500",
+        "ring-blue-500",
         "z-10",
-        "z-50"
+        "z-30"
       );
       switch (newValue) {
         case "default":
           this.classList.add("ring-1", "ring-gray-300", "z-10");
           break;
         case "active":
-          this.classList.add("ring-2", "ring-gray-500", "z-50");
+          this.classList.add("ring-2", "ring-gray-500", "z-30");
           break;
         case "changed":
-          this.classList.add("ring-2", "ring-orange-500", "z-50");
+          this.classList.add("ring-2", "ring-orange-500", "z-30");
           break;
         case "edit":
-          this.classList.add("ring-2", "ring-lightBlue-500", "z-50");
+          this.classList.add("ring-2", "ring-blue-500", "z-30");
           break;
       }
     }

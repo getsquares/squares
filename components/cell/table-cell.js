@@ -12,7 +12,7 @@ class TableCell extends HTMLElement {
     this.innerHTML = `
       <cell-ring state="default"></cell-ring>
       <cell-edit></cell-edit>
-      <cell-preview active="true">
+      <cell-preview active="true" class="select-none">
         ${this.value}
       </cell-preview>
     `;

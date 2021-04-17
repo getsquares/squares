@@ -10,26 +10,13 @@ class SidebarDatabase extends HTMLElement {
   connectedCallback() {
     const title = this.getAttribute("title");
     this.removeAttribute("title");
-    /*this.classList.add(
-      ...[
-        "flex",
-        "gap-2",
-        "px-2",
-        "py-3",
-        "mx-2",
-        "cursor-default",
-        "select-none",
-        "fill-current",
-        "hover:bg-gray-200",
-        "items-center",
-        "rounded",
-      ]
-    );*/
 
     this.innerHTML = `
-      <div data-database class="flex gap-2 px-2 py-3 mx-2 cursor-default select-none fill-current hover:bg-gray-200 items-center rounded">
+      <div data-database class="${hollowClassInactive().join(
+        " "
+      )} flex gap-2 p-2 mx-2 cursor-default select-none fill-current items-center rounded border">
         <img-svg src="assets/icons/remixicon/database-2.svg"></img-svg>
-        <div class="flex-1 truncate font-bold">${title}</div>
+        <div data-local-database class="flex-1 truncate font-bold">${title}</div>
         <img-svg data-arrow src="assets/icons/remixicon/arrow-down-s.svg" classes="transform rotate-180 w-6 h-6"></img-svg>
       </div>
 
@@ -95,6 +82,9 @@ class SidebarDatabase extends HTMLElement {
           const el = e.currentTarget;
           this.deactivateAllTables();
           el.activate();
+
+          $("bar-footer-breadcrumbs").setAttribute("database", this.getValue());
+          $("bar-footer-breadcrumbs").setAttribute("table", el.getValue());
         });
       });
     }
@@ -107,6 +97,10 @@ class SidebarDatabase extends HTMLElement {
 
   isActive() {
     return this.getAttribute("active") == "true";
+  }
+
+  getValue() {
+    return this.querySelector("[data-local-database]").innerHTML;
   }
 }
 

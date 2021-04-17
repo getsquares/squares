@@ -20,16 +20,17 @@ class SidebarTable extends HTMLElement {
         "px-2",
         "border",
         "border-transparent",
+        "hover:border-gray-200",
+        "hover:bg-gray-50",
         "cursor-default",
         "select-none",
         "rounded",
         "fill-current",
-        "hover:bg-gray-200",
       ]
     );
 
     this.innerHTML = `
-      <div class="ml-8 flex-1 truncate" title="${title}">
+      <div data-local-table class="ml-8 flex-1 truncate" title="${title}">
         ${title}
       </div>
       `;
@@ -38,11 +39,11 @@ class SidebarTable extends HTMLElement {
   attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
       if (attr == "active" && newValue == "true") {
-        this.classList.add("bg-blue-800", "text-white");
-        this.classList.remove("hover:bg-gray-200");
+        this.classList.add(...hollowClassActive());
+        this.classList.remove(...hollowClassInactive());
       } else {
-        this.classList.remove("bg-blue-800", "text-white");
-        this.classList.add("hover:bg-gray-200");
+        this.classList.remove(...hollowClassActive());
+        this.classList.add(...hollowClassInactive());
       }
     }
   }
@@ -59,6 +60,10 @@ class SidebarTable extends HTMLElement {
 
   isActive() {
     return this.getAttribute("active") == "true";
+  }
+
+  getValue() {
+    return this.querySelector("[data-local-table]").innerHTML;
   }
 }
 

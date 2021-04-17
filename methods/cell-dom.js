@@ -57,6 +57,14 @@ function resetDomCellEdits() {
   });
 }
 
+function hollowClassActive() {
+  return ["bg-blue-100", "text-blue-900", "border-blue-300"];
+}
+
+function hollowClassInactive() {
+  return ["border-transparent", "hover:border-gray-200", "hover:bg-gray-50"];
+}
+
 function resetDomCells() {
   resetDomCellRings();
   resetDomCellEdits();

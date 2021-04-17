@@ -6,7 +6,7 @@ class ModalInfo extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <div class="flex flex-col flex-1 gap-6">
-        <div class="flex gap-3 items-center text-pink-600">
+        <div class="flex gap-3 items-center">
           <img-svg src="assets/icons/remixicon/checkbox-multiple-blank.svg" classes="h-12 w-12"></img-svg>
           <img-svg
             src="assets/icons/logo.svg"
@@ -24,7 +24,7 @@ class ModalInfo extends HTMLElement {
               <a
                 href="https://github.com/getsquares/squares"
                 target="_blank"
-                class="text-lightBlue-600 hover:underline"
+                class="text-blue-600 underline"
                 >Github</a
               >
             </li>
@@ -32,7 +32,7 @@ class ModalInfo extends HTMLElement {
               <a
                 href="https://github.com/getsquares/squares"
                 target="_blank"
-                class="text-lightBlue-600 hover:underline"
+                class="text-blue-600 underline"
                 >Documentation</a
               >
             </li>
@@ -47,7 +47,7 @@ class ModalInfo extends HTMLElement {
               <a
                 href="https://remixicon.com/"
                 target="_blank"
-                class="text-lightBlue-600 hover:underline"
+                class="text-blue-600 underline"
                 >Remixicon</a
               >
             </li>
@@ -55,7 +55,7 @@ class ModalInfo extends HTMLElement {
               <a
                 href="https://fonts.google.com/icons"
                 target="_blank"
-                class="text-lightBlue-600 hover:underline"
+                class="text-blue-600 underline"
                 >Material Icons</a
               >
             </li>

@@ -14,7 +14,7 @@ class ModalBox extends HTMLElement {
           <div class="p-8 flex-1" data-modal-content>
             <modal-info></modal-info>
           </div>
-          <button class="p-2 m-2 focus:outline-none hover:bg-gray-100">
+          <button class="p-2 m-2 focus:outline-none hover:bg-gray-100 rounded">
             <img-svg src="assets/icons/remixicon/close.svg"></img-svg>
           </button>
         </div>
