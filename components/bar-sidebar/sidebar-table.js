@@ -30,9 +30,7 @@ class SidebarTable extends HTMLElement {
     );
 
     this.innerHTML = `
-      <div data-local-table class="ml-8 flex-1 truncate" title="${title}">
-        ${title}
-      </div>
+      <div data-local-table class="ml-8 flex-1 truncate" title="${title}">${title}</div>
       `;
   }
 
@@ -56,6 +54,14 @@ class SidebarTable extends HTMLElement {
 
   deactivate() {
     this.removeAttribute("active");
+  }
+
+  hide() {
+    this.setAttribute("hidden", "");
+  }
+
+  show() {
+    this.removeAttribute("hidden");
   }
 
   isActive() {

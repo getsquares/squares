@@ -77,14 +77,16 @@ class SidebarDatabase extends HTMLElement {
         <sidebar-table title="wp_taxonomies"></sidebar-table>
       `;
 
+      $("sidebar-filter").filter();
+
       tables.querySelectorAll("sidebar-table").forEach((item) => {
         item.addEventListener("click", (e) => {
           const el = e.currentTarget;
           this.deactivateAllTables();
           el.activate();
 
-          $("bar-footer-breadcrumbs").setAttribute("database", this.getValue());
-          $("bar-footer-breadcrumbs").setAttribute("table", el.getValue());
+          $("bar-footer-items").setAttribute("database", this.getValue());
+          $("bar-footer-items").setAttribute("table", el.getValue());
         });
       });
     }

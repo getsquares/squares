@@ -31,6 +31,36 @@ class TableHeadingCheck extends HTMLElement {
 
       $$("row-select").forEach((item) => {
         item.querySelector("input").checked = checked;
+
+        if (checked) {
+          this.selectAll();
+        } else {
+          this.deselectAll();
+        }
+      });
+    });
+  }
+
+  selectAll() {
+    $$("[data-cells] row-select").forEach((item) => {
+      const el_cells = item
+        .closest(".contents")
+        .querySelectorAll("row-select, table-cell");
+
+      el_cells.forEach((el) => {
+        item.selectOne(el);
+      });
+    });
+  }
+
+  deselectAll() {
+    $$("[data-cells] row-select").forEach((item) => {
+      const el_cells = item
+        .closest(".contents")
+        .querySelectorAll("row-select, table-cell");
+
+      el_cells.forEach((el) => {
+        item.deselectOne(el);
       });
     });
   }

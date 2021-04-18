@@ -88,9 +88,10 @@
           class="flex justify-between gap-2 p-2 bg-gray-100 border-t-2 border-gray-300"
         >
           <div class="flex gap-2">
-            <bar-footer-breadcrumbs></bar-footer-breadcrumbs>
-            <!-- Records -->
-            <div></div>
+            <bar-footer-items></bar-footer-items>
+            <bar-footer-records
+              value="1-300 of 20,000 rows"
+            ></bar-footer-records>
           </div>
           <!-- Pages -->
           <div class="flex gap-4">
@@ -174,9 +175,10 @@
     <script src="components/cell/cell-preview.js"></script>
 
     <!-- Sidebar -->
-    <script src="components/sidebar/sidebar-database.js"></script>
-    <script src="components/sidebar/table.js"></script>
-    <script src="components/sidebar/sidebar-wrap.js"></script>
+    <script src="components/bar-sidebar/sidebar-database.js"></script>
+    <script src="components/bar-sidebar/sidebar-table.js"></script>
+    <script src="components/bar-sidebar/sidebar-wrap.js"></script>
+    <script src="components/bar-sidebar/sidebar-filter.js"></script>
 
     <!-- Actionbar -->
     <script src="components/actionbar/actionbar.js"></script>
@@ -193,7 +195,8 @@
     <script src="components/modals/info.js"></script>
     <script src="components/modals/logout.js"></script>
 
-    <script src="components/bar-footer/bar-footer-breadcrumbs.js"></script>
+    <script src="components/bar-footer/bar-footer-items.js"></script>
+    <script src="components/bar-footer/bar-footer-records.js"></script>
 
     <script src="components/img-svg.js"></script>
     <script src="components/modal-box.js"></script>

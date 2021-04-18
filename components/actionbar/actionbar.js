@@ -7,13 +7,8 @@ class ActionbarItems extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      <div class="flex justify-between gap-4 p-2">
-        <div data-items class="flex gap-4">
-          ${this.itemHtml(
-            "refresh",
-            "assets/icons/material-icons/refresh.svg",
-            "Refresh"
-          )}
+      <div class="flex justify-between gap-4">
+        <div data-items class="flex gap-4 p-2">
           ${this.itemHtml(
             "columns",
             "assets/icons/remixicon/eye-off.svg",
@@ -26,12 +21,13 @@ class ActionbarItems extends HTMLElement {
             "Sort"
           )}
         </div>
-        <div class="flex gap-4">
+        <div class="flex gap-4 p-2">
           ${this.buttonHtml(
-            "add",
-            "assets/icons/remixicon/add-circle-fill.svg",
-            "Add row"
+            "refresh",
+            "assets/icons/material-icons/refresh.svg",
+            "Refresh"
           )}
+          ${this.buttonHtml("add", "assets/icons/remixicon/add.svg", "Add row")}
           
           <!--
           <actionbar-import></actionbar-import>
@@ -46,7 +42,9 @@ class ActionbarItems extends HTMLElement {
 
   buttonHtml(name, src, title) {
     return `
-    <div data-local-add class="border-transparent bg-green-600 hover:text-white text-green-100 flex pr-4 cursor-default items-center px-2 py-1.5 select-none gap-2 rounded-full border">
+    <div data-local-add class="${hollowClassInactive().join(
+      " "
+    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded border">
       <img-svg src="${src}"></img-svg>
       <div>${title}</div>
     </div>

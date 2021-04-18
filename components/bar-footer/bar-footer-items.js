@@ -1,4 +1,4 @@
-class BarFooterBreadcrumbs extends HTMLElement {
+class BarFooterItems extends HTMLElement {
   constructor() {
     super();
   }
@@ -55,4 +55,4 @@ class BarFooterBreadcrumbs extends HTMLElement {
   }
 }
 
-customElements.define("bar-footer-breadcrumbs", BarFooterBreadcrumbs);
+customElements.define("bar-footer-items", BarFooterItems);
