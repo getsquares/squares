@@ -78,6 +78,7 @@ class SidebarDatabase extends HTMLElement {
       `;
 
       $("sidebar-filter").filter();
+      //current.database = this.getValue();
 
       tables.querySelectorAll("sidebar-table").forEach((item) => {
         item.addEventListener("click", (e) => {

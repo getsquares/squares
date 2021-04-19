@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-300">
+<html lang="en" class="h-full bg-blue-600">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -22,7 +22,9 @@
       <!-- Sidebar -->
       <sidebar-wrap></sidebar-wrap>
       <!-- Main -->
-      <div class="flex flex-col flex-1 bg-gray-200">
+      <div class="flex flex-col flex-1">
+        <tab-items></tab-items>
+
         <!-- Actionbar -->
         <div class="bg-white border-b-2 border-gray-300">
           <actionbar-items></actionbar-items>
@@ -145,6 +147,10 @@
         top: null,
         down: null,
       };
+      var current = {
+        database: null,
+        table: null,
+      };
 
       window.addEventListener("DOMContentLoaded", () => {
         eventCellKeydown();
@@ -204,6 +210,9 @@
     <script src="components/radio-item.js"></script>
     <script src="components/checkbox-item.js"></script>
     <script src="components/message-item.js"></script>
+
+    <script src="components/tabs/tab-item.js"></script>
+    <script src="components/tabs/tab-items.js"></script>
 
     <script src="fields/text.js"></script>
   </body>

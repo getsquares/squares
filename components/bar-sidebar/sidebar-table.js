@@ -49,7 +49,20 @@ class SidebarTable extends HTMLElement {
   activate() {
     this.setAttribute("active", "true");
 
-    // Fetch
+    current.table = this.getValue();
+    current.database = this.closest("sidebar-database").getValue();
+
+    const has_tab = $(
+      `tab-item[database="${current.database}"][table="${current.table}"]`
+    );
+
+    if (has_tab) {
+      $("tab-items").deactivateAllTabs();
+      has_tab.activate();
+    } else {
+      $("tab-items").addTab(current.database, current.table);
+      // Fetch
+    }
   }
 
   deactivate() {

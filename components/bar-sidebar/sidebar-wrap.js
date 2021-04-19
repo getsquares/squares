@@ -16,6 +16,7 @@ class SidebarWrap extends HTMLElement {
         "border-r",
         "border-gray-300",
         "gap-6",
+        "rounded-tr",
       ]
     );
     this.innerHTML = `

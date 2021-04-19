@@ -75,7 +75,7 @@ class ButtonItem extends HTMLElement {
     return [
       "text-white",
       "border-2",
-      "bg-blue-800",
+      "bg-blue-600",
       "border-transparent",
       "hover:bg-blue-900",
     ];
