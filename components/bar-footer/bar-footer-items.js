@@ -23,6 +23,12 @@ class BarFooterItems extends HTMLElement {
         "table",
         "assets/icons/remixicon/table-line.svg"
       )}
+
+      ${this.itemHtml(
+        this.getAttribute("records"),
+        "records",
+        "assets/icons/remixicon/layout-row-line.svg"
+      )}
     `;
   }
 
@@ -38,6 +44,12 @@ class BarFooterItems extends HTMLElement {
 
   keyHtml() {
     return `<img-svg src="assets/icons/remixicon/key-2-line.svg"></img-svg>`;
+  }
+
+  setRecords(offset, rows, total) {
+    this.querySelector(
+      `[data-local-records]`
+    ).innerHTML = `${offset}-${rows} of ${total}`;
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {

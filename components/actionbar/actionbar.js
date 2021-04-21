@@ -102,8 +102,6 @@ class ActionbarItems extends HTMLElement {
   activate(el) {
     el.classList.add(...hollowClassActive());
     el.classList.remove(...hollowClassInactive());
-
-    console.log(el);
   }
 
   deactivate(el) {

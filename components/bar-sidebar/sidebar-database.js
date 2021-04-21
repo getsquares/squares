@@ -86,8 +86,13 @@ class SidebarDatabase extends HTMLElement {
           this.deactivateAllTables();
           el.activate();
 
+          const offset = 1;
+          const rows = 300;
+          const total = 1235;
+
           $("bar-footer-items").setAttribute("database", this.getValue());
           $("bar-footer-items").setAttribute("table", el.getValue());
+          $("bar-footer-items").setRecords(offset, rows, total);
         });
       });
     }

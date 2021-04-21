@@ -33,7 +33,6 @@ class TopbarItems extends HTMLElement {
   onClick() {
     this.querySelectorAll("[data-action]").forEach((item) => {
       item.addEventListener("click", (e) => {
-        console.log("click");
         const el = e.currentTarget;
         const name = el.getAttribute("data-action");
 

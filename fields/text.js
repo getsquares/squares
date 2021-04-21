@@ -34,7 +34,6 @@ class FieldText extends HTMLElement {
       if (e.key !== "Enter") return;
       e.preventDefault();
       leaveEdit();
-      console.log("lvea");
     });
   }
 
