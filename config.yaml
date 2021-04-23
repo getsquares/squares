@@ -1,0 +1,27 @@
+test:
+  a_table_with_a_really_long_name:
+    id: id
+    columns:
+      id:
+        field: number
+        preview: number
+      slug:
+        hidden: true
+      content:
+        autoload: false
+        field: textarea
+        preview: textblock
+  wp_many_columns:
+    id: post_id
+    columns:
+      post_id:
+        field: number
+        preview: number
+  jiddra:
+  wp_many_columns:
+    hidden: true
+phpmyadmin:
+  pma__bookmark:
+    hidden: true
+  pma__users:
+    hidden: true

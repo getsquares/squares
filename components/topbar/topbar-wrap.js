@@ -6,7 +6,7 @@ class TopbarWrap extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
     <div
-      class="flex items-center justify-between py-2 pl-4 pr-2 text-gray-200"
+      class="flex items-center justify-between py-2 pl-4 pr-2 text-gray-200 bg-blue-600"
     >
       <div class="flex items-center gap-2 text-2xl text-white uppercase">
         <img-svg

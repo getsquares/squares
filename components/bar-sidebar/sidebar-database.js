@@ -71,14 +71,8 @@ class SidebarDatabase extends HTMLElement {
     this.querySelector("[data-tables]").removeAttribute("hidden");
 
     if (tables.innerHTML == "") {
-      // LOAD FROM FETCH
-      tables.innerHTML = `
-        <sidebar-table title="wp_post_categories"></sidebar-table>
-        <sidebar-table title="wp_taxonomies"></sidebar-table>
-      `;
-
-      $("sidebar-filter").filter();
-      //current.database = this.getValue();
+      this.populate();
+      /*
 
       tables.querySelectorAll("sidebar-table").forEach((item) => {
         item.addEventListener("click", (e) => {
@@ -94,8 +88,53 @@ class SidebarDatabase extends HTMLElement {
           $("bar-footer-items").setAttribute("table", el.getValue());
           $("bar-footer-items").setRecords(offset, rows, total);
         });
-      });
+      });*/
     }
+  }
+
+  populate() {
+    axios
+      .get(
+        "http://localhost/tools/squares/server/php/queries/tables.php?database=" +
+          this.getValue()
+      )
+      .then((response) => {
+        if (response.status !== 200) return;
+
+        const tables = this.querySelector("[data-tables]");
+
+        let html = "";
+
+        response.data.forEach((title) => {
+          html += this.template(title);
+        });
+
+        tables.innerHTML = html;
+        $("sidebar-filter").filter(tables);
+        this.populateEvents(tables);
+      });
+  }
+
+  populateEvents(tables) {
+    tables.querySelectorAll("sidebar-table").forEach((item) => {
+      item.addEventListener("click", (e) => {
+        const el = e.currentTarget;
+        this.deactivateAllTables();
+        el.activate();
+
+        const offset = 1;
+        const rows = 300;
+        const total = 1235;
+
+        $("bar-footer-items").setAttribute("database", this.getValue());
+        $("bar-footer-items").setAttribute("table", el.getValue());
+        $("bar-footer-items").setRecords(offset, rows, total);
+      });
+    });
+  }
+
+  template(title) {
+    return `<sidebar-table title="${title}"></sidebar-table>`;
   }
 
   deactivate() {

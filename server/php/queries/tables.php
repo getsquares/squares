@@ -1,40 +1,36 @@
 <?php
-header('Content-Type: application/json');
+require __DIR__ . '/../methods/core.php';
 
-// Session
-require __DIR__ . '/../methods/methods.php';
+header::json();
+session::validate();
 
-$args = $_GET;
+$config_class = new Config();
+$config = $config_class->data;
 
-if(!isset($args['db'])) {
-  header("HTTP/1.0 404 Not Found");
-  die('Not valid args');
+$args = (object)array_merge(['database' => null], $_GET);
+
+if(!validate($args->database))
+  header::error('No database');
+if(!isset($config[$args->database]))
+  header::error('No database match in config');
+if(!is_array($config[$args->database]))
+  header::error('Tables are not an array');
+
+$hidden_tables = [];
+
+foreach($config[$args->database] as $name => $table) {
+  if(!empty($table['hidden'])) {
+    $hidden_tables[] = $name;
+  }
 }
 
-if(!config($args['db'])) {
-  header("HTTP/1.0 404 Not Found");
-  die('databasfel');
-} else {
-  $config = config($args['db']);
-  print_r($config);
-}
+$db = new db();
+$db->connect($args->database);
+$db->sql("SHOW TABLES FROM " . $args->database);
+$db->attr(PDO::FETCH_GROUP|PDO::FETCH_OBJ);
+$db->query();
 
-$pdo = connect($args['db']);
+$db_tables = array_keys($db->results);
+$out = array_diff($db_tables, $hidden_tables);
 
-print_r(array_keys($config));
-
-$sql = "
-SELECT schema_name
-FROM information_schema.schemata
-  WHERE schema_name IN ('" . implode("', '" , array_keys($config)) . "')
-";
-
-echo $sql;
-
-$stmt = $pdo->prepare($sql);
-//$stmt->bindValue(':offset', $args['offset'], PDO::PARAM_INT);
-$stmt->execute();
-$results = $stmt->fetchAll(PDO::FETCH_GROUP|PDO::FETCH_ASSOC);
-
-print_r($results);
-//echo json_encode($results);
+echo json_encode(array_values($out));

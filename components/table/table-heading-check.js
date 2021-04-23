@@ -9,8 +9,10 @@ class TableHeadingCheck extends HTMLElement {
       "ring-gray-300",
       "sticky",
       "top-0",
-      "z-40",
-      "flex"
+      "left-0",
+      "z-50",
+      "flex",
+      "sticky"
     );
     this.innerHTML = `
       <label class="py-2 px-4 relative bg-gray-100 flex items-center">

@@ -758,14 +758,8 @@ class SidebarDatabase extends HTMLElement {
     this.querySelector("[data-tables]").removeAttribute("hidden");
 
     if (tables.innerHTML == "") {
-      // LOAD FROM FETCH
-      tables.innerHTML = `
-        <sidebar-table title="wp_post_categories"></sidebar-table>
-        <sidebar-table title="wp_taxonomies"></sidebar-table>
-      `;
-
-      $("sidebar-filter").filter();
-      //current.database = this.getValue();
+      this.populate();
+      /*
 
       tables.querySelectorAll("sidebar-table").forEach((item) => {
         item.addEventListener("click", (e) => {
@@ -781,8 +775,53 @@ class SidebarDatabase extends HTMLElement {
           $("bar-footer-items").setAttribute("table", el.getValue());
           $("bar-footer-items").setRecords(offset, rows, total);
         });
-      });
+      });*/
     }
+  }
+
+  populate() {
+    axios
+      .get(
+        "http://localhost/tools/squares/server/php/queries/tables.php?database=" +
+          this.getValue()
+      )
+      .then((response) => {
+        if (response.status !== 200) return;
+
+        const tables = this.querySelector("[data-tables]");
+
+        let html = "";
+
+        response.data.forEach((title) => {
+          html += this.template(title);
+        });
+
+        tables.innerHTML = html;
+        $("sidebar-filter").filter(tables);
+        this.populateEvents(tables);
+      });
+  }
+
+  populateEvents(tables) {
+    tables.querySelectorAll("sidebar-table").forEach((item) => {
+      item.addEventListener("click", (e) => {
+        const el = e.currentTarget;
+        this.deactivateAllTables();
+        el.activate();
+
+        const offset = 1;
+        const rows = 300;
+        const total = 1235;
+
+        $("bar-footer-items").setAttribute("database", this.getValue());
+        $("bar-footer-items").setAttribute("table", el.getValue());
+        $("bar-footer-items").setRecords(offset, rows, total);
+      });
+    });
+  }
+
+  template(title) {
+    return `<sidebar-table title="${title}"></sidebar-table>`;
   }
 
   deactivate() {
@@ -800,6 +839,40 @@ class SidebarDatabase extends HTMLElement {
 }
 
 customElements.define("sidebar-database", SidebarDatabase);
+
+class SidebarDatabases extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.classList.add(...["flex", "flex-col"]);
+    this.populate();
+  }
+
+  template(title) {
+    return `<sidebar-database title="${title}"></sidebar-database>`;
+  }
+
+  populate() {
+    axios
+      .get("http://localhost/tools/squares/server/php/queries/databases.php")
+      .then((response) => {
+        if (response.status !== 200) return;
+        console.log(response.data);
+
+        let html = "";
+
+        response.data.forEach((title) => {
+          html += this.template(title);
+        });
+
+        this.innerHTML = html;
+      });
+  }
+}
+
+customElements.define("sidebar-databases", SidebarDatabases);
 
 class SidebarFilter extends HTMLElement {
   constructor() {
@@ -949,10 +1022,7 @@ class SidebarWrap extends HTMLElement {
     this.innerHTML = `
       <h2 class="p-4 pb-0 text-xl">Databases and tables</h2>
       <sidebar-filter></sidebar-filter>
-      <div class="flex flex-col">
-        <sidebar-database title="jiddra_se"></sidebar-database>
-        <sidebar-database title="jiddra2_se"></sidebar-database>
-      </div>
+      <sidebar-databases></sidebar-databases>
     `;
   }
 }
@@ -1305,7 +1375,14 @@ class RowSelect extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("relative", "flex", "bg-white");
+    this.classList.add(
+      "relative",
+      "flex",
+      "bg-white",
+      "sticky",
+      "z-50",
+      "left-0"
+    );
     this.innerHTML = `
       <label class="py-2 px-4 relative">
         <input type="checkbox" class="w-5 h-5 rounded-sm text-white" name="test" />
@@ -1361,8 +1438,10 @@ class TableHeadingCheck extends HTMLElement {
       "ring-gray-300",
       "sticky",
       "top-0",
-      "z-40",
-      "flex"
+      "left-0",
+      "z-50",
+      "flex",
+      "sticky"
     );
     this.innerHTML = `
       <label class="py-2 px-4 relative bg-gray-100 flex items-center">
@@ -1547,7 +1626,14 @@ class TabItems extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("flex", "items-center", "gap-2", "text-white", "px-2");
+    this.classList.add(
+      "flex",
+      "items-center",
+      "gap-2",
+      "text-white",
+      "px-2",
+      "bg-blue-600"
+    );
   }
 }
 
@@ -1653,7 +1739,7 @@ class TopbarWrap extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
     <div
-      class="flex items-center justify-between py-2 pl-4 pr-2 text-gray-200"
+      class="flex items-center justify-between py-2 pl-4 pr-2 text-gray-200 bg-blue-600"
     >
       <div class="flex items-center gap-2 text-2xl text-white uppercase">
         <img-svg
@@ -1668,43 +1754,6 @@ class TopbarWrap extends HTMLElement {
 }
 
 customElements.define("topbar-wrap", TopbarWrap);
-
-class ActionbarColumns2 extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex gap-8">
-        <checkbox-item name="test" label="id" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="title" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="slug" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="description" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="categories" checked="true"></checkbox-item>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-columns2", ActionbarColumns2);
-
-class ActionbarSort2 extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex gap-4">
-        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
-        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-sort2", ActionbarSort2);
 
 class ActionbarColumns extends HTMLElement {
   constructor() {
@@ -1959,6 +2008,43 @@ class ActionbarSort extends HTMLElement {
 }
 
 customElements.define("actionbar-sort", ActionbarSort);
+
+class ActionbarColumns2 extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div class="flex gap-8">
+        <checkbox-item name="test" label="id" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="title" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="slug" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="description" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="categories" checked="true"></checkbox-item>
+      </div>
+    `;
+  }
+}
+
+customElements.define("actionbar-columns2", ActionbarColumns2);
+
+class ActionbarSort2 extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div class="flex gap-4">
+        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
+        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
+      </div>
+    `;
+  }
+}
+
+customElements.define("actionbar-sort2", ActionbarSort2);
 
 class ButtonItem extends HTMLElement {
   constructor() {

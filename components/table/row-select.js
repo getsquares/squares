@@ -8,7 +8,14 @@ class RowSelect extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("relative", "flex", "bg-white");
+    this.classList.add(
+      "relative",
+      "flex",
+      "bg-white",
+      "sticky",
+      "z-50",
+      "left-0"
+    );
     this.innerHTML = `
       <label class="py-2 px-4 relative">
         <input type="checkbox" class="w-5 h-5 rounded-sm text-white" name="test" />

@@ -22,10 +22,7 @@ class SidebarWrap extends HTMLElement {
     this.innerHTML = `
       <h2 class="p-4 pb-0 text-xl">Databases and tables</h2>
       <sidebar-filter></sidebar-filter>
-      <div class="flex flex-col">
-        <sidebar-database title="jiddra_se"></sidebar-database>
-        <sidebar-database title="jiddra2_se"></sidebar-database>
-      </div>
+      <sidebar-databases></sidebar-databases>
     `;
   }
 }

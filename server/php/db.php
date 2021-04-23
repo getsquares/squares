@@ -9,5 +9,10 @@ return [
     'host' => 'localhost',
     'user' => 'root',
     'password' => ''
+  ],
+  'phpmyadmin' => [
+    'host' => 'localhost',
+    'user' => 'root',
+    'password' => ''
   ]
 ];
