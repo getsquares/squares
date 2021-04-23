@@ -1,6 +1,7 @@
 test:
   a_table_with_a_really_long_name:
     id: id
+    limit: 300
     columns:
       id:
         field: number
@@ -8,7 +9,7 @@ test:
       slug:
         hidden: true
       content:
-        autoload: false
+        passive: true
         field: textarea
         preview: textblock
   wp_many_columns:
@@ -19,7 +20,11 @@ test:
         preview: number
   jiddra:
   wp_many_columns:
-    hidden: true
+    id: post_id
+    columns:
+      post_id:
+        field: number
+        preview: asda
 phpmyadmin:
   pma__bookmark:
     hidden: true
