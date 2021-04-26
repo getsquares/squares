@@ -1632,7 +1632,9 @@ class TabItems extends HTMLElement {
       "gap-2",
       "text-white",
       "px-2",
-      "bg-blue-600"
+      "bg-blue-600",
+      "overflow-auto",
+      "w-full"
     );
   }
 }
@@ -1754,6 +1756,43 @@ class TopbarWrap extends HTMLElement {
 }
 
 customElements.define("topbar-wrap", TopbarWrap);
+
+class ActionbarColumns2 extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div class="flex gap-8">
+        <checkbox-item name="test" label="id" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="title" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="slug" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="description" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="categories" checked="true"></checkbox-item>
+      </div>
+    `;
+  }
+}
+
+customElements.define("actionbar-columns2", ActionbarColumns2);
+
+class ActionbarSort2 extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div class="flex gap-4">
+        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
+        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
+      </div>
+    `;
+  }
+}
+
+customElements.define("actionbar-sort2", ActionbarSort2);
 
 class ActionbarColumns extends HTMLElement {
   constructor() {
@@ -2008,43 +2047,6 @@ class ActionbarSort extends HTMLElement {
 }
 
 customElements.define("actionbar-sort", ActionbarSort);
-
-class ActionbarColumns2 extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex gap-8">
-        <checkbox-item name="test" label="id" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="title" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="slug" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="description" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="categories" checked="true"></checkbox-item>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-columns2", ActionbarColumns2);
-
-class ActionbarSort2 extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex gap-4">
-        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
-        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-sort2", ActionbarSort2);
 
 class ButtonItem extends HTMLElement {
   constructor() {

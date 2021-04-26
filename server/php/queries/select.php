@@ -1,4 +1,5 @@
 <?php
+/*
 header('Content-Type: application/json');
 
 // Session
@@ -33,4 +34,4 @@ $stmt->bindValue(':offset', $args['offset'], PDO::PARAM_INT);
 $stmt->execute();
 $results = $stmt->fetchAll();
 
-echo json_encode($results);
+echo json_encode($results);*/

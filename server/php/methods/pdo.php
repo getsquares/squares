@@ -58,6 +58,7 @@ class db {
         PDO::ATTR_ERRMODE,
         PDO::ERRMODE_EXCEPTION
       );
+      $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
       $this->pdo = $pdo;
       return $pdo;
     } catch(PDOException $e) {
