@@ -34,3 +34,7 @@ function isCellState(state = "active") {
 function setCellActiveToEl(el, state = "active") {
   el.setAttribute("state", state);
 }
+
+function syncSidebarLogo() {
+  $("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
+}

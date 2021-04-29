@@ -8,7 +8,7 @@ class CellPreview extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("block", "relative", "p-2");
+    this.classList.add("block", "relative", "tp");
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {

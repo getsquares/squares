@@ -15,19 +15,19 @@ class BarFooterItems extends HTMLElement {
       ${this.itemHtml(
         this.getAttribute("database"),
         "database",
-        "assets/icons/remixicon/database-2.svg"
+        "remixicon/database-2.svg"
       )}
 
       ${this.itemHtml(
         this.getAttribute("table"),
         "table",
-        "assets/icons/remixicon/table-line.svg"
+        "remixicon/table-line.svg"
       )}
 
       ${this.itemHtml(
         this.getAttribute("records"),
         "records",
-        "assets/icons/remixicon/layout-row-line.svg"
+        "remixicon/layout-row-line.svg"
       )}
     `;
   }
@@ -43,7 +43,7 @@ class BarFooterItems extends HTMLElement {
   }
 
   keyHtml() {
-    return `<img-svg src="assets/icons/remixicon/key-2-line.svg"></img-svg>`;
+    return `<img-svg src="remixicon/key-2-line.svg"></img-svg>`;
   }
 
   setRecords(offset, rows, total) {

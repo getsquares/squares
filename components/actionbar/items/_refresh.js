@@ -10,7 +10,7 @@ class ActionbarRefresh extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <div data-action>
-        <img-svg src="assets/icons/material-icons/refresh.svg" classes="animate-spin w-5 h-5"></img-svg>
+        <img-svg src="material-icons/refresh.svg" classes="animate-spin w-5 h-5"></img-svg>
         <div>Refresh</div>
       </div>
     `;

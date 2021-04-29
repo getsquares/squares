@@ -11,15 +11,15 @@ class RowSelect extends HTMLElement {
     this.classList.add(
       "relative",
       "flex",
-      "bg-white",
       "sticky",
       "z-50",
-      "left-0"
+      "left-0",
+      "heading-bkg"
     );
     this.innerHTML = `
-      <label class="py-2 px-4 relative">
-        <input type="checkbox" class="w-5 h-5 rounded-sm text-white" name="test" />
-        <div class="absolute block inset-0 ring-1 ring-gray-300"></div>
+      <label class="tp relative">
+        <input type="checkbox" class="w-4 h-4 text-navy-600 rounded-sm focus:ring-0 focus:ring-offset-0  bg-gray-200 border-none" name="test" />
+        <div class="absolute block inset-0 shadow-y"></div>
       </label>
     `;
     this.onClick();
@@ -43,12 +43,12 @@ class RowSelect extends HTMLElement {
   }
 
   selectOne(el) {
-    el.classList.add("bg-blue-100");
+    el.classList.add("bg-navy-100");
     el.classList.remove("bg-white");
   }
 
   deselectOne(el) {
-    el.classList.remove("bg-blue-100");
+    el.classList.remove("bg-navy-100");
     el.classList.add("bg-white");
   }
 }

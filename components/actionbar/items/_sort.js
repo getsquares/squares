@@ -6,7 +6,7 @@ class ActionbarSort extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <actionbar-icon
-        src="assets/icons/remixicon/arrow-up-down.svg"
+        src="remixicon/arrow-up-down.svg"
         title="Sort"
       ></actionbar-icon>
     `;

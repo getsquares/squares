@@ -6,13 +6,14 @@ class TabItems extends HTMLElement {
   connectedCallback() {
     this.classList.add(
       "flex",
+      "flex-1",
       "items-center",
       "gap-2",
       "text-white",
-      "px-2",
-      "bg-blue-600",
+      "bg-navy-600",
       "overflow-auto",
-      "w-full"
+      "w-full",
+      "self-end"
     );
   }
 }

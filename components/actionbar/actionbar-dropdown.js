@@ -13,7 +13,7 @@ class ActionbarDropdown extends HTMLElement {
         </div>
         <div class="p-2">
           <button class="focus:outline-none hover:bg-gray-200 p-2 rounded">
-            <img-svg src="assets/icons/remixicon/close.svg"></img-svg>
+            <img-svg src="remixicon/close.svg"></img-svg>
           </button>
         </div>
       </div>

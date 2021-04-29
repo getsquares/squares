@@ -10,7 +10,7 @@ class ImgSvg extends HTMLElement {
   attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
       if (attr == "src" && newValue != "") {
-        fetch(newValue)
+        fetch(`assets/icons/${newValue}`)
           .then((response) => response.text())
           .then((text) => {
             this.innerHTML = text;

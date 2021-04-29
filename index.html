@@ -18,118 +18,12 @@
     <!-- Topbar wrap -->
     <topbar-wrap></topbar-wrap>
     <!-- Sidebar main -->
-    <div class="flex" style="height: calc(100% - 52px)">
+    <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar -->
       <sidebar-wrap></sidebar-wrap>
       <!-- Main -->
-      <div class="flex flex-col flex-1 overflow-auto">
-        <tab-items></tab-items>
-
-        <div class="contents">
-          <!-- Actionbar -->
-          <div class="bg-white border-b-2 border-gray-300">
-            <actionbar-items></actionbar-items>
-            <actionbar-dropdown></actionbar-dropdown>
-          </div>
-
-          <!-- Table wrap -->
-          <div class="flex-1 overflow-auto text-sm bg-white">
-            <!-- Table -->
-            <style>
-              [data-table] {
-                grid-template-columns: auto 1fr 1fr 1fr;
-              }
-            </style>
-            <div data-table class="grid gap-px bg-gray-300">
-              <div data-headings class="z-40 contents">
-                <table-heading-check></table-heading-check>
-                <table-heading title="id" key="true"></table-heading>
-                <table-heading title="title"></table-heading>
-                <table-heading title="description"></table-heading>
-              </div>
-              <div data-cells class="contents">
-                <div class="contents">
-                  <row-select></row-select>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                </div>
-                <div class="contents">
-                  <row-select></row-select>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                </div>
-                <div class="contents">
-                  <row-select></row-select>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                </div>
-                <div class="contents">
-                  <row-select></row-select>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                </div>
-                <div class="contents">
-                  <row-select></row-select>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                </div>
-                <div class="contents">
-                  <row-select></row-select>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                  <table-cell></table-cell>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="flex justify-between gap-2 p-2 bg-gray-100 border-t-2 border-gray-300"
-          >
-            <div class="flex gap-2">
-              <bar-footer-items></bar-footer-items>
-            </div>
-            <!-- Pages -->
-            <div class="flex gap-4">
-              <div
-                class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  height="24"
-                >
-                  <path fill="none" d="M0 0h24v24H0z" />
-                  <path
-                    d="M10.828 12l4.95 4.95-1.414 1.414L8 12l6.364-6.364 1.414 1.414z"
-                  />
-                </svg>
-                Previous
-              </div>
-              <div
-                class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded"
-              >
-                Next
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  height="24"
-                >
-                  <path fill="none" d="M0 0h24v24H0z" />
-                  <path
-                    d="M13.172 12l-4.95-4.95 1.414-1.414L16 12l-6.364 6.364-1.414-1.414z"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="flex flex-col flex-1 overflow-hidden bg-white">
+        <pane-main></pane-main>
       </div>
     </div>
 
@@ -160,12 +54,19 @@
         table: null,
       };
 
+      var tables = {};
+
       window.addEventListener("DOMContentLoaded", () => {
         eventCellKeydown();
         outsideClick();
         eventCellClick();
         eventCellDoubleclick();
       });
+
+      new ResizeObserver(() => {
+        //$("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
+        syncSidebarLogo();
+      }).observe($("sidebar-wrap"));
     </script>
 
     <script src="assets/js/axios.min.js"></script>

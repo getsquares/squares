@@ -3,6 +3,30 @@ class SidebarWrap extends HTMLElement {
     super();
   }
 
+  /*
+  bg-navy-50
+  bg-navy-100
+  bg-navy-200
+  bg-navy-300
+  bg-navy-400
+  bg-navy-500
+  bg-navy-600
+  bg-navy-700
+  bg-navy-800
+  bg-navy-900
+
+  bg-gray-50
+  bg-gray-100
+  bg-gray-200
+  bg-gray-300
+  bg-gray-400
+  bg-gray-500
+  bg-gray-600
+  bg-gray-700
+  bg-gray-800
+  bg-gray-900
+  */
+
   connectedCallback() {
     this.classList.add(
       ...[
@@ -13,10 +37,7 @@ class SidebarWrap extends HTMLElement {
         "resize-x",
         "bg-white",
         "w-80",
-        "border-r",
-        "border-gray-300",
         "gap-6",
-        "rounded-tr",
       ]
     );
     this.innerHTML = `

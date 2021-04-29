@@ -5,8 +5,8 @@ class TableHeadingCheck extends HTMLElement {
 
   connectedCallback() {
     this.classList.add(
-      "ring-1",
-      "ring-gray-300",
+      //"ring-1",
+      //"ring-gray-100",
       "sticky",
       "top-0",
       "left-0",
@@ -15,16 +15,16 @@ class TableHeadingCheck extends HTMLElement {
       "sticky"
     );
     this.innerHTML = `
-      <label class="py-2 px-4 relative bg-gray-100 flex items-center">
-        <input type="checkbox" class="w-5 h-5 rounded-sm text-white" name="test" />
-        <div class="absolute block inset-0 ring-1 ring-gray-300"></div>
+      <label class="tp relative heading-bkg flex items-center">
+        <input type="checkbox" class="w-4 h-4 rounded-sm border-gray-300 focus:outline-none focus:ring-0 text-navy-600 focus:ring-offset-0" name="test" />
+        <div class="absolute block inset-0 ring-1 ring-gray-100"></div>
       </label>
     `;
     this.onChange();
   }
 
   keyHtml() {
-    return `<img-svg src="assets/icons/remixicon/key-2-line.svg"></img-svg>`;
+    return `<img-svg src="remixicon/key-2-line.svg"></img-svg>`;
   }
 
   onChange() {

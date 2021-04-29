@@ -11,7 +11,7 @@ class ActionbarInfo extends HTMLElement {
     this.innerHTML =
       `
       <div data-action>
-        <img-svg src="assets/icons/remixicon/info.svg" classes="w-5 h-5">
+        <img-svg src="remixicon/info.svg" classes="w-5 h-5">
         <div>Info</div>
       </div>kkk
     ` + this.modal();

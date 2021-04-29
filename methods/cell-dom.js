@@ -57,8 +57,22 @@ function resetDomCellEdits() {
   });
 }
 
+function tabClassActive() {
+  return [
+    "bg-navy-600",
+    "text-white",
+    "hover:bg-navy-600",
+    "hover:text-white",
+    "ring-navy-600",
+  ];
+}
+
+function tabClassInactive() {
+  return ["hover:border-gray-300", "bg-gray-50", "ring-gray-300"];
+}
+
 function hollowClassActive() {
-  return ["bg-blue-100", "text-blue-900", "border-blue-300"];
+  return ["bg-blue-100", "text-blue-900"];
 }
 
 function hollowClassInactive() {

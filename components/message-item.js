@@ -22,7 +22,7 @@ class MessageItem extends HTMLElement {
       <div class="flex-1 p-6">${message}</div>
       <div class="p-2">
         <button class="hover:bg-black hover:bg-opacity-10 p-2 focus:outline-none cursor-default">
-          <img-svg src="assets/icons/remixicon/close.svg"></img-svg>
+          <img-svg src="remixicon/close.svg"></img-svg>
         </button>
       </div>
     `;

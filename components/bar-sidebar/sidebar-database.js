@@ -15,9 +15,9 @@ class SidebarDatabase extends HTMLElement {
       <div data-database class="${hollowClassInactive().join(
         " "
       )} flex gap-2 p-2 mx-2 cursor-default select-none fill-current items-center rounded border">
-        <img-svg src="assets/icons/remixicon/database-2.svg"></img-svg>
+        <img-svg src="remixicon/database-2.svg"></img-svg>
         <div data-local-database class="flex-1 truncate font-bold">${title}</div>
-        <img-svg data-arrow src="assets/icons/remixicon/arrow-down-s.svg" classes="transform rotate-180 w-6 h-6"></img-svg>
+        <img-svg data-arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-6 h-6"></img-svg>
       </div>
 
       <div data-tables hidden></div>

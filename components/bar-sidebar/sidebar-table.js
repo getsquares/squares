@@ -59,7 +59,30 @@ class SidebarTable extends HTMLElement {
       el.activate();
     } else {
       tab.add(current.database, current.table);
+
+      //$("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
+      syncSidebarLogo();
       // Fetch
+      console.log("tab");
+      this.test(current.database, current.table).then((test) => {
+        console.log(tables);
+      });
+    }
+  }
+
+  async test(database, table) {
+    try {
+      const resp = await axios.get(
+        `http://localhost/tools/squares/server/php/queries/data.php?database=${database}&table=${table}`
+      );
+      //console.log(resp.data);
+
+      tables[`${database}|${table}`] = resp.data;
+
+      return resp.data;
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
     }
   }
 

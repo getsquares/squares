@@ -7,27 +7,15 @@ class ActionbarItems extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      <div class="flex justify-between gap-4">
-        <div data-items class="flex gap-4 p-2">
-          ${this.itemHtml(
-            "columns",
-            "assets/icons/remixicon/eye-off.svg",
-            "4 hidden columns"
-          )}
-          <!--<actionbar-filter></actionbar-filter>-->
-          ${this.itemHtml(
-            "sort",
-            "assets/icons/remixicon/arrow-up-down.svg",
-            "Sort"
-          )}
+      <div class="flex justify-between gap-4 px-8 pt-4">
+        <div data-items class="flex rounded overflow-hidden">
+          <action-item name="columns" label="4 hidden columns" icon="remixicon/eye-off.svg"></action-item>
+          <action-item name="filter" label="Filter" icon="remixicon/filter-3-line.svg"></action-item>
+          <action-item name="sort" label="Sort" icon="remixicon/arrow-up-down.svg"></action-item>
         </div>
-        <div class="flex gap-4 p-2">
-          ${this.buttonHtml(
-            "refresh",
-            "assets/icons/material-icons/refresh.svg",
-            "Refresh"
-          )}
-          ${this.buttonHtml("add", "assets/icons/remixicon/add.svg", "Add row")}
+        <div class="flex gap-4">
+          ${this.buttonHtml("refresh", "material-icons/refresh.svg", "Refresh")}
+          ${this.buttonHtml("add", "remixicon/add.svg", "Add row")}
           
           <!--
           <actionbar-import></actionbar-import>
@@ -44,7 +32,7 @@ class ActionbarItems extends HTMLElement {
     return `
     <div data-local-add class="${hollowClassInactive().join(
       " "
-    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded border">
+    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded-t border">
       <img-svg src="${src}"></img-svg>
       <div>${title}</div>
     </div>
@@ -55,7 +43,7 @@ class ActionbarItems extends HTMLElement {
     return `
       <div data-title="${title}" data-action="${name}" class="${hollowClassInactive().join(
       " "
-    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded border">
+    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded-t border">
         <img-svg src="${src}"></img-svg>
         <div>${title}</div>
       </div>
@@ -78,7 +66,7 @@ class ActionbarItems extends HTMLElement {
           this.deactivate(el);
         }
 
-        if (["columns", "sort"].includes(name)) {
+        /*if (["columns", "sort"].includes(name)) {
           const title = el.getAttribute("data-title");
 
           if (is_active) {
@@ -90,7 +78,7 @@ class ActionbarItems extends HTMLElement {
           }
         } else {
           dropdown.deactivate();
-        }
+        }*/
       });
     });
   }
@@ -100,13 +88,13 @@ class ActionbarItems extends HTMLElement {
   }
 
   activate(el) {
-    el.classList.add(...hollowClassActive());
-    el.classList.remove(...hollowClassInactive());
+    el.classList.add(...tabClassActive());
+    el.classList.remove(...tabClassInactive());
   }
 
   deactivate(el) {
-    el.classList.add(...hollowClassInactive());
-    el.classList.remove(...hollowClassActive());
+    el.classList.add(...tabClassInactive());
+    el.classList.remove(...tabClassActive());
   }
 
   deactivateAll() {

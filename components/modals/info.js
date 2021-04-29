@@ -7,9 +7,9 @@ class ModalInfo extends HTMLElement {
     this.innerHTML = `
       <div class="flex flex-col flex-1 gap-6">
         <div class="flex gap-3 items-center">
-          <img-svg src="assets/icons/remixicon/checkbox-multiple-blank.svg" classes="h-12 w-12"></img-svg>
+          <img-svg src="remixicon/checkbox-multiple-blank.svg" classes="h-12 w-12"></img-svg>
           <img-svg
-            src="assets/icons/logo.svg"
+            src="logo.svg"
             classes="h-10"
           ></img-svg>
         </div>

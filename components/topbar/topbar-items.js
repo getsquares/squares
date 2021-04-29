@@ -5,16 +5,12 @@ class TopbarItems extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      <div class="flex gap-2 text-sm text-white">
-        ${this.itemHtml(
-          "info",
-          "Info",
-          "assets/icons/remixicon/question-fill.svg"
-        )}
+      <div class="flex gap-2 text-sm text-white py-2">
+        ${this.itemHtml("info", "Info", "remixicon/question-fill.svg")}
         ${this.itemHtml(
           "logout",
           "Logout",
-          "assets/icons/material-icons/logout_black_24dp.svg"
+          "material-icons/logout_black_24dp.svg"
         )}
       </div>
     `;

@@ -31,7 +31,7 @@ class TabItem extends HTMLElement {
 
     this.innerHTML = `
       ${this.getAttribute("table")}
-      <img-svg src="assets/icons/remixicon/close.svg" class="rounded">
+      <img-svg src="remixicon/close.svg" class="rounded">
     `;
 
     tab.onClose(this);

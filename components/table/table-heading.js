@@ -13,19 +13,16 @@ class TableHeading extends HTMLElement {
     const key_html = id ? this.keyHtml() : "";
 
     this.classList.add(
-      "px-2",
-      "py-3",
-      "ring-1",
-      "ring-gray-300",
-      "bg-gray-100",
+      "tp",
+      "heading-bkg",
       "font-bold",
-      "sticky",
-      "top-0",
-      "z-40",
       "flex",
       "gap-2",
       "items-center",
-      "text-base"
+      "text-sm",
+      "sticky",
+      "top-0",
+      "z-50"
     );
     this.innerHTML = `
       ${key_html}
@@ -34,7 +31,7 @@ class TableHeading extends HTMLElement {
   }
 
   keyHtml() {
-    return `<img-svg src="assets/icons/remixicon/key-2-line.svg"></img-svg>`;
+    return `<img-svg src="remixicon/key-2-line.svg" classes="w-5 h-5"></img-svg>`;
   }
 
   /*attributeChangedCallback(attr, oldValue, newValue) {

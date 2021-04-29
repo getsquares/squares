@@ -6,7 +6,7 @@ class ActionbarColumns extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <actionbar-icon
-        src="assets/icons/remixicon/eye-off.svg"
+        src="remixicon/eye-off.svg"
         title="4 hidden fields"
       ></actionbar-icon>
     `;

@@ -8,14 +8,7 @@ class CellRing extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add(
-      "absolute",
-      "block",
-      "inset-0",
-      "ring-1",
-      "z-10",
-      "ring-gray-300"
-    );
+    this.classList.add("absolute", "block", "inset-0", "z-10");
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
@@ -24,15 +17,21 @@ class CellRing extends HTMLElement {
       this.classList.remove(
         "ring-1",
         "ring-2",
-        "ring-gray-300",
         "ring-gray-500",
         "ring-blue-500",
+        "ring-orange-500",
         "z-10",
-        "z-30"
+        "z-30",
+        "shadow-y",
+        "ml-2px"
       );
+      const prev_el = this.closest("table-cell").previousElementSibling;
+      const next_el = this.closest("table-cell").nextElementSibling;
+
       switch (newValue) {
         case "default":
-          this.classList.add("ring-1", "ring-gray-300", "z-10");
+          this.classList.add("shadow-y");
+          this.classList.add("z-10");
           break;
         case "active":
           this.classList.add("ring-2", "ring-gray-500", "z-30");
@@ -43,6 +42,11 @@ class CellRing extends HTMLElement {
         case "edit":
           this.classList.add("ring-2", "ring-blue-500", "z-30");
           break;
+      }
+
+      if (newValue != "default") {
+        if (prev_el.tagName == "ROW-SELECT") this.classList.add("ml-2px");
+        if (!next_el) this.classList.add("mr-2px");
       }
     }
   }

@@ -57,8 +57,22 @@ function resetDomCellEdits() {
   });
 }
 
+function tabClassActive() {
+  return [
+    "bg-navy-600",
+    "text-white",
+    "hover:bg-navy-600",
+    "hover:text-white",
+    "ring-navy-600",
+  ];
+}
+
+function tabClassInactive() {
+  return ["hover:border-gray-300", "bg-gray-50", "ring-gray-300"];
+}
+
 function hollowClassActive() {
-  return ["bg-blue-100", "text-blue-900", "border-blue-300"];
+  return ["bg-blue-100", "text-blue-900"];
 }
 
 function hollowClassInactive() {
@@ -247,6 +261,10 @@ function setCellActiveToEl(el, state = "active") {
   el.setAttribute("state", state);
 }
 
+function syncSidebarLogo() {
+  $("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
+}
+
 function error(message) {}
 
 function success(message) {}
@@ -373,7 +391,7 @@ class tab {
   }
 
   static classesInactive() {
-    return ["bg-blue-700", "hover:bg-blue-800"];
+    return ["bg-navy-700", "hover:bg-navy-800"];
   }
 
   static classesActiveClose() {
@@ -381,7 +399,7 @@ class tab {
   }
 
   static classesInactiveClose() {
-    return ["hover:bg-blue-600"];
+    return ["hover:bg-navy-600"];
   }
 
   // tab.hasActive()
@@ -426,6 +444,96 @@ class tabs {
   }
 }
 
+class ActionItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    const label = this.getAttribute("label");
+    const icon = this.getAttribute("icon");
+
+    this.classList.add(
+      "flex",
+      "cursor-default",
+      "items-center",
+      "px-3",
+      "py-1.5",
+      "text-sm",
+      "select-none",
+      "gap-2",
+      "ring-1",
+      ...tabClassInactive()
+    );
+
+    this.innerHTML = `
+      <img-svg src="${icon}" classes="w-5 h-5"></img-svg>
+      <div>${label}</div>
+    `;
+
+    this.onClick();
+  }
+
+  onClick() {
+    this.addEventListener("click", () => {
+      const active = this.getAttribute("active") == "true";
+      const pane = $(`pane-${this.getAttribute("name")}`);
+
+      $$("action-item").forEach((el) => {
+        this.deactivate(el);
+      });
+
+      $$("pane-items > *").forEach((el) => {
+        el.deactivate();
+      });
+
+      if (active) {
+        this.deactivate();
+        pane.deactivate();
+      } else {
+        this.activate();
+        pane.activate();
+      }
+    });
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.classesActivate();
+        } else {
+          this.classesDeactivate();
+        }
+      }
+    }
+  }
+
+  classesActivate() {
+    this.classList.add(...tabClassActive());
+    this.classList.remove(...tabClassInactive());
+  }
+
+  classesDeactivate(el = this) {
+    el.classList.remove(...tabClassActive());
+    el.classList.add(...tabClassInactive());
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate(el = this) {
+    el.removeAttribute("active");
+  }
+}
+
+customElements.define("action-item", ActionItem);
+
 class ActionbarDropdown extends HTMLElement {
   constructor() {
     super();
@@ -441,7 +549,7 @@ class ActionbarDropdown extends HTMLElement {
         </div>
         <div class="p-2">
           <button class="focus:outline-none hover:bg-gray-200 p-2 rounded">
-            <img-svg src="assets/icons/remixicon/close.svg"></img-svg>
+            <img-svg src="remixicon/close.svg"></img-svg>
           </button>
         </div>
       </div>
@@ -503,27 +611,15 @@ class ActionbarItems extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      <div class="flex justify-between gap-4">
-        <div data-items class="flex gap-4 p-2">
-          ${this.itemHtml(
-            "columns",
-            "assets/icons/remixicon/eye-off.svg",
-            "4 hidden columns"
-          )}
-          <!--<actionbar-filter></actionbar-filter>-->
-          ${this.itemHtml(
-            "sort",
-            "assets/icons/remixicon/arrow-up-down.svg",
-            "Sort"
-          )}
+      <div class="flex justify-between gap-4 px-8 pt-4">
+        <div data-items class="flex rounded overflow-hidden">
+          <action-item name="columns" label="4 hidden columns" icon="remixicon/eye-off.svg"></action-item>
+          <action-item name="filter" label="Filter" icon="remixicon/filter-3-line.svg"></action-item>
+          <action-item name="sort" label="Sort" icon="remixicon/arrow-up-down.svg"></action-item>
         </div>
-        <div class="flex gap-4 p-2">
-          ${this.buttonHtml(
-            "refresh",
-            "assets/icons/material-icons/refresh.svg",
-            "Refresh"
-          )}
-          ${this.buttonHtml("add", "assets/icons/remixicon/add.svg", "Add row")}
+        <div class="flex gap-4">
+          ${this.buttonHtml("refresh", "material-icons/refresh.svg", "Refresh")}
+          ${this.buttonHtml("add", "remixicon/add.svg", "Add row")}
           
           <!--
           <actionbar-import></actionbar-import>
@@ -540,7 +636,7 @@ class ActionbarItems extends HTMLElement {
     return `
     <div data-local-add class="${hollowClassInactive().join(
       " "
-    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded border">
+    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded-t border">
       <img-svg src="${src}"></img-svg>
       <div>${title}</div>
     </div>
@@ -551,7 +647,7 @@ class ActionbarItems extends HTMLElement {
     return `
       <div data-title="${title}" data-action="${name}" class="${hollowClassInactive().join(
       " "
-    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded border">
+    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded-t border">
         <img-svg src="${src}"></img-svg>
         <div>${title}</div>
       </div>
@@ -574,7 +670,7 @@ class ActionbarItems extends HTMLElement {
           this.deactivate(el);
         }
 
-        if (["columns", "sort"].includes(name)) {
+        /*if (["columns", "sort"].includes(name)) {
           const title = el.getAttribute("data-title");
 
           if (is_active) {
@@ -586,7 +682,7 @@ class ActionbarItems extends HTMLElement {
           }
         } else {
           dropdown.deactivate();
-        }
+        }*/
       });
     });
   }
@@ -596,13 +692,13 @@ class ActionbarItems extends HTMLElement {
   }
 
   activate(el) {
-    el.classList.add(...hollowClassActive());
-    el.classList.remove(...hollowClassInactive());
+    el.classList.add(...tabClassActive());
+    el.classList.remove(...tabClassInactive());
   }
 
   deactivate(el) {
-    el.classList.add(...hollowClassInactive());
-    el.classList.remove(...hollowClassActive());
+    el.classList.add(...tabClassInactive());
+    el.classList.remove(...tabClassActive());
   }
 
   deactivateAll() {
@@ -613,6 +709,32 @@ class ActionbarItems extends HTMLElement {
 }
 
 customElements.define("actionbar-items", ActionbarItems);
+
+class PaneClose extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div class="p-2">
+        <button class="focus:outline-none hover:bg-gray-200 p-2 rounded">
+          <img-svg src="remixicon/close.svg"></img-svg>
+        </button>
+      </div>`;
+    this.onClick();
+  }
+
+  onClick() {
+    const hide = this.getAttribute("hide");
+
+    $("button", this).addEventListener("click", () => {
+      this.closest(hide).deactivate();
+    });
+  }
+}
+
+customElements.define("pane-close", PaneClose);
 
 class BarFooterItems extends HTMLElement {
   constructor() {
@@ -631,19 +753,19 @@ class BarFooterItems extends HTMLElement {
       ${this.itemHtml(
         this.getAttribute("database"),
         "database",
-        "assets/icons/remixicon/database-2.svg"
+        "remixicon/database-2.svg"
       )}
 
       ${this.itemHtml(
         this.getAttribute("table"),
         "table",
-        "assets/icons/remixicon/table-line.svg"
+        "remixicon/table-line.svg"
       )}
 
       ${this.itemHtml(
         this.getAttribute("records"),
         "records",
-        "assets/icons/remixicon/layout-row-line.svg"
+        "remixicon/layout-row-line.svg"
       )}
     `;
   }
@@ -659,7 +781,7 @@ class BarFooterItems extends HTMLElement {
   }
 
   keyHtml() {
-    return `<img-svg src="assets/icons/remixicon/key-2-line.svg"></img-svg>`;
+    return `<img-svg src="remixicon/key-2-line.svg"></img-svg>`;
   }
 
   setRecords(offset, rows, total) {
@@ -702,9 +824,9 @@ class SidebarDatabase extends HTMLElement {
       <div data-database class="${hollowClassInactive().join(
         " "
       )} flex gap-2 p-2 mx-2 cursor-default select-none fill-current items-center rounded border">
-        <img-svg src="assets/icons/remixicon/database-2.svg"></img-svg>
+        <img-svg src="remixicon/database-2.svg"></img-svg>
         <div data-local-database class="flex-1 truncate font-bold">${title}</div>
-        <img-svg data-arrow src="assets/icons/remixicon/arrow-down-s.svg" classes="transform rotate-180 w-6 h-6"></img-svg>
+        <img-svg data-arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-6 h-6"></img-svg>
       </div>
 
       <div data-tables hidden></div>
@@ -971,7 +1093,30 @@ class SidebarTable extends HTMLElement {
       el.activate();
     } else {
       tab.add(current.database, current.table);
+
+      //$("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
+      syncSidebarLogo();
       // Fetch
+      console.log("tab");
+      this.test(current.database, current.table).then((test) => {
+        console.log(tables);
+      });
+    }
+  }
+
+  async test(database, table) {
+    try {
+      const resp = await axios.get(
+        `http://localhost/tools/squares/server/php/queries/data.php?database=${database}&table=${table}`
+      );
+      //console.log(resp.data);
+
+      tables[`${database}|${table}`] = resp.data;
+
+      return resp.data;
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
     }
   }
 
@@ -1003,6 +1148,30 @@ class SidebarWrap extends HTMLElement {
     super();
   }
 
+  /*
+  bg-navy-50
+  bg-navy-100
+  bg-navy-200
+  bg-navy-300
+  bg-navy-400
+  bg-navy-500
+  bg-navy-600
+  bg-navy-700
+  bg-navy-800
+  bg-navy-900
+
+  bg-gray-50
+  bg-gray-100
+  bg-gray-200
+  bg-gray-300
+  bg-gray-400
+  bg-gray-500
+  bg-gray-600
+  bg-gray-700
+  bg-gray-800
+  bg-gray-900
+  */
+
   connectedCallback() {
     this.classList.add(
       ...[
@@ -1013,10 +1182,7 @@ class SidebarWrap extends HTMLElement {
         "resize-x",
         "bg-white",
         "w-80",
-        "border-r",
-        "border-gray-300",
         "gap-6",
-        "rounded-tr",
       ]
     );
     this.innerHTML = `
@@ -1078,7 +1244,7 @@ class CellPreview extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("block", "relative", "p-2");
+    this.classList.add("block", "relative", "tp");
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
@@ -1105,14 +1271,7 @@ class CellRing extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add(
-      "absolute",
-      "block",
-      "inset-0",
-      "ring-1",
-      "z-10",
-      "ring-gray-300"
-    );
+    this.classList.add("absolute", "block", "inset-0", "z-10");
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
@@ -1121,15 +1280,21 @@ class CellRing extends HTMLElement {
       this.classList.remove(
         "ring-1",
         "ring-2",
-        "ring-gray-300",
         "ring-gray-500",
         "ring-blue-500",
+        "ring-orange-500",
         "z-10",
-        "z-30"
+        "z-30",
+        "shadow-y",
+        "ml-2px"
       );
+      const prev_el = this.closest("table-cell").previousElementSibling;
+      const next_el = this.closest("table-cell").nextElementSibling;
+
       switch (newValue) {
         case "default":
-          this.classList.add("ring-1", "ring-gray-300", "z-10");
+          this.classList.add("shadow-y");
+          this.classList.add("z-10");
           break;
         case "active":
           this.classList.add("ring-2", "ring-gray-500", "z-30");
@@ -1140,6 +1305,11 @@ class CellRing extends HTMLElement {
         case "edit":
           this.classList.add("ring-2", "ring-blue-500", "z-30");
           break;
+      }
+
+      if (newValue != "default") {
+        if (prev_el.tagName == "ROW-SELECT") this.classList.add("ml-2px");
+        if (!next_el) this.classList.add("mr-2px");
       }
     }
   }
@@ -1220,9 +1390,9 @@ class ModalInfo extends HTMLElement {
     this.innerHTML = `
       <div class="flex flex-col flex-1 gap-6">
         <div class="flex gap-3 items-center">
-          <img-svg src="assets/icons/remixicon/checkbox-multiple-blank.svg" classes="h-12 w-12"></img-svg>
+          <img-svg src="remixicon/checkbox-multiple-blank.svg" classes="h-12 w-12"></img-svg>
           <img-svg
-            src="assets/icons/logo.svg"
+            src="logo.svg"
             classes="h-10"
           ></img-svg>
         </div>
@@ -1378,15 +1548,15 @@ class RowSelect extends HTMLElement {
     this.classList.add(
       "relative",
       "flex",
-      "bg-white",
       "sticky",
       "z-50",
-      "left-0"
+      "left-0",
+      "heading-bkg"
     );
     this.innerHTML = `
-      <label class="py-2 px-4 relative">
-        <input type="checkbox" class="w-5 h-5 rounded-sm text-white" name="test" />
-        <div class="absolute block inset-0 ring-1 ring-gray-300"></div>
+      <label class="tp relative">
+        <input type="checkbox" class="w-4 h-4 text-navy-600 rounded-sm focus:ring-0 focus:ring-offset-0  bg-gray-200 border-none" name="test" />
+        <div class="absolute block inset-0 shadow-y"></div>
       </label>
     `;
     this.onClick();
@@ -1410,12 +1580,12 @@ class RowSelect extends HTMLElement {
   }
 
   selectOne(el) {
-    el.classList.add("bg-blue-100");
+    el.classList.add("bg-navy-100");
     el.classList.remove("bg-white");
   }
 
   deselectOne(el) {
-    el.classList.remove("bg-blue-100");
+    el.classList.remove("bg-navy-100");
     el.classList.add("bg-white");
   }
 }
@@ -1434,8 +1604,8 @@ class TableHeadingCheck extends HTMLElement {
 
   connectedCallback() {
     this.classList.add(
-      "ring-1",
-      "ring-gray-300",
+      //"ring-1",
+      //"ring-gray-100",
       "sticky",
       "top-0",
       "left-0",
@@ -1444,16 +1614,16 @@ class TableHeadingCheck extends HTMLElement {
       "sticky"
     );
     this.innerHTML = `
-      <label class="py-2 px-4 relative bg-gray-100 flex items-center">
-        <input type="checkbox" class="w-5 h-5 rounded-sm text-white" name="test" />
-        <div class="absolute block inset-0 ring-1 ring-gray-300"></div>
+      <label class="tp relative heading-bkg flex items-center">
+        <input type="checkbox" class="w-4 h-4 rounded-sm border-gray-300 focus:outline-none focus:ring-0 text-navy-600 focus:ring-offset-0" name="test" />
+        <div class="absolute block inset-0 ring-1 ring-gray-100"></div>
       </label>
     `;
     this.onChange();
   }
 
   keyHtml() {
-    return `<img-svg src="assets/icons/remixicon/key-2-line.svg"></img-svg>`;
+    return `<img-svg src="remixicon/key-2-line.svg"></img-svg>`;
   }
 
   onChange() {
@@ -1521,19 +1691,16 @@ class TableHeading extends HTMLElement {
     const key_html = id ? this.keyHtml() : "";
 
     this.classList.add(
-      "px-2",
-      "py-3",
-      "ring-1",
-      "ring-gray-300",
-      "bg-gray-100",
+      "tp",
+      "heading-bkg",
       "font-bold",
-      "sticky",
-      "top-0",
-      "z-40",
       "flex",
       "gap-2",
       "items-center",
-      "text-base"
+      "text-sm",
+      "sticky",
+      "top-0",
+      "z-50"
     );
     this.innerHTML = `
       ${key_html}
@@ -1542,7 +1709,7 @@ class TableHeading extends HTMLElement {
   }
 
   keyHtml() {
-    return `<img-svg src="assets/icons/remixicon/key-2-line.svg"></img-svg>`;
+    return `<img-svg src="remixicon/key-2-line.svg" classes="w-5 h-5"></img-svg>`;
   }
 
   /*attributeChangedCallback(attr, oldValue, newValue) {
@@ -1588,7 +1755,7 @@ class TabItem extends HTMLElement {
 
     this.innerHTML = `
       ${this.getAttribute("table")}
-      <img-svg src="assets/icons/remixicon/close.svg" class="rounded">
+      <img-svg src="remixicon/close.svg" class="rounded">
     `;
 
     tab.onClose(this);
@@ -1628,13 +1795,14 @@ class TabItems extends HTMLElement {
   connectedCallback() {
     this.classList.add(
       "flex",
+      "flex-1",
       "items-center",
       "gap-2",
       "text-white",
-      "px-2",
-      "bg-blue-600",
+      "bg-navy-600",
       "overflow-auto",
-      "w-full"
+      "w-full",
+      "self-end"
     );
   }
 }
@@ -1654,7 +1822,7 @@ class ActionbarInfo extends HTMLElement {
     this.innerHTML =
       `
       <div data-action>
-        <img-svg src="assets/icons/remixicon/info.svg" classes="w-5 h-5">
+        <img-svg src="remixicon/info.svg" classes="w-5 h-5">
         <div>Info</div>
       </div>kkk
     ` + this.modal();
@@ -1689,16 +1857,12 @@ class TopbarItems extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      <div class="flex gap-2 text-sm text-white">
-        ${this.itemHtml(
-          "info",
-          "Info",
-          "assets/icons/remixicon/question-fill.svg"
-        )}
+      <div class="flex gap-2 text-sm text-white py-2">
+        ${this.itemHtml("info", "Info", "remixicon/question-fill.svg")}
         ${this.itemHtml(
           "logout",
           "Logout",
-          "assets/icons/material-icons/logout_black_24dp.svg"
+          "material-icons/logout_black_24dp.svg"
         )}
       </div>
     `;
@@ -1741,14 +1905,17 @@ class TopbarWrap extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
     <div
-      class="flex items-center justify-between py-2 pl-4 pr-2 text-gray-200 bg-blue-600"
+      class="flex items-center justify-between pr-2 text-gray-200 bg-navy-600"
     >
-      <div class="flex items-center gap-2 text-2xl text-white uppercase">
-        <img-svg
-          src="assets/icons/remixicon/checkbox-multiple-blank.svg"
-        ></img-svg>
-        <img-svg src="assets/icons/logo.svg" classes="h-5"></img-svg>
-      </div>
+      <resize-logo>
+        <div class="pl-4 pr-8 flex items-center gap-2 text-2xl text-white uppercase">
+          <img-svg
+            src="remixicon/checkbox-multiple-blank.svg"
+          ></img-svg>
+          <img-svg src="logo.svg" classes="h-5"></img-svg>
+        </div>
+      </resize-logo>
+      <tab-items></tab-items>
       <topbar-items></topbar-items>
     </div>
     `;
@@ -1802,7 +1969,7 @@ class ActionbarColumns extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <actionbar-icon
-        src="assets/icons/remixicon/eye-off.svg"
+        src="remixicon/eye-off.svg"
         title="4 hidden fields"
       ></actionbar-icon>
     `;
@@ -1975,7 +2142,7 @@ class ActionbarRefresh extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <div data-action>
-        <img-svg src="assets/icons/material-icons/refresh.svg" classes="animate-spin w-5 h-5"></img-svg>
+        <img-svg src="material-icons/refresh.svg" classes="animate-spin w-5 h-5"></img-svg>
         <div>Refresh</div>
       </div>
     `;
@@ -2003,7 +2170,7 @@ class ActionbarSort extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <actionbar-icon
-        src="assets/icons/remixicon/arrow-up-down.svg"
+        src="remixicon/arrow-up-down.svg"
         title="Sort"
       ></actionbar-icon>
     `;
@@ -2047,6 +2214,344 @@ class ActionbarSort extends HTMLElement {
 }
 
 customElements.define("actionbar-sort", ActionbarSort);
+
+class PaneColumns extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add(
+      "gap-4",
+      "bg-white",
+      "flex",
+      "hidden",
+      "mt-1",
+      "text-sm",
+      "rounded"
+    );
+    this.innerHTML = this.template("Columns");
+  }
+
+  checkboxes() {
+    return this.partCheckbox("test23", true) + this.partCheckbox("test");
+  }
+
+  template(title) {
+    return `
+      <div class="flex flex-col gap-4 p-4 flex-1">
+        <div class="font-bold">${title}</div>
+        <div class="flex gap-8">
+          ${this.checkboxes()}
+        </div>
+      </div>
+      <pane-close hide="pane-columns"></pane-close>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    console.log("hit");
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.classesActivate();
+        } else {
+          this.classesDeactivate();
+        }
+      }
+    }
+  }
+
+  classesActivate(el = this) {
+    el.classList.remove("hidden");
+  }
+
+  classesDeactivate(el = this) {
+    el.classList.add("hidden");
+  }
+
+  partCheckbox(name, checked) {
+    return `
+    <checkbox-item name="${name}" label="${name}" checked="${checked}"></checkbox-item>
+    `;
+  }
+
+  activate() {
+    console.log("activate");
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    console.log("123");
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("pane-columns", PaneColumns);
+
+class PaneFilter extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add(
+      "gap-4",
+      "bg-white",
+      "flex",
+      "hidden",
+      "mt-1",
+      "text-sm",
+      "rounded"
+    );
+    this.innerHTML = this.template("Filter");
+  }
+
+  filters() {
+    return this.partFilter("test23", true) + this.partFilter("test");
+  }
+
+  template(title) {
+    return `
+      <div class="flex flex-col gap-4 p-4 flex-1">
+        <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content),1fr] gap-2 flex-col">
+          <div class="contents">
+            ${this.partHeading("Column")}
+            ${this.partHeading("Match")}
+            ${this.partHeading("Value")}
+          </div>
+          ${this.filters()}
+        </div>
+        <button-item style="action" title="Filter data" class="ml-auto"></button-item>
+      </div>
+      <pane-close hide="pane-filter"></pane-close>
+    `;
+  }
+
+  partHeading(label) {
+    return `<div class="font-bold text-sm">${label}</div>`;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.classesActivate();
+        } else {
+          this.classesDeactivate();
+        }
+      }
+    }
+  }
+
+  classesActivate(el = this) {
+    el.classList.remove("hidden");
+  }
+
+  classesDeactivate(el = this) {
+    el.classList.add("hidden");
+  }
+
+  partFilter(name, checked) {
+    //&filter[]=slug%20equals%202
+    return `
+    <div class="contents">
+      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+        <option>hello</option>
+        <option>hello2</option>
+      </select>
+      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+        ${this.partMatches()}
+      </select>
+      <input type="text" class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+    </div>
+    `;
+  }
+
+  partMatches() {
+    const matches = [
+      {
+        name: "contains",
+        label: "Contains",
+      },
+      {
+        name: "not_contains",
+        label: "Not contains",
+      },
+      {
+        name: "starts_with",
+        label: "Starts with",
+      },
+      {
+        name: "ends_with",
+        label: "Ends with",
+      },
+      {
+        name: "equals",
+        label: "Equals",
+      },
+      {
+        name: "not_equals",
+        label: "Not equals",
+      },
+      {
+        name: "less_than",
+        label: "Less than",
+      },
+      {
+        name: "larger_than",
+        label: "Larger than",
+      },
+    ];
+
+    let html_part = [];
+
+    matches.forEach((item) => {
+      html_part.push(`<option value="${item.name}">${item.label}</option>`);
+    });
+
+    return html_part.join(" ");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("pane-filter", PaneFilter);
+
+class PaneSort extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add(
+      "gap-4",
+      "bg-white",
+      "flex",
+      "hidden",
+      "mt-1",
+      "text-sm",
+      "rounded"
+    );
+    this.innerHTML = this.template("Filter");
+    //this.activate();
+  }
+
+  filters() {
+    return this.partFilter("test23", true) + this.partFilter("test");
+  }
+
+  template(title) {
+    return `
+      <div class="flex flex-col gap-4 p-6 flex-1">
+        <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content)] gap-2 flex-col">
+          <div class="contents">
+            ${this.partHeading("Order by")}
+            ${this.partHeading("Order")}
+          </div>
+          <div class="contents">
+            <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400">
+              <option>hello</option>
+              <option>hello2</option>
+            </select>
+            <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400">
+              ${this.partMatches()}
+            </select>
+          </div>
+        </div>
+      </div>
+      <pane-close hide="pane-filter"></pane-close>
+    `;
+  }
+
+  partHeading(label) {
+    return `<div class="font-bold text-sm uppercase">${label}</div>`;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.classesActivate();
+        } else {
+          this.classesDeactivate();
+        }
+      }
+    }
+  }
+
+  classesActivate(el = this) {
+    el.classList.remove("hidden");
+  }
+
+  classesDeactivate(el = this) {
+    el.classList.add("hidden");
+  }
+
+  partFilter(name, checked) {
+    //&filter[]=slug%20equals%202
+    return `
+    <div class="contents">
+      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+        <option>hello</option>
+        <option>hello2</option>
+      </select>
+      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+        ${this.partMatches()}
+      </select>
+    </div>
+    `;
+  }
+
+  partMatches() {
+    const matches = [
+      {
+        name: "asc",
+        label: "Ascending",
+      },
+      {
+        name: "desc",
+        label: "Descending",
+      },
+    ];
+
+    let html_part = [];
+
+    matches.forEach((item) => {
+      html_part.push(`<option value="${item.name}">${item.label}</option>`);
+    });
+
+    return html_part.join(" ");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("pane-sort", PaneSort);
 
 class ButtonItem extends HTMLElement {
   constructor() {
@@ -2150,7 +2655,7 @@ class CheckboxItem extends HTMLElement {
 
     this.innerHTML = `
       <label class="flex select-none items-center gap-2">
-        <input type="checkbox" class="w-5 h-5 rounded-sm text-white" name="${name}" ${checked} />
+        <input type="checkbox" class="w-4 h-4 rounded focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
         ${label ? label : ""}
       </label>
     `;
@@ -2171,7 +2676,7 @@ class ImgSvg extends HTMLElement {
   attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
       if (attr == "src" && newValue != "") {
-        fetch(newValue)
+        fetch(`assets/icons/${newValue}`)
           .then((response) => response.text())
           .then((text) => {
             this.innerHTML = text;
@@ -2211,7 +2716,7 @@ class MessageItem extends HTMLElement {
       <div class="flex-1 p-6">${message}</div>
       <div class="p-2">
         <button class="hover:bg-black hover:bg-opacity-10 p-2 focus:outline-none cursor-default">
-          <img-svg src="assets/icons/remixicon/close.svg"></img-svg>
+          <img-svg src="remixicon/close.svg"></img-svg>
         </button>
       </div>
     `;
@@ -2237,7 +2742,7 @@ class ModalBox extends HTMLElement {
             <modal-info></modal-info>
           </div>
           <button class="p-2 m-2 focus:outline-none hover:bg-gray-100 rounded">
-            <img-svg src="assets/icons/remixicon/close.svg"></img-svg>
+            <img-svg src="remixicon/close.svg"></img-svg>
           </button>
         </div>
       </div>
@@ -2266,6 +2771,107 @@ class ModalBox extends HTMLElement {
 }
 
 customElements.define("modal-box", ModalBox);
+
+class PaneMain extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("flex", "flex-col", "overflow-auto");
+    this.innerHTML = `
+      ${this.actionbar()}
+
+      <div class="flex-1 flex my-4 overflow-auto">
+        <div class="flex-1 overflow-x-auto border border-gray-200">
+    <!-- Table wrap -->
+    <div class="flex-1 text-[13px] w-[1300px]">
+      
+        <!-- Table -->
+        <div data-table class="grid gap-y-px bg-white grid-cols-[auto,1200px,300px,300px]">
+          ${this.headings()}
+          <div data-cells class="contents"></div>
+        </div>
+      
+    </div>
+  </div>
+  </div>
+
+  <prev-next></prev-next>
+
+`;
+    let parts = "";
+    for (let i = 0; i < 100; i++) {
+      parts += this.part();
+    }
+
+    $("[data-cells]").innerHTML = parts;
+  }
+
+  headings() {
+    return `
+    <div data-headings class="z-40 contents">
+      <table-heading-check></table-heading-check>
+      <table-heading title="id" key="true"></table-heading>
+      <table-heading title="title"></table-heading>
+      <table-heading title="description"></table-heading>
+    </div>`;
+  }
+
+  actionbar() {
+    return `<!-- Actionbar -->
+    <div>
+      <actionbar-items></actionbar-items>
+      <pane-items class="mx-8 block">
+        <pane-columns></pane-columns>
+        <pane-filter></pane-filter>
+        <pane-sort></pane-sort>
+      </pane-items>
+    </div>`;
+  }
+
+  part() {
+    return `
+      <div class="contents">
+        <row-select></row-select>
+        <table-cell></table-cell>
+        <table-cell></table-cell>
+        <table-cell></table-cell>
+      </div>`;
+  }
+}
+
+customElements.define("pane-main", PaneMain);
+
+class PrevNext extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+    <div class="flex justify-between gap-8 px-8 pb-4">
+      <div class="flex gap-2 items-center text-sm font-bold">
+        1-100 of 12,300
+      </div>
+      <div class="flex gap-4">
+        <div class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded">
+          <img-svg src="remixicon/arrow-left-line.svg" classes="w-5 h-5">
+        </div>
+        <div class="text-sm items-center flex font-bold">1 of 41</div>
+        <div class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded">
+          <img-svg src="remixicon/arrow-right-line.svg" classes="w-5 h-5">
+        </div>
+      </div>
+    </div>
+    `;
+  }
+}
+customElements.define("prev-next", PrevNext);
 
 class RadioItem extends HTMLElement {
   constructor() {
