@@ -13,13 +13,14 @@ class TabItem extends HTMLElement {
         "rounded-t",
         "px-4",
         "pr-2",
-        "py-2",
+        "py-1.5",
         "cursor-default",
         "select-none",
         "focus:outline-none",
         "flex",
         "gap-3",
         "items-center",
+        "text-sm",
       ],
       ...tab.classesInactive()
     );
@@ -31,7 +32,7 @@ class TabItem extends HTMLElement {
 
     this.innerHTML = `
       ${this.getAttribute("table")}
-      <img-svg src="remixicon/close.svg" class="rounded">
+      <img-svg src="remixicon/close.svg" classes="rounded w-5 h-5">
     `;
 
     tab.onClose(this);

@@ -14,10 +14,10 @@ class SidebarDatabase extends HTMLElement {
     this.innerHTML = `
       <div data-database class="${hollowClassInactive().join(
         " "
-      )} flex gap-2 p-2 mx-2 cursor-default select-none fill-current items-center rounded border">
-        <img-svg src="remixicon/database-2.svg"></img-svg>
-        <div data-local-database class="flex-1 truncate font-bold">${title}</div>
-        <img-svg data-arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-6 h-6"></img-svg>
+      )} flex gap-2 px-4 py-1 cursor-default select-none fill-current items-center">
+        <img-svg src="remixicon/database-2-fill.svg" classes="w-4 h-4 text-yellow-500"></img-svg>
+        <div data-local-database class="flex-1 truncate font-bold text-sm">${title}</div>
+        <img-svg data-arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-4 h-4"></img-svg>
       </div>
 
       <div data-tables hidden></div>
@@ -93,6 +93,9 @@ class SidebarDatabase extends HTMLElement {
   }
 
   populate() {
+    const tables = this.querySelector("[data-tables]");
+    tables.innerHTML = `<sidebar-database-loading></sidebar-database-loading>`;
+
     axios
       .get(
         "http://localhost/tools/squares/server/php/queries/tables.php?database=" +
@@ -101,9 +104,9 @@ class SidebarDatabase extends HTMLElement {
       .then((response) => {
         if (response.status !== 200) return;
 
-        const tables = this.querySelector("[data-tables]");
-
-        let html = "";
+        let html = `
+        <sidebar-database-refresh></sidebar-database-refresh>
+        `;
 
         response.data.forEach((title) => {
           html += this.template(title);

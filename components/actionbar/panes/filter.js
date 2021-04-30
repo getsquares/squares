@@ -8,15 +8,7 @@ class PaneFilter extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add(
-      "gap-4",
-      "bg-white",
-      "flex",
-      "hidden",
-      "mt-1",
-      "text-sm",
-      "rounded"
-    );
+    this.classList.add("gap-4", "flex", "hidden", "text-sm");
     this.innerHTML = this.template("Filter");
   }
 
@@ -26,7 +18,7 @@ class PaneFilter extends HTMLElement {
 
   template(title) {
     return `
-      <div class="flex flex-col gap-4 p-4 flex-1">
+      <div class="flex flex-col gap-2 p-4 flex-1">
         <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content),1fr] gap-2 flex-col">
           <div class="contents">
             ${this.partHeading("Column")}
@@ -69,14 +61,14 @@ class PaneFilter extends HTMLElement {
     //&filter[]=slug%20equals%202
     return `
     <div class="contents">
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+      <select class="actionbar-select">
         <option>hello</option>
         <option>hello2</option>
       </select>
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+      <select class="actionbar-select">
         ${this.partMatches()}
       </select>
-      <input type="text" class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+      <input type="text" class="actionbar-select">
     </div>
     `;
   }

@@ -92,7 +92,7 @@ class tab {
   }
 
   static classesInactive() {
-    return ["bg-navy-700", "hover:bg-navy-800"];
+    return ["bg-navy-700", "text-navy-200", "hover:bg-navy-800"];
   }
 
   static classesActiveClose() {

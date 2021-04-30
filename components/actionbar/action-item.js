@@ -12,6 +12,7 @@ class ActionItem extends HTMLElement {
     const icon = this.getAttribute("icon");
 
     this.classList.add(
+      ...tabClassInactive(),
       "flex",
       "cursor-default",
       "items-center",
@@ -20,8 +21,8 @@ class ActionItem extends HTMLElement {
       "text-sm",
       "select-none",
       "gap-2",
-      "ring-1",
-      ...tabClassInactive()
+      "rounded",
+      "border"
     );
 
     this.innerHTML = `

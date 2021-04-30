@@ -8,28 +8,21 @@ class PaneMain extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("flex", "flex-col", "overflow-auto");
+    this.classList.add("flex", "flex-col", "overflow-auto", "gap-2");
     this.innerHTML = `
-      ${this.actionbar()}
-
-      <div class="flex-1 flex my-4 overflow-auto">
-        <div class="flex-1 overflow-x-auto border border-gray-200">
-    <!-- Table wrap -->
-    <div class="flex-1 text-[13px] w-[1300px]">
-      
-        <!-- Table -->
-        <div data-table class="grid gap-y-px bg-white grid-cols-[auto,1200px,300px,300px]">
-          ${this.headings()}
-          <div data-cells class="contents"></div>
+      <actions-wrap></actions-wrap>
+      <div class="flex-1 flex overflow-auto">
+        <div class="flex-1 overflow-x-auto border border-gray-200 rounded">
+          <div class="flex-1 text-13 w-[1300px]">
+            <div data-table class="grid gap-y-px bg-white grid-cols-[auto,1200px,300px,300px]">
+              ${this.headings()}
+              <div data-cells class="contents"></div>
+            </div>
+          </div>
         </div>
-      
-    </div>
-  </div>
-  </div>
-
-  <prev-next></prev-next>
-
-`;
+      </div>
+      <prev-next></prev-next>
+    `;
     let parts = "";
     for (let i = 0; i < 100; i++) {
       parts += this.part();
@@ -45,18 +38,6 @@ class PaneMain extends HTMLElement {
       <table-heading title="id" key="true"></table-heading>
       <table-heading title="title"></table-heading>
       <table-heading title="description"></table-heading>
-    </div>`;
-  }
-
-  actionbar() {
-    return `<!-- Actionbar -->
-    <div>
-      <actionbar-items></actionbar-items>
-      <pane-items class="mx-8 block">
-        <pane-columns></pane-columns>
-        <pane-filter></pane-filter>
-        <pane-sort></pane-sort>
-      </pane-items>
     </div>`;
   }
 

@@ -7,7 +7,7 @@ class SidebarFilter extends HTMLElement {
     this.innerHTML = `
       <label class="flex flex-col gap-2 mx-4">
         <div class="uppercase font-bold text-sm">Filter tables</div>
-        <input spellcheck="false" placeholder="Show matching tables..." type="text" class="bg-white border-gray-200 focus:shadow-inner rounded focus:bg-gray-100 focus:ring-0 focus:border-gray-300">
+        <input spellcheck="false" placeholder="Show matching tables..." type="text" class="bg-white border-gray-200 text-sm rounded focus:ring-0 focus:border-gray-400">
       </label>
     `;
     this.onChange();

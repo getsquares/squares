@@ -18,7 +18,7 @@ class RowSelect extends HTMLElement {
     );
     this.innerHTML = `
       <label class="tp relative">
-        <input type="checkbox" class="w-4 h-4 text-navy-600 rounded-sm focus:ring-0 focus:ring-offset-0  bg-gray-200 border-none" name="test" />
+        <input type="checkbox" class="checkstyle" name="test" />
         <div class="absolute block inset-0 shadow-y"></div>
       </label>
     `;

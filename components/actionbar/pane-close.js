@@ -6,7 +6,7 @@ class PaneClose extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <div class="p-2">
-        <button class="focus:outline-none hover:bg-gray-200 p-2 rounded">
+        <button class="focus:outline-none hover:bg-gray-100 p-2 rounded">
           <img-svg src="remixicon/close.svg"></img-svg>
         </button>
       </div>`;

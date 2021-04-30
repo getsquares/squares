@@ -8,15 +8,7 @@ class PaneColumns extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add(
-      "gap-4",
-      "bg-white",
-      "flex",
-      "hidden",
-      "mt-1",
-      "text-sm",
-      "rounded"
-    );
+    this.classList.add("gap-4", "flex", "hidden", "text-sm");
     this.innerHTML = this.template("Columns");
   }
 
@@ -26,9 +18,9 @@ class PaneColumns extends HTMLElement {
 
   template(title) {
     return `
-      <div class="flex flex-col gap-4 p-4 flex-1">
+      <div class="flex flex-col gap-2 p-4 flex-1">
         <div class="font-bold">${title}</div>
-        <div class="flex gap-8">
+        <div class="flex gap-2">
           ${this.checkboxes()}
         </div>
       </div>
@@ -37,7 +29,6 @@ class PaneColumns extends HTMLElement {
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
-    console.log("hit");
     if (oldValue !== newValue) {
       if (attr == "active") {
         if (newValue == "true") {
@@ -59,17 +50,15 @@ class PaneColumns extends HTMLElement {
 
   partCheckbox(name, checked) {
     return `
-    <checkbox-item name="${name}" label="${name}" checked="${checked}"></checkbox-item>
+    <checkbox-item class="bg-gray-50 px-3 py-1.5 rounded border border-gray-200" name="${name}" label="${name}" checked="${checked}"></checkbox-item>
     `;
   }
 
   activate() {
-    console.log("activate");
     this.setAttribute("active", "true");
   }
 
   deactivate() {
-    console.log("123");
     this.removeAttribute("active");
   }
 }

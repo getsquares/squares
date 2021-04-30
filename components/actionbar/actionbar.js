@@ -7,21 +7,24 @@ class ActionbarItems extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      <div class="flex justify-between gap-4 px-8 pt-4">
-        <div data-items class="flex rounded overflow-hidden">
-          <action-item name="columns" label="4 hidden columns" icon="remixicon/eye-off.svg"></action-item>
+      <div class="flex justify-between gap-4 pt-2 bg-gray-50">
+        <div data-items class="flex rounded overflow-hidden gap-1">
+          <action-item name="panes" label="Panes" icon="remixicon/layout-5-line.svg"></action-item>
+          <action-item name="columns" label="4 hidden columns" icon="remixicon/layout-column-line.svg"></action-item>
           <action-item name="filter" label="Filter" icon="remixicon/filter-3-line.svg"></action-item>
-          <action-item name="sort" label="Sort" icon="remixicon/arrow-up-down.svg"></action-item>
+          <action-item name="sort" label="Order" icon="remixicon/arrow-up-down.svg"></action-item>
         </div>
+        <!--
         <div class="flex gap-4">
           ${this.buttonHtml("refresh", "material-icons/refresh.svg", "Refresh")}
           ${this.buttonHtml("add", "remixicon/add.svg", "Add row")}
           
-          <!--
+          
           <actionbar-import></actionbar-import>
           <actionbar-export></actionbar-export>
-          -->
+          
         </div>
+        -->
       </div>
     `;
 

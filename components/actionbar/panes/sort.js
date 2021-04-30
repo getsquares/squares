@@ -8,16 +8,8 @@ class PaneSort extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add(
-      "gap-4",
-      "bg-white",
-      "flex",
-      "hidden",
-      "mt-1",
-      "text-sm",
-      "rounded"
-    );
-    this.innerHTML = this.template("Filter");
+    this.classList.add("gap-4", "flex", "hidden", "text-sm");
+    this.innerHTML = this.template("Sort by");
     //this.activate();
   }
 
@@ -27,20 +19,23 @@ class PaneSort extends HTMLElement {
 
   template(title) {
     return `
-      <div class="flex flex-col gap-4 p-6 flex-1">
-        <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content)] gap-2 flex-col">
-          <div class="contents">
-            ${this.partHeading("Order by")}
-            ${this.partHeading("Order")}
+      <div class="flex flex-col gap-6 p-4 flex-1">
+        <div class="flex flex-col gap-2">
+          <div class="font-bold">Order by</div>
+          <div class="flex gap-8">
+            <radio-item name="order_by" label="Unsorted" checked=""></radio-item>
+            <radio-item name="order_by" label="id" checked=""></radio-item>
+            <radio-item name="order_by" label="title" checked=""></radio-item>
+            <radio-item name="order_by" label="slug" checked=""></radio-item>
+            <radio-item name="order_by" label="description" checked=""></radio-item>
           </div>
-          <div class="contents">
-            <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400">
-              <option>hello</option>
-              <option>hello2</option>
-            </select>
-            <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400">
-              ${this.partMatches()}
-            </select>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="font-bold">Order direction</div>
+          <div class="flex gap-8">
+            <radio-item name="order" label="Unsorted" checked=""></radio-item>
+            <radio-item name="order" label="Ascending" checked=""></radio-item>
+            <radio-item name="order" label="Descending" checked=""></radio-item>
           </div>
         </div>
       </div>

@@ -58,25 +58,26 @@ function resetDomCellEdits() {
 }
 
 function tabClassActive() {
-  return [
-    "bg-navy-600",
-    "text-white",
-    "hover:bg-navy-600",
-    "hover:text-white",
-    "ring-navy-600",
-  ];
+  return ["bg-navy-100", "text-navy-900", "border-navy-300"];
 }
 
 function tabClassInactive() {
-  return ["hover:border-gray-300", "bg-gray-50", "ring-gray-300"];
+  return [
+    "hover:bg-gray-100",
+    "bg-gray-50",
+    "bg-gradient-to-b",
+    "from-white",
+    "to-gray-100",
+    "border-gray-300",
+  ];
 }
 
 function hollowClassActive() {
-  return ["bg-blue-100", "text-blue-900"];
+  return ["bg-navy-100", "text-navy-900", "shadow-navy"];
 }
 
 function hollowClassInactive() {
-  return ["border-transparent", "hover:border-gray-200", "hover:bg-gray-50"];
+  return ["hover:bg-grayExtra"];
 }
 
 function resetDomCells() {
@@ -391,7 +392,7 @@ class tab {
   }
 
   static classesInactive() {
-    return ["bg-navy-700", "hover:bg-navy-800"];
+    return ["bg-navy-700", "text-navy-200", "hover:bg-navy-800"];
   }
 
   static classesActiveClose() {
@@ -444,6 +445,77 @@ class tabs {
   }
 }
 
+class BarFooterItems extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["database", "table"];
+  }
+
+  connectedCallback() {
+    this.classList.add("flex", "items-center", "gap-4");
+    this.setAttribute("hidden", "");
+
+    this.innerHTML = `
+      ${this.itemHtml(
+        this.getAttribute("database"),
+        "database",
+        "remixicon/database-2.svg"
+      )}
+
+      ${this.itemHtml(
+        this.getAttribute("table"),
+        "table",
+        "remixicon/table-line.svg"
+      )}
+
+      ${this.itemHtml(
+        this.getAttribute("records"),
+        "records",
+        "remixicon/layout-row-line.svg"
+      )}
+    `;
+  }
+
+  itemHtml(value, type, src) {
+    return `
+      <div class="py-1.5 px-2 select-none flex gap-2 items-center hover:bg-gray-200 rounded"
+      >
+        <img-svg src="${src}"></img-svg>
+        <div data-local-${type}>${value}</div>
+      </div>
+    `;
+  }
+
+  keyHtml() {
+    return `<img-svg src="remixicon/key-2-line.svg"></img-svg>`;
+  }
+
+  setRecords(offset, rows, total) {
+    this.querySelector(
+      `[data-local-records]`
+    ).innerHTML = `${offset}-${rows} of ${total}`;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    const database = this.querySelector("[data-local-database]");
+    const table = this.querySelector("[data-local-table]");
+
+    if (oldValue !== newValue) {
+      if (attr == "database" && database) {
+        database.innerHTML = newValue;
+        this.removeAttribute("hidden");
+      } else if (attr == "table" && table) {
+        table.innerHTML = newValue;
+      }
+    }
+  }
+}
+
+customElements.define("bar-footer-items", BarFooterItems);
+
 class ActionItem extends HTMLElement {
   constructor() {
     super();
@@ -458,6 +530,7 @@ class ActionItem extends HTMLElement {
     const icon = this.getAttribute("icon");
 
     this.classList.add(
+      ...tabClassInactive(),
       "flex",
       "cursor-default",
       "items-center",
@@ -466,8 +539,8 @@ class ActionItem extends HTMLElement {
       "text-sm",
       "select-none",
       "gap-2",
-      "ring-1",
-      ...tabClassInactive()
+      "rounded",
+      "border"
     );
 
     this.innerHTML = `
@@ -611,21 +684,24 @@ class ActionbarItems extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      <div class="flex justify-between gap-4 px-8 pt-4">
-        <div data-items class="flex rounded overflow-hidden">
-          <action-item name="columns" label="4 hidden columns" icon="remixicon/eye-off.svg"></action-item>
+      <div class="flex justify-between gap-4 pt-2 bg-gray-50">
+        <div data-items class="flex rounded overflow-hidden gap-1">
+          <action-item name="panes" label="Panes" icon="remixicon/layout-5-line.svg"></action-item>
+          <action-item name="columns" label="4 hidden columns" icon="remixicon/layout-column-line.svg"></action-item>
           <action-item name="filter" label="Filter" icon="remixicon/filter-3-line.svg"></action-item>
-          <action-item name="sort" label="Sort" icon="remixicon/arrow-up-down.svg"></action-item>
+          <action-item name="sort" label="Order" icon="remixicon/arrow-up-down.svg"></action-item>
         </div>
+        <!--
         <div class="flex gap-4">
           ${this.buttonHtml("refresh", "material-icons/refresh.svg", "Refresh")}
           ${this.buttonHtml("add", "remixicon/add.svg", "Add row")}
           
-          <!--
+          
           <actionbar-import></actionbar-import>
           <actionbar-export></actionbar-export>
-          -->
+          
         </div>
+        -->
       </div>
     `;
 
@@ -710,6 +786,30 @@ class ActionbarItems extends HTMLElement {
 
 customElements.define("actionbar-items", ActionbarItems);
 
+class ActionsWrap extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("flex", "flex-col", "gap-2");
+    this.innerHTML = `      
+      <actionbar-items></actionbar-items>
+      <pane-items class="block bg-white border rounded border-gray-200">
+        <pane-columns></pane-columns>
+        <pane-filter></pane-filter>
+        <pane-sort></pane-sort>
+      </pane-items>
+      `;
+  }
+}
+
+customElements.define("actions-wrap", ActionsWrap);
+
 class PaneClose extends HTMLElement {
   constructor() {
     super();
@@ -718,7 +818,7 @@ class PaneClose extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
       <div class="p-2">
-        <button class="focus:outline-none hover:bg-gray-200 p-2 rounded">
+        <button class="focus:outline-none hover:bg-gray-100 p-2 rounded">
           <img-svg src="remixicon/close.svg"></img-svg>
         </button>
       </div>`;
@@ -736,76 +836,56 @@ class PaneClose extends HTMLElement {
 
 customElements.define("pane-close", PaneClose);
 
-class BarFooterItems extends HTMLElement {
+class SidebarDatabaseLoading extends HTMLElement {
   constructor() {
     super();
   }
 
-  static get observedAttributes() {
-    return ["database", "table"];
-  }
-
   connectedCallback() {
-    this.classList.add("flex", "items-center", "gap-4");
-    this.setAttribute("hidden", "");
-
+    this.classList.add(
+      "flex",
+      "gap-2",
+      "py-1",
+      "px-4",
+      "cursor-default",
+      "select-none",
+      "fill-current",
+      "items-center"
+    );
     this.innerHTML = `
-      ${this.itemHtml(
-        this.getAttribute("database"),
-        "database",
-        "remixicon/database-2.svg"
-      )}
-
-      ${this.itemHtml(
-        this.getAttribute("table"),
-        "table",
-        "remixicon/table-line.svg"
-      )}
-
-      ${this.itemHtml(
-        this.getAttribute("records"),
-        "records",
-        "remixicon/layout-row-line.svg"
-      )}
+      <img-svg src="material-icons/refresh.svg" classes="animate-spin w-4 h-4 text-gray-400"></img-svg>
+      <div data-local-table class="flex-1 truncate text-13">Loading...</div>
     `;
-  }
-
-  itemHtml(value, type, src) {
-    return `
-      <div class="py-1.5 px-2 select-none flex gap-2 items-center hover:bg-gray-200 rounded"
-      >
-        <img-svg src="${src}"></img-svg>
-        <div data-local-${type}>${value}</div>
-      </div>
-    `;
-  }
-
-  keyHtml() {
-    return `<img-svg src="remixicon/key-2-line.svg"></img-svg>`;
-  }
-
-  setRecords(offset, rows, total) {
-    this.querySelector(
-      `[data-local-records]`
-    ).innerHTML = `${offset}-${rows} of ${total}`;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    const database = this.querySelector("[data-local-database]");
-    const table = this.querySelector("[data-local-table]");
-
-    if (oldValue !== newValue) {
-      if (attr == "database" && database) {
-        database.innerHTML = newValue;
-        this.removeAttribute("hidden");
-      } else if (attr == "table" && table) {
-        table.innerHTML = newValue;
-      }
-    }
   }
 }
 
-customElements.define("bar-footer-items", BarFooterItems);
+customElements.define("sidebar-database-loading", SidebarDatabaseLoading);
+
+class SidebarDatabaseRefresh extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.classList.add(
+      ...hollowClassInactive(),
+      "flex",
+      "gap-2",
+      "py-1",
+      "px-4",
+      "cursor-default",
+      "select-none",
+      "fill-current",
+      "items-center"
+    );
+    this.innerHTML = `
+      <img-svg src="material-icons/refresh.svg" classes="w-4 h-4 text-gray-400"></img-svg>
+      <div data-local-table class="flex-1 truncate text-13">Refresh</div>
+    `;
+  }
+}
+
+customElements.define("sidebar-database-refresh", SidebarDatabaseRefresh);
 
 class SidebarDatabase extends HTMLElement {
   constructor() {
@@ -823,10 +903,10 @@ class SidebarDatabase extends HTMLElement {
     this.innerHTML = `
       <div data-database class="${hollowClassInactive().join(
         " "
-      )} flex gap-2 p-2 mx-2 cursor-default select-none fill-current items-center rounded border">
-        <img-svg src="remixicon/database-2.svg"></img-svg>
-        <div data-local-database class="flex-1 truncate font-bold">${title}</div>
-        <img-svg data-arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-6 h-6"></img-svg>
+      )} flex gap-2 px-4 py-1 cursor-default select-none fill-current items-center">
+        <img-svg src="remixicon/database-2-fill.svg" classes="w-4 h-4 text-yellow-500"></img-svg>
+        <div data-local-database class="flex-1 truncate font-bold text-sm">${title}</div>
+        <img-svg data-arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-4 h-4"></img-svg>
       </div>
 
       <div data-tables hidden></div>
@@ -902,6 +982,9 @@ class SidebarDatabase extends HTMLElement {
   }
 
   populate() {
+    const tables = this.querySelector("[data-tables]");
+    tables.innerHTML = `<sidebar-database-loading></sidebar-database-loading>`;
+
     axios
       .get(
         "http://localhost/tools/squares/server/php/queries/tables.php?database=" +
@@ -910,9 +993,9 @@ class SidebarDatabase extends HTMLElement {
       .then((response) => {
         if (response.status !== 200) return;
 
-        const tables = this.querySelector("[data-tables]");
-
-        let html = "";
+        let html = `
+        <sidebar-database-refresh></sidebar-database-refresh>
+        `;
 
         response.data.forEach((title) => {
           html += this.template(title);
@@ -989,7 +1072,7 @@ class SidebarDatabases extends HTMLElement {
           html += this.template(title);
         });
 
-        this.innerHTML = html;
+        this.innerHTML += html;
       });
   }
 }
@@ -1005,7 +1088,7 @@ class SidebarFilter extends HTMLElement {
     this.innerHTML = `
       <label class="flex flex-col gap-2 mx-4">
         <div class="uppercase font-bold text-sm">Filter tables</div>
-        <input spellcheck="false" placeholder="Show matching tables..." type="text" class="bg-white border-gray-200 focus:shadow-inner rounded focus:bg-gray-100 focus:ring-0 focus:border-gray-300">
+        <input spellcheck="false" placeholder="Show matching tables..." type="text" class="bg-white border-gray-200 text-sm rounded focus:ring-0 focus:border-gray-400">
       </label>
     `;
     this.onChange();
@@ -1046,25 +1129,21 @@ class SidebarTable extends HTMLElement {
     this.removeAttribute("title");
 
     this.classList.add(
-      ...[
-        "flex",
-        "gap-2",
-        "py-1.5",
-        "mx-2",
-        "px-2",
-        "border",
-        "border-transparent",
-        "hover:border-gray-200",
-        "hover:bg-gray-50",
-        "cursor-default",
-        "select-none",
-        "rounded",
-        "fill-current",
-      ]
+      ...hollowClassInactive(),
+      "flex",
+      "gap-2",
+      "py-1",
+      "px-4",
+      "cursor-default",
+      "select-none",
+      "fill-current",
+      "items-center"
     );
 
     this.innerHTML = `
-      <div data-local-table class="ml-8 flex-1 truncate" title="${title}">${title}</div>
+      <img-svg src="boxicons/bx-table.svg" classes="w-4 h-4 text-navy-400"></img-svg>
+      <div data-local-table class="flex-1 truncate text-13" title="${title}">${title}</div>
+      
       `;
   }
 
@@ -1073,9 +1152,21 @@ class SidebarTable extends HTMLElement {
       if (attr == "active" && newValue == "true") {
         this.classList.add(...hollowClassActive());
         this.classList.remove(...hollowClassInactive());
+
+        console.log(this.querySelector("img-svg"));
+
+        this.querySelector("svg").classList.replace(
+          "text-navy-300",
+          "text-navy-500"
+        );
       } else {
         this.classList.remove(...hollowClassActive());
         this.classList.add(...hollowClassInactive());
+
+        this.querySelector("svg").classList.replace(
+          "text-navy-500",
+          "text-navy-300"
+        );
       }
     }
   }
@@ -1180,13 +1271,13 @@ class SidebarWrap extends HTMLElement {
         "pb-4",
         "overflow-auto",
         "resize-x",
-        "bg-white",
+        "bg-gray-50",
         "w-80",
-        "gap-6",
+        "gap-4",
       ]
     );
     this.innerHTML = `
-      <h2 class="p-4 pb-0 text-xl">Databases and tables</h2>
+      <h2 class="p-4 pb-0 text-sm text-gray-400 uppercase">Databases and tables</h2>
       <sidebar-filter></sidebar-filter>
       <sidebar-databases></sidebar-databases>
     `;
@@ -1194,156 +1285,6 @@ class SidebarWrap extends HTMLElement {
 }
 
 customElements.define("sidebar-wrap", SidebarWrap);
-
-class CellEdit extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.setAttribute("active", "false");
-    this.classList.add(
-      "z-20",
-      "hidden",
-      "block",
-      "absolute",
-      "bg-gray-100",
-      "shadow-md",
-      "top-full",
-      "p-4",
-      "left-0",
-      "mt-0.5"
-    );
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }
-  }
-}
-
-customElements.define("cell-edit", CellEdit);
-
-class CellPreview extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("block", "relative", "tp");
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }
-  }
-}
-
-customElements.define("cell-preview", CellPreview);
-
-class CellRing extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["state"];
-  }
-
-  connectedCallback() {
-    this.classList.add("absolute", "block", "inset-0", "z-10");
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "state") return;
-    if (oldValue !== newValue) {
-      this.classList.remove(
-        "ring-1",
-        "ring-2",
-        "ring-gray-500",
-        "ring-blue-500",
-        "ring-orange-500",
-        "z-10",
-        "z-30",
-        "shadow-y",
-        "ml-2px"
-      );
-      const prev_el = this.closest("table-cell").previousElementSibling;
-      const next_el = this.closest("table-cell").nextElementSibling;
-
-      switch (newValue) {
-        case "default":
-          this.classList.add("shadow-y");
-          this.classList.add("z-10");
-          break;
-        case "active":
-          this.classList.add("ring-2", "ring-gray-500", "z-30");
-          break;
-        case "changed":
-          this.classList.add("ring-2", "ring-orange-500", "z-30");
-          break;
-        case "edit":
-          this.classList.add("ring-2", "ring-blue-500", "z-30");
-          break;
-      }
-
-      if (newValue != "default") {
-        if (prev_el.tagName == "ROW-SELECT") this.classList.add("ml-2px");
-        if (!next_el) this.classList.add("mr-2px");
-      }
-    }
-  }
-}
-
-customElements.define("cell-ring", CellRing);
-
-class TableCell extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["value"];
-  }
-
-  connectedCallback() {
-    this.classList.add("relative", "bg-white");
-    this.innerHTML = `
-      <cell-ring state="default"></cell-ring>
-      <cell-edit></cell-edit>
-      <cell-preview active="true" class="select-none">
-        ${this.value}
-      </cell-preview>
-    `;
-  }
-}
-
-/*
-Enter - Triggar annan component i annan typ
-Bostav eller siffra - om allowKeypress från fält options
-*/
-
-customElements.define("table-cell", TableCell);
 
 class IconDatabase2 extends HTMLElement {
   constructor() {
@@ -1535,6 +1476,128 @@ class ModalLogout extends HTMLElement {
 
 customElements.define("modal-logout", ModalLogout);
 
+class CellEdit extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.setAttribute("active", "false");
+    this.classList.add(
+      "z-20",
+      "hidden",
+      "block",
+      "absolute",
+      "bg-gray-100",
+      "shadow-md",
+      "top-full",
+      "p-4",
+      "left-0",
+      "mt-0.5"
+    );
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (attr != "active") return;
+    if (oldValue !== newValue) {
+      if (newValue == "true") {
+        this.classList.remove("hidden");
+      } else {
+        this.classList.add("hidden");
+      }
+    }
+  }
+}
+
+customElements.define("cell-edit", CellEdit);
+
+class CellPreview extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("block", "relative", "tp");
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (attr != "active") return;
+    if (oldValue !== newValue) {
+      if (newValue == "true") {
+        this.classList.remove("hidden");
+      } else {
+        this.classList.add("hidden");
+      }
+    }
+  }
+}
+
+customElements.define("cell-preview", CellPreview);
+
+class CellRing extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["state"];
+  }
+
+  connectedCallback() {
+    this.classList.add("absolute", "block", "inset-0", "z-10");
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (attr != "state") return;
+    if (oldValue !== newValue) {
+      this.classList.remove(
+        "ring-1",
+        "ring-2",
+        "ring-gray-500",
+        "ring-blue-500",
+        "ring-orange-500",
+        "z-10",
+        "z-30",
+        "shadow-y",
+        "ml-2px"
+      );
+      const prev_el = this.closest("table-cell").previousElementSibling;
+      const next_el = this.closest("table-cell").nextElementSibling;
+
+      switch (newValue) {
+        case "default":
+          this.classList.add("shadow-y");
+          this.classList.add("z-10");
+          break;
+        case "active":
+          this.classList.add("ring-2", "ring-gray-500", "z-30");
+          break;
+        case "changed":
+          this.classList.add("ring-2", "ring-orange-500", "z-30");
+          break;
+        case "edit":
+          this.classList.add("ring-2", "ring-blue-500", "z-30");
+          break;
+      }
+
+      if (newValue != "default") {
+        if (prev_el.tagName == "ROW-SELECT") this.classList.add("ml-2px");
+        if (!next_el) this.classList.add("mr-2px");
+      }
+    }
+  }
+}
+
+customElements.define("cell-ring", CellRing);
+
 class RowSelect extends HTMLElement {
   constructor() {
     super();
@@ -1555,7 +1618,7 @@ class RowSelect extends HTMLElement {
     );
     this.innerHTML = `
       <label class="tp relative">
-        <input type="checkbox" class="w-4 h-4 text-navy-600 rounded-sm focus:ring-0 focus:ring-offset-0  bg-gray-200 border-none" name="test" />
+        <input type="checkbox" class="checkstyle" name="test" />
         <div class="absolute block inset-0 shadow-y"></div>
       </label>
     `;
@@ -1597,6 +1660,34 @@ Bostav eller siffra - om allowKeypress från fält options
 
 customElements.define("row-select", RowSelect);
 
+class TableCell extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["value"];
+  }
+
+  connectedCallback() {
+    this.classList.add("relative", "bg-white");
+    this.innerHTML = `
+      <cell-ring state="default"></cell-ring>
+      <cell-edit></cell-edit>
+      <cell-preview active="true" class="select-none">
+        ${this.value}
+      </cell-preview>
+    `;
+  }
+}
+
+/*
+Enter - Triggar annan component i annan typ
+Bostav eller siffra - om allowKeypress från fält options
+*/
+
+customElements.define("table-cell", TableCell);
+
 class TableHeadingCheck extends HTMLElement {
   constructor() {
     super();
@@ -1615,7 +1706,7 @@ class TableHeadingCheck extends HTMLElement {
     );
     this.innerHTML = `
       <label class="tp relative heading-bkg flex items-center">
-        <input type="checkbox" class="w-4 h-4 rounded-sm border-gray-300 focus:outline-none focus:ring-0 text-navy-600 focus:ring-offset-0" name="test" />
+        <input type="checkbox" class="checkstyle" name="test" />
         <div class="absolute block inset-0 ring-1 ring-gray-100"></div>
       </label>
     `;
@@ -1737,13 +1828,14 @@ class TabItem extends HTMLElement {
         "rounded-t",
         "px-4",
         "pr-2",
-        "py-2",
+        "py-1.5",
         "cursor-default",
         "select-none",
         "focus:outline-none",
         "flex",
         "gap-3",
         "items-center",
+        "text-sm",
       ],
       ...tab.classesInactive()
     );
@@ -1755,7 +1847,7 @@ class TabItem extends HTMLElement {
 
     this.innerHTML = `
       ${this.getAttribute("table")}
-      <img-svg src="remixicon/close.svg" class="rounded">
+      <img-svg src="remixicon/close.svg" classes="rounded w-5 h-5">
     `;
 
     tab.onClose(this);
@@ -1924,212 +2016,6 @@ class TopbarWrap extends HTMLElement {
 
 customElements.define("topbar-wrap", TopbarWrap);
 
-class ActionbarColumns2 extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex gap-8">
-        <checkbox-item name="test" label="id" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="title" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="slug" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="description" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="categories" checked="true"></checkbox-item>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-columns2", ActionbarColumns2);
-
-class ActionbarSort2 extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex gap-4">
-        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
-        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-sort2", ActionbarSort2);
-
-class ActionbarColumns extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <actionbar-icon
-        src="remixicon/eye-off.svg"
-        title="4 hidden fields"
-      ></actionbar-icon>
-    `;
-    this.onClick();
-  }
-
-  onClick() {
-    this.addEventListener("click", () => {
-      const icon = this.querySelector("actionbar-icon");
-
-      if (icon.isActive()) {
-        icon.deactivate();
-      } else {
-        icon.activate("Toggle columns", this.html());
-      }
-    });
-  }
-
-  html() {
-    return `
-      <div class="flex gap-4">
-        <label class="flex select-none items-center gap-2">
-          <input
-            type="checkbox"
-            class="w-5 h-5 border border-gray-400 text-blue-600 focus:ring-0 focus:ring-offset-0"
-          />
-          Testing
-        </label>
-        <label class="flex select-none items-center gap-2">
-          <input
-            type="checkbox"
-            class="w-5 h-5 border border-gray-400 text-blue-600 focus:ring-0 focus:ring-offset-0"
-          />
-          Testing
-        </label>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-columns", ActionbarColumns);
-
-class ActionbarExport extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div data-action>
-        <svg
-        class="w-5 h-5"
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        width="24"
-        height="24"
-      >
-        <path fill="none" d="M0 0h24v24H0z" />
-        <path
-          d="M3 19h18v2H3v-2zm10-5.828L19.071 7.1l1.414 1.414L12 17 3.515 8.515 4.929 7.1 11 13.17V2h2v11.172z"
-        />
-      </svg>
-        <div>Export</div>
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }
-  }
-}
-
-customElements.define("actionbar-export", ActionbarExport);
-
-class ActionbarFilter extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div data-action>
-        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z"/></svg>
-        <div>Filter</div>
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }
-  }
-}
-
-customElements.define("actionbar-filter", ActionbarFilter);
-
-class ActionbarImport extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div data-action>
-        <svg
-          class="w-5 h-5"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          width="24"
-          height="24"
-        >
-          <path fill="none" d="M0 0h24v24H0z" />
-          <path
-            d="M3 19h18v2H3v-2zM13 5.828V17h-2V5.828L4.929 11.9l-1.414-1.414L12 2l8.485 8.485-1.414 1.414L13 5.83z"
-          />
-        </svg>
-        <div>Import</div>
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }
-  }
-}
-
-customElements.define("actionbar-import", ActionbarImport);
-
 class ActionbarRefresh extends HTMLElement {
   constructor() {
     super();
@@ -2215,6 +2101,43 @@ class ActionbarSort extends HTMLElement {
 
 customElements.define("actionbar-sort", ActionbarSort);
 
+class ActionbarColumns2 extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div class="flex gap-8">
+        <checkbox-item name="test" label="id" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="title" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="slug" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="description" checked="true"></checkbox-item>
+        <checkbox-item name="test" label="categories" checked="true"></checkbox-item>
+      </div>
+    `;
+  }
+}
+
+customElements.define("actionbar-columns2", ActionbarColumns2);
+
+class ActionbarSort2 extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div class="flex gap-4">
+        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
+        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
+      </div>
+    `;
+  }
+}
+
+customElements.define("actionbar-sort2", ActionbarSort2);
+
 class PaneColumns extends HTMLElement {
   constructor() {
     super();
@@ -2225,15 +2148,7 @@ class PaneColumns extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add(
-      "gap-4",
-      "bg-white",
-      "flex",
-      "hidden",
-      "mt-1",
-      "text-sm",
-      "rounded"
-    );
+    this.classList.add("gap-4", "flex", "hidden", "text-sm");
     this.innerHTML = this.template("Columns");
   }
 
@@ -2243,9 +2158,9 @@ class PaneColumns extends HTMLElement {
 
   template(title) {
     return `
-      <div class="flex flex-col gap-4 p-4 flex-1">
+      <div class="flex flex-col gap-2 p-4 flex-1">
         <div class="font-bold">${title}</div>
-        <div class="flex gap-8">
+        <div class="flex gap-2">
           ${this.checkboxes()}
         </div>
       </div>
@@ -2254,7 +2169,6 @@ class PaneColumns extends HTMLElement {
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
-    console.log("hit");
     if (oldValue !== newValue) {
       if (attr == "active") {
         if (newValue == "true") {
@@ -2276,17 +2190,15 @@ class PaneColumns extends HTMLElement {
 
   partCheckbox(name, checked) {
     return `
-    <checkbox-item name="${name}" label="${name}" checked="${checked}"></checkbox-item>
+    <checkbox-item class="bg-gray-50 px-3 py-1.5 rounded border border-gray-200" name="${name}" label="${name}" checked="${checked}"></checkbox-item>
     `;
   }
 
   activate() {
-    console.log("activate");
     this.setAttribute("active", "true");
   }
 
   deactivate() {
-    console.log("123");
     this.removeAttribute("active");
   }
 }
@@ -2303,15 +2215,7 @@ class PaneFilter extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add(
-      "gap-4",
-      "bg-white",
-      "flex",
-      "hidden",
-      "mt-1",
-      "text-sm",
-      "rounded"
-    );
+    this.classList.add("gap-4", "flex", "hidden", "text-sm");
     this.innerHTML = this.template("Filter");
   }
 
@@ -2321,7 +2225,7 @@ class PaneFilter extends HTMLElement {
 
   template(title) {
     return `
-      <div class="flex flex-col gap-4 p-4 flex-1">
+      <div class="flex flex-col gap-2 p-4 flex-1">
         <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content),1fr] gap-2 flex-col">
           <div class="contents">
             ${this.partHeading("Column")}
@@ -2364,14 +2268,14 @@ class PaneFilter extends HTMLElement {
     //&filter[]=slug%20equals%202
     return `
     <div class="contents">
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+      <select class="actionbar-select">
         <option>hello</option>
         <option>hello2</option>
       </select>
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+      <select class="actionbar-select">
         ${this.partMatches()}
       </select>
-      <input type="text" class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+      <input type="text" class="actionbar-select">
     </div>
     `;
   }
@@ -2442,16 +2346,8 @@ class PaneSort extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add(
-      "gap-4",
-      "bg-white",
-      "flex",
-      "hidden",
-      "mt-1",
-      "text-sm",
-      "rounded"
-    );
-    this.innerHTML = this.template("Filter");
+    this.classList.add("gap-4", "flex", "hidden", "text-sm");
+    this.innerHTML = this.template("Sort by");
     //this.activate();
   }
 
@@ -2461,20 +2357,23 @@ class PaneSort extends HTMLElement {
 
   template(title) {
     return `
-      <div class="flex flex-col gap-4 p-6 flex-1">
-        <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content)] gap-2 flex-col">
-          <div class="contents">
-            ${this.partHeading("Order by")}
-            ${this.partHeading("Order")}
+      <div class="flex flex-col gap-6 p-4 flex-1">
+        <div class="flex flex-col gap-2">
+          <div class="font-bold">Order by</div>
+          <div class="flex gap-8">
+            <radio-item name="order_by" label="Unsorted" checked=""></radio-item>
+            <radio-item name="order_by" label="id" checked=""></radio-item>
+            <radio-item name="order_by" label="title" checked=""></radio-item>
+            <radio-item name="order_by" label="slug" checked=""></radio-item>
+            <radio-item name="order_by" label="description" checked=""></radio-item>
           </div>
-          <div class="contents">
-            <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400">
-              <option>hello</option>
-              <option>hello2</option>
-            </select>
-            <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400">
-              ${this.partMatches()}
-            </select>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="font-bold">Order direction</div>
+          <div class="flex gap-8">
+            <radio-item name="order" label="Unsorted" checked=""></radio-item>
+            <radio-item name="order" label="Ascending" checked=""></radio-item>
+            <radio-item name="order" label="Descending" checked=""></radio-item>
           </div>
         </div>
       </div>
@@ -2610,7 +2509,8 @@ class ButtonItem extends HTMLElement {
       "items-center",
       "gap-2",
       "px-4",
-      "py-2",
+      "py-1.5",
+      "font-bold",
       "rounded",
       "fill-current",
     ];
@@ -2629,10 +2529,13 @@ class ButtonItem extends HTMLElement {
   classesStyleAction() {
     return [
       "text-white",
-      "border-2",
-      "bg-blue-600",
-      "border-transparent",
-      "hover:bg-blue-900",
+      "bg-gradient-to-br",
+      "from-navy-500",
+      "via-navy-600",
+      "to-navy-600",
+      "hover:from-navy-600",
+      "border",
+      "border-navy-600",
     ];
   }
 
@@ -2782,28 +2685,21 @@ class PaneMain extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("flex", "flex-col", "overflow-auto");
+    this.classList.add("flex", "flex-col", "overflow-auto", "gap-2");
     this.innerHTML = `
-      ${this.actionbar()}
-
-      <div class="flex-1 flex my-4 overflow-auto">
-        <div class="flex-1 overflow-x-auto border border-gray-200">
-    <!-- Table wrap -->
-    <div class="flex-1 text-[13px] w-[1300px]">
-      
-        <!-- Table -->
-        <div data-table class="grid gap-y-px bg-white grid-cols-[auto,1200px,300px,300px]">
-          ${this.headings()}
-          <div data-cells class="contents"></div>
+      <actions-wrap></actions-wrap>
+      <div class="flex-1 flex overflow-auto">
+        <div class="flex-1 overflow-x-auto border border-gray-200 rounded">
+          <div class="flex-1 text-13 w-[1300px]">
+            <div data-table class="grid gap-y-px bg-white grid-cols-[auto,1200px,300px,300px]">
+              ${this.headings()}
+              <div data-cells class="contents"></div>
+            </div>
+          </div>
         </div>
-      
-    </div>
-  </div>
-  </div>
-
-  <prev-next></prev-next>
-
-`;
+      </div>
+      <prev-next></prev-next>
+    `;
     let parts = "";
     for (let i = 0; i < 100; i++) {
       parts += this.part();
@@ -2819,18 +2715,6 @@ class PaneMain extends HTMLElement {
       <table-heading title="id" key="true"></table-heading>
       <table-heading title="title"></table-heading>
       <table-heading title="description"></table-heading>
-    </div>`;
-  }
-
-  actionbar() {
-    return `<!-- Actionbar -->
-    <div>
-      <actionbar-items></actionbar-items>
-      <pane-items class="mx-8 block">
-        <pane-columns></pane-columns>
-        <pane-filter></pane-filter>
-        <pane-sort></pane-sort>
-      </pane-items>
     </div>`;
   }
 
@@ -2854,17 +2738,17 @@ class PrevNext extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-    <div class="flex justify-between gap-8 px-8 pb-4">
-      <div class="flex gap-2 items-center text-sm font-bold">
-        1-100 of 12,300
+    <div class="flex justify-between gap-8 px-4 pb-2 bg-gray-50">
+      <div class="flex gap-2 items-center text-sm">
+        <!--1-100 of 12,300-->
       </div>
       <div class="flex gap-4">
-        <div class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded">
-          <img-svg src="remixicon/arrow-left-line.svg" classes="w-5 h-5">
+        <div class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-grayExtra rounded">
+          <img-svg src="remixicon/arrow-left-s-line.svg" classes="w-5 h-5">
         </div>
-        <div class="text-sm items-center flex font-bold">1 of 41</div>
-        <div class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-gray-200 rounded">
-          <img-svg src="remixicon/arrow-right-line.svg" classes="w-5 h-5">
+        <div class="text-13 items-center flex">1-100 of 12,300</div>
+        <div class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-grayExtra rounded">
+          <img-svg src="remixicon/arrow-right-s-line.svg" classes="w-5 h-5">
         </div>
       </div>
     </div>
@@ -2885,7 +2769,7 @@ class RadioItem extends HTMLElement {
 
     this.innerHTML = `
       <label class="flex select-none items-center gap-2">
-        <input type="radio" class="w-5 h-5 text-white" name="${name}" ${checked} />
+        <input type="radio" class="w-4 h-4 focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
         ${label}
       </label>
     `;

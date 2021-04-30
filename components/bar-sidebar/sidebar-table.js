@@ -12,25 +12,21 @@ class SidebarTable extends HTMLElement {
     this.removeAttribute("title");
 
     this.classList.add(
-      ...[
-        "flex",
-        "gap-2",
-        "py-1.5",
-        "mx-2",
-        "px-2",
-        "border",
-        "border-transparent",
-        "hover:border-gray-200",
-        "hover:bg-gray-50",
-        "cursor-default",
-        "select-none",
-        "rounded",
-        "fill-current",
-      ]
+      ...hollowClassInactive(),
+      "flex",
+      "gap-2",
+      "py-1",
+      "px-4",
+      "cursor-default",
+      "select-none",
+      "fill-current",
+      "items-center"
     );
 
     this.innerHTML = `
-      <div data-local-table class="ml-8 flex-1 truncate" title="${title}">${title}</div>
+      <img-svg src="boxicons/bx-table.svg" classes="w-4 h-4 text-navy-400"></img-svg>
+      <div data-local-table class="flex-1 truncate text-13" title="${title}">${title}</div>
+      
       `;
   }
 
@@ -39,9 +35,21 @@ class SidebarTable extends HTMLElement {
       if (attr == "active" && newValue == "true") {
         this.classList.add(...hollowClassActive());
         this.classList.remove(...hollowClassInactive());
+
+        console.log(this.querySelector("img-svg"));
+
+        this.querySelector("svg").classList.replace(
+          "text-navy-300",
+          "text-navy-500"
+        );
       } else {
         this.classList.remove(...hollowClassActive());
         this.classList.add(...hollowClassInactive());
+
+        this.querySelector("svg").classList.replace(
+          "text-navy-500",
+          "text-navy-300"
+        );
       }
     }
   }

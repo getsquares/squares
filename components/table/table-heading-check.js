@@ -16,7 +16,7 @@ class TableHeadingCheck extends HTMLElement {
     );
     this.innerHTML = `
       <label class="tp relative heading-bkg flex items-center">
-        <input type="checkbox" class="w-4 h-4 rounded-sm border-gray-300 focus:outline-none focus:ring-0 text-navy-600 focus:ring-offset-0" name="test" />
+        <input type="checkbox" class="checkstyle" name="test" />
         <div class="absolute block inset-0 ring-1 ring-gray-100"></div>
       </label>
     `;

@@ -45,6 +45,10 @@ module.exports = {
       },
       boxShadow: {
         y: "0 -1px 0px 0px #e5e5e5, 0 1px 0px 0px #e5e5e5",
+        navy: "0 -1px 0px 0px #afcdef, 0 1px 0px 0px #afcdef",
+      },
+      fontSize: {
+        13: "0.813rem",
       },
     },
     fontFamily: {

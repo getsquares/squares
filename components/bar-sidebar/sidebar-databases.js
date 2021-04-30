@@ -25,7 +25,7 @@ class SidebarDatabases extends HTMLElement {
           html += this.template(title);
         });
 
-        this.innerHTML = html;
+        this.innerHTML += html;
       });
   }
 }
