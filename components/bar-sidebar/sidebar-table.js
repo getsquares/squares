@@ -36,8 +36,6 @@ class SidebarTable extends HTMLElement {
         this.classList.add(...hollowClassActive());
         this.classList.remove(...hollowClassInactive());
 
-        console.log(this.querySelector("img-svg"));
-
         this.querySelector("svg").classList.replace(
           "text-navy-300",
           "text-navy-500"
@@ -71,10 +69,7 @@ class SidebarTable extends HTMLElement {
       //$("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
       syncSidebarLogo();
       // Fetch
-      console.log("tab");
-      this.test(current.database, current.table).then((test) => {
-        console.log(tables);
-      });
+      this.test(current.database, current.table).then((test) => {});
     }
   }
 
@@ -83,7 +78,6 @@ class SidebarTable extends HTMLElement {
       const resp = await axios.get(
         `http://localhost/tools/squares/server/php/queries/data.php?database=${database}&table=${table}`
       );
-      //console.log(resp.data);
 
       tables[`${database}|${table}`] = resp.data;
 

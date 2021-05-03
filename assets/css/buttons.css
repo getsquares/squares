@@ -1,0 +1,26 @@
+.btn {
+  @apply border border-b-2 cursor-default flex gap-2 items-center px-3 py-1.5 rounded select-none text-sm;
+}
+
+/* Default */
+
+.btn-default {
+  @apply border-gray-200 bg-gray-50;
+}
+
+.btn-default:hover {
+  @apply hover:border-gray-300;
+}
+
+.btn-default-active {
+  @apply bg-navy-100 text-navy-900 border-navy-300;
+}
+
+/* Primary */
+.btn-primary {
+  @apply text-white border-navy-600 bg-navy-500 hover:border-navy-800;
+}
+
+.btn-primary:hover {
+  @apply hover:border-navy-800;
+}

@@ -1,4 +1,4 @@
-class PaneColumns extends HTMLElement {
+class ColumnsX extends HTMLElement {
   constructor() {
     super();
   }
@@ -8,12 +8,16 @@ class PaneColumns extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("gap-4", "flex", "hidden", "text-sm");
+    this.classList.add("gap-4", "flex", "text-sm");
+    this.setAttribute("hidden", "");
     this.innerHTML = this.template("Columns");
   }
 
   checkboxes() {
-    return this.partCheckbox("test23", true) + this.partCheckbox("test");
+    return `
+      <columns-item name="alright" checked="true"></columns-item>
+      <columns-item name="asd"></columns-item>
+    `;
   }
 
   template(title) {
@@ -32,26 +36,20 @@ class PaneColumns extends HTMLElement {
     if (oldValue !== newValue) {
       if (attr == "active") {
         if (newValue == "true") {
-          this.classesActivate();
+          this.thisActivate();
         } else {
-          this.classesDeactivate();
+          this.thisDeactivate();
         }
       }
     }
   }
 
-  classesActivate(el = this) {
-    el.classList.remove("hidden");
+  thisActivate() {
+    this.classList.remove("hidden");
   }
 
-  classesDeactivate(el = this) {
-    el.classList.add("hidden");
-  }
-
-  partCheckbox(name, checked) {
-    return `
-    <checkbox-item class="bg-gray-50 px-3 py-1.5 rounded border border-gray-200" name="${name}" label="${name}" checked="${checked}"></checkbox-item>
-    `;
+  thisDeactivate() {
+    this.classList.add("hidden");
   }
 
   activate() {
@@ -63,4 +61,4 @@ class PaneColumns extends HTMLElement {
   }
 }
 
-customElements.define("pane-columns", PaneColumns);
+customElements.define("columns-x", ColumnsX);

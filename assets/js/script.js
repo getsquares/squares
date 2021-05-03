@@ -445,78 +445,71 @@ class tabs {
   }
 }
 
-class BarFooterItems extends HTMLElement {
+class ActionsPanes extends HTMLElement {
   constructor() {
     super();
   }
 
   static get observedAttributes() {
-    return ["database", "table"];
+    return ["active"];
   }
 
   connectedCallback() {
-    this.classList.add("flex", "items-center", "gap-4");
+    this.classList.add(
+      "block",
+      "bg-white",
+      "border",
+      "rounded",
+      "border-gray-200"
+    );
     this.setAttribute("hidden", "");
-
     this.innerHTML = `
-      ${this.itemHtml(
-        this.getAttribute("database"),
-        "database",
-        "remixicon/database-2.svg"
-      )}
-
-      ${this.itemHtml(
-        this.getAttribute("table"),
-        "table",
-        "remixicon/table-line.svg"
-      )}
-
-      ${this.itemHtml(
-        this.getAttribute("records"),
-        "records",
-        "remixicon/layout-row-line.svg"
-      )}
+      <columns-x></columns-x>
+      <filter-x></filter-x>
+      <order-x></order-x>
     `;
-  }
-
-  itemHtml(value, type, src) {
-    return `
-      <div class="py-1.5 px-2 select-none flex gap-2 items-center hover:bg-gray-200 rounded"
-      >
-        <img-svg src="${src}"></img-svg>
-        <div data-local-${type}>${value}</div>
-      </div>
-    `;
-  }
-
-  keyHtml() {
-    return `<img-svg src="remixicon/key-2-line.svg"></img-svg>`;
-  }
-
-  setRecords(offset, rows, total) {
-    this.querySelector(
-      `[data-local-records]`
-    ).innerHTML = `${offset}-${rows} of ${total}`;
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
-    const database = this.querySelector("[data-local-database]");
-    const table = this.querySelector("[data-local-table]");
-
     if (oldValue !== newValue) {
-      if (attr == "database" && database) {
-        database.innerHTML = newValue;
-        this.removeAttribute("hidden");
-      } else if (attr == "table" && table) {
-        table.innerHTML = newValue;
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
       }
     }
   }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.setAttribute("hidden", "");
+  }
+
+  activate(name) {
+    this.setAttribute("active", "true");
+    console.log(name);
+    this.querySelector(name).removeAttribute("hidden");
+  }
+
+  deactivate() {
+    // Hide all panes
+    [...this.children].forEach((el) => {
+      el.setAttribute("hidden", "");
+    });
+
+    // Hide pane container
+    this.removeAttribute("active");
+  }
 }
 
-customElements.define("bar-footer-items", BarFooterItems);
+customElements.define("actions-panes", ActionsPanes);
 
-class ActionItem extends HTMLElement {
+class ActionsTab extends HTMLElement {
   constructor() {
     super();
   }
@@ -529,19 +522,7 @@ class ActionItem extends HTMLElement {
     const label = this.getAttribute("label");
     const icon = this.getAttribute("icon");
 
-    this.classList.add(
-      ...tabClassInactive(),
-      "flex",
-      "cursor-default",
-      "items-center",
-      "px-3",
-      "py-1.5",
-      "text-sm",
-      "select-none",
-      "gap-2",
-      "rounded",
-      "border"
-    );
+    this.classList.add("btn", "btn-default");
 
     this.innerHTML = `
       <img-svg src="${icon}" classes="w-5 h-5"></img-svg>
@@ -554,9 +535,19 @@ class ActionItem extends HTMLElement {
   onClick() {
     this.addEventListener("click", () => {
       const active = this.getAttribute("active") == "true";
+      const name = this.getAttribute("name");
+
+      $("actions-tabs").deactivate();
+      $("actions-panes").deactivate();
+
+      if (!active) {
+        this.activate();
+        $("actions-panes").activate(name);
+      }
+      /*
       const pane = $(`pane-${this.getAttribute("name")}`);
 
-      $$("action-item").forEach((el) => {
+      $$("actions-tab").forEach((el) => {
         this.deactivate(el);
       });
 
@@ -565,12 +556,10 @@ class ActionItem extends HTMLElement {
       });
 
       if (active) {
-        this.deactivate();
         pane.deactivate();
       } else {
-        this.activate();
         pane.activate();
-      }
+      }*/
     });
   }
 
@@ -578,237 +567,80 @@ class ActionItem extends HTMLElement {
     if (oldValue !== newValue) {
       if (attr == "active") {
         if (newValue == "true") {
-          this.classesActivate();
+          this.thisActivate();
         } else {
-          this.classesDeactivate();
+          this.thisDeactivate();
         }
       }
     }
   }
 
-  classesActivate() {
-    this.classList.add(...tabClassActive());
-    this.classList.remove(...tabClassInactive());
+  thisActivate() {
+    this.classList.replace("btn-default", "btn-default-active");
   }
 
-  classesDeactivate(el = this) {
-    el.classList.remove(...tabClassActive());
-    el.classList.add(...tabClassInactive());
+  thisDeactivate() {
+    this.classList.replace("btn-default-active", "btn-default");
   }
 
   activate() {
     this.setAttribute("active", "true");
   }
 
-  deactivate(el = this) {
-    el.removeAttribute("active");
+  deactivate() {
+    this.removeAttribute("active");
   }
 }
 
-customElements.define("action-item", ActionItem);
+customElements.define("actions-tab", ActionsTab);
 
-class ActionbarDropdown extends HTMLElement {
+class ActionsTabs extends HTMLElement {
   constructor() {
     super();
   }
 
   connectedCallback() {
-    this.setAttribute("hidden", "");
+    this.classList.add(
+      "flex",
+      "justify-between",
+      "gap-4",
+      "pt-2",
+      "bg-gray-50"
+    );
     this.innerHTML = `
-      <div class="gap-4 bg-gray-100 border-t flex">
-        <div class="flex flex-col gap-4 p-6 flex-1">
-          <div data-actionbar-title class="font-bold"></div>
-          <div data-actionbar-dropdown-content></div>
-        </div>
-        <div class="p-2">
-          <button class="focus:outline-none hover:bg-gray-200 p-2 rounded">
-            <img-svg src="remixicon/close.svg"></img-svg>
-          </button>
-        </div>
+      <div data-items class="flex rounded overflow-hidden gap-1">
+        <actions-tab name="panes-x" label="Panes" icon="remixicon/layout-5-line.svg"></actions-tab>
+        <actions-tab name="columns-x" label="Columns" icon="remixicon/layout-column-line.svg"></actions-tab>
+        <actions-tab name="filter-x" label="Filter" icon="remixicon/filter-3-line.svg"></actions-tab>
+        <actions-tab name="order-x" label="Order" icon="remixicon/arrow-up-down.svg"></actions-tab>
       </div>
     `;
-
-    this.onClose();
-  }
-
-  onClose() {
-    this.querySelector("button").addEventListener("click", () => {
-      this.deactivate();
-    });
-  }
-
-  setHtml(title, content) {
-    this.setTitle(title);
-    this.setContent(content);
-  }
-
-  setTitle(title) {
-    this.querySelector("[data-actionbar-title]").innerHTML = title;
-  }
-
-  setContent(content) {
-    this.querySelector("[data-actionbar-dropdown-content]").innerHTML = content;
-  }
-
-  isActive() {
-    return !this.hasAttribute("hidden");
-  }
-
-  setActive(state) {
-    if (state) {
-      this.removeAttribute("hidden", "");
-    } else {
-      this.setAttribute("hidden", "");
-    }
-  }
-
-  activate() {
-    this.removeAttribute("hidden", "");
   }
 
   deactivate() {
-    this.setAttribute("hidden", "");
-    this.setTitle("");
-    this.setContent("");
-  }
-}
-
-customElements.define("actionbar-dropdown", ActionbarDropdown);
-
-class ActionbarItems extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {}
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex justify-between gap-4 pt-2 bg-gray-50">
-        <div data-items class="flex rounded overflow-hidden gap-1">
-          <action-item name="panes" label="Panes" icon="remixicon/layout-5-line.svg"></action-item>
-          <action-item name="columns" label="4 hidden columns" icon="remixicon/layout-column-line.svg"></action-item>
-          <action-item name="filter" label="Filter" icon="remixicon/filter-3-line.svg"></action-item>
-          <action-item name="sort" label="Order" icon="remixicon/arrow-up-down.svg"></action-item>
-        </div>
-        <!--
-        <div class="flex gap-4">
-          ${this.buttonHtml("refresh", "material-icons/refresh.svg", "Refresh")}
-          ${this.buttonHtml("add", "remixicon/add.svg", "Add row")}
-          
-          
-          <actionbar-import></actionbar-import>
-          <actionbar-export></actionbar-export>
-          
-        </div>
-        -->
-      </div>
-    `;
-
-    this.onClick();
-  }
-
-  buttonHtml(name, src, title) {
-    return `
-    <div data-local-add class="${hollowClassInactive().join(
-      " "
-    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded-t border">
-      <img-svg src="${src}"></img-svg>
-      <div>${title}</div>
-    </div>
-  `;
-  }
-
-  itemHtml(name, src, title) {
-    return `
-      <div data-title="${title}" data-action="${name}" class="${hollowClassInactive().join(
-      " "
-    )} flex cursor-default items-center px-2 py-1.5 select-none gap-2 rounded-t border">
-        <img-svg src="${src}"></img-svg>
-        <div>${title}</div>
-      </div>
-    `;
-  }
-
-  onClick() {
-    this.querySelectorAll("[data-action]").forEach((item) => {
-      item.addEventListener("click", (e) => {
-        const el = e.currentTarget;
-        const is_active = this.isActive(el);
-        const name = el.getAttribute("data-action");
-        const dropdown = $("actionbar-dropdown");
-
-        this.deactivateAll();
-
-        if (!is_active) {
-          this.activate(el);
-        } else {
-          this.deactivate(el);
-        }
-
-        /*if (["columns", "sort"].includes(name)) {
-          const title = el.getAttribute("data-title");
-
-          if (is_active) {
-            dropdown.deactivate();
-          } else {
-            const html = `<actionbar-${name}2></actionbar-${name}2>`;
-            dropdown.activate();
-            dropdown.setHtml(title, html);
-          }
-        } else {
-          dropdown.deactivate();
-        }*/
-      });
-    });
-  }
-
-  isActive(el) {
-    return el.classList.contains("bg-blue-50");
-  }
-
-  activate(el) {
-    el.classList.add(...tabClassActive());
-    el.classList.remove(...tabClassInactive());
-  }
-
-  deactivate(el) {
-    el.classList.add(...tabClassInactive());
-    el.classList.remove(...tabClassActive());
-  }
-
-  deactivateAll() {
-    $$("[data-action]").forEach((el) => {
-      this.deactivate(el);
+    $$("actions-tab").forEach((el) => {
+      el.deactivate();
     });
   }
 }
 
-customElements.define("actionbar-items", ActionbarItems);
+customElements.define("actions-tabs", ActionsTabs);
 
-class ActionsWrap extends HTMLElement {
+class ActionsX extends HTMLElement {
   constructor() {
     super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
   }
 
   connectedCallback() {
     this.classList.add("flex", "flex-col", "gap-2");
     this.innerHTML = `      
-      <actionbar-items></actionbar-items>
-      <pane-items class="block bg-white border rounded border-gray-200">
-        <pane-columns></pane-columns>
-        <pane-filter></pane-filter>
-        <pane-sort></pane-sort>
-      </pane-items>
+      <actions-tabs></actions-tabs>
+      <actions-panes></actions-panes>
       `;
   }
 }
 
-customElements.define("actions-wrap", ActionsWrap);
+customElements.define("actions-x", ActionsX);
 
 class PaneClose extends HTMLElement {
   constructor() {
@@ -835,6 +667,471 @@ class PaneClose extends HTMLElement {
 }
 
 customElements.define("pane-close", PaneClose);
+
+class ColumnsItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const checked = this.getAttribute("checked");
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, checked);
+    this.onClick();
+  }
+
+  template(name, checked) {
+    return `
+      <checkbox-item class="bg-gray-50 px-3 py-1.5 rounded border border-gray-200" name="${name}" label="${name}" checked="${checked}"></checkbox-item>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange();
+      }
+    }
+  }
+
+  onClick() {
+    this.querySelector("input").addEventListener("change", (e) => {
+      console.log("clicked");
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange() {
+    console.log("Something has changed");
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("columns-item", ColumnsItem);
+
+class ColumnsX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-4", "flex", "text-sm");
+    this.setAttribute("hidden", "");
+    this.innerHTML = this.template("Columns");
+  }
+
+  checkboxes() {
+    return `
+      <columns-item name="alright" checked="true"></columns-item>
+      <columns-item name="asd"></columns-item>
+    `;
+  }
+
+  template(title) {
+    return `
+      <div class="flex flex-col gap-2 p-4 flex-1">
+        <div class="font-bold">${title}</div>
+        <div class="flex gap-2">
+          ${this.checkboxes()}
+        </div>
+      </div>
+      <pane-close hide="pane-columns"></pane-close>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("columns-x", ColumnsX);
+
+class FilterItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.classList.add("contents");
+    this.innerHTML = `
+      <select class="actionbar-select">
+        <option>hello</option>
+        <option>hello2</option>
+      </select>
+      <select class="actionbar-select">
+        ${this.matchesOptions()}
+      </select>
+      <input type="text" class="actionbar-select" />
+      <filter-delete class="btn btn-default">
+        <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
+      </filter-delete>
+    `;
+    this.onRemove();
+  }
+
+  onRemove() {
+    this.querySelector("filter-delete").addEventListener("click", (e) => {
+      e.currentTarget.closest("filter-item").remove();
+    });
+  }
+
+  matchesOptions() {
+    const matches = [
+      {
+        name: "contains",
+        label: "Contains",
+      },
+      {
+        name: "not_contains",
+        label: "Not contains",
+      },
+      {
+        name: "starts_with",
+        label: "Starts with",
+      },
+      {
+        name: "ends_with",
+        label: "Ends with",
+      },
+      {
+        name: "equals",
+        label: "Equals",
+      },
+      {
+        name: "not_equals",
+        label: "Not equals",
+      },
+      {
+        name: "less_than",
+        label: "Less than",
+      },
+      {
+        name: "larger_than",
+        label: "Larger than",
+      },
+    ];
+
+    let html_part = [];
+
+    matches.forEach((item) => {
+      html_part.push(`<option value="${item.name}">${item.label}</option>`);
+    });
+
+    return html_part.join(" ");
+  }
+}
+
+customElements.define("filter-item", FilterItem);
+
+class FilterX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-4", "flex", "text-sm");
+    this.setAttribute("hidden", "");
+    this.innerHTML = this.template("Filter");
+    this.onAdd();
+  }
+
+  template(title) {
+    return `
+      <div class="flex flex-col gap-4 p-4 pr-0 flex-1">
+        <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content),1fr,auto] gap-2 flex-col">
+          <div class="contents">
+            ${this.heading("Column")}
+            ${this.heading("Match")}
+            ${this.heading("Value")}
+            ${this.heading("")}
+          </div>
+          <filter-items class="contents"></filter-items>
+        </div>
+        <div class="flex gap-2 justify-between">
+          <filter-add class="btn btn-default">
+            <img-svg src="remixicon/add.svg" classes="w-5 h-5"></img-svg>
+            <div>Add new</div>
+          </filter-add>
+          <button class="btn btn-primary">
+            <img-svg src="remixicon/filter-3-line.svg" classes="w-5 h-5"></img-svg>
+            <div>Filter rows</div>
+          </button>
+        </div>
+      </div>
+      <pane-close hide="pane-filter"></pane-close>
+    `;
+  }
+
+  onAdd() {
+    $("filter-add").addEventListener("click", () => {
+      this.appendItem();
+    });
+  }
+
+  appendItem() {
+    const el = "<filter-item></filter-item>";
+    $("filter-items").insertAdjacentHTML("beforeend", el);
+  }
+
+  heading(label) {
+    return `<div class="font-bold text-sm">${label}</div>`;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.setAttribute("hidden", "");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("filter-x", FilterX);
+
+class OrderX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-4", "flex", "text-sm");
+    this.setAttribute("hidden", "");
+    this.innerHTML = this.template("Sort by");
+  }
+
+  filters() {
+    return this.partFilter("test23", true) + this.partFilter("test");
+  }
+
+  template(title) {
+    return `
+      <div class="flex flex-col gap-6 p-4 flex-1">
+        <div class="flex flex-col gap-2">
+          <div class="font-bold">Order by</div>
+          <div class="flex gap-8">
+            <radio-item name="order_by" label="Unsorted" checked=""></radio-item>
+            <radio-item name="order_by" label="id" checked=""></radio-item>
+            <radio-item name="order_by" label="title" checked=""></radio-item>
+            <radio-item name="order_by" label="slug" checked=""></radio-item>
+            <radio-item name="order_by" label="description" checked=""></radio-item>
+          </div>
+        </div>
+        <div class="flex flex-col gap-2">
+          <div class="font-bold">Order direction</div>
+          <div class="flex gap-8">
+            <radio-item name="order" label="Unsorted" checked=""></radio-item>
+            <radio-item name="order" label="Ascending" checked=""></radio-item>
+            <radio-item name="order" label="Descending" checked=""></radio-item>
+          </div>
+        </div>
+      </div>
+      <pane-close hide="pane-filter"></pane-close>
+    `;
+  }
+
+  partHeading(label) {
+    return `<div class="font-bold text-sm uppercase">${label}</div>`;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.removeAttribute("hidden", "");
+  }
+
+  partFilter(name, checked) {
+    //&filter[]=slug%20equals%202
+    return `
+    <div class="contents">
+      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+        <option>hello</option>
+        <option>hello2</option>
+      </select>
+      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
+        ${this.partMatches()}
+      </select>
+    </div>
+    `;
+  }
+
+  partMatches() {
+    const matches = [
+      {
+        name: "asc",
+        label: "Ascending",
+      },
+      {
+        name: "desc",
+        label: "Descending",
+      },
+    ];
+
+    let html_part = [];
+
+    matches.forEach((item) => {
+      html_part.push(`<option value="${item.name}">${item.label}</option>`);
+    });
+
+    return html_part.join(" ");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("order-x", OrderX);
+
+class PaginationX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+    <div class="flex py-2 bg-gray-50">
+      <div class="flex gap-4 ml-auto">
+        ${this.buttonTemplate("prev", "remixicon/arrow-left-s-line.svg")}
+        <records-x offset="101" rows="100" total="120234233"></records-x>
+        ${this.buttonTemplate("next", "remixicon/arrow-right-s-line.svg")}
+      </div>
+    </div>
+    `;
+  }
+
+  buttonTemplate(direction, icon) {
+    return `
+      <records-${direction} class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-grayExtra rounded">
+        <img-svg src="${icon}" classes="w-5 h-5">
+      </records-${direction}>`;
+  }
+}
+customElements.define("pagination-x", PaginationX);
+
+class RecordsX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.classList.add("text-13", "items-center", "flex");
+    this.update();
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      this.update();
+    }
+  }
+
+  update() {
+    const offset = this.getAttribute("offset");
+    const rows = this.getAttribute("rows");
+    const total = this.getAttribute("total");
+
+    this.innerHTML = this.template(offset, rows, total);
+  }
+
+  template(offset, rows, total) {
+    const from = offset;
+    const to = parseInt(offset) + parseInt(rows);
+    const all = parseInt(total).toLocaleString("en-US");
+
+    return `${from}-${to} of ${all}`;
+  }
+}
+customElements.define("records-x", RecordsX);
 
 class SidebarDatabaseLoading extends HTMLElement {
   constructor() {
@@ -1018,8 +1315,8 @@ class SidebarDatabase extends HTMLElement {
         const rows = 300;
         const total = 1235;
 
-        $("bar-footer-items").setAttribute("database", this.getValue());
-        $("bar-footer-items").setAttribute("table", el.getValue());
+        //$("bar-footer-items").setAttribute("database", this.getValue());
+        //$("bar-footer-items").setAttribute("table", el.getValue());
         $("bar-footer-items").setRecords(offset, rows, total);
       });
     });
@@ -1064,7 +1361,6 @@ class SidebarDatabases extends HTMLElement {
       .get("http://localhost/tools/squares/server/php/queries/databases.php")
       .then((response) => {
         if (response.status !== 200) return;
-        console.log(response.data);
 
         let html = "";
 
@@ -1153,8 +1449,6 @@ class SidebarTable extends HTMLElement {
         this.classList.add(...hollowClassActive());
         this.classList.remove(...hollowClassInactive());
 
-        console.log(this.querySelector("img-svg"));
-
         this.querySelector("svg").classList.replace(
           "text-navy-300",
           "text-navy-500"
@@ -1188,10 +1482,7 @@ class SidebarTable extends HTMLElement {
       //$("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
       syncSidebarLogo();
       // Fetch
-      console.log("tab");
-      this.test(current.database, current.table).then((test) => {
-        console.log(tables);
-      });
+      this.test(current.database, current.table).then((test) => {});
     }
   }
 
@@ -1200,7 +1491,6 @@ class SidebarTable extends HTMLElement {
       const resp = await axios.get(
         `http://localhost/tools/squares/server/php/queries/data.php?database=${database}&table=${table}`
       );
-      //console.log(resp.data);
 
       tables[`${database}|${table}`] = resp.data;
 
@@ -2048,410 +2338,6 @@ class ActionbarRefresh extends HTMLElement {
 
 customElements.define("actionbar-refresh", ActionbarRefresh);
 
-class ActionbarSort extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <actionbar-icon
-        src="remixicon/arrow-up-down.svg"
-        title="Sort"
-      ></actionbar-icon>
-    `;
-    this.onClick();
-  }
-
-  onClick() {
-    this.addEventListener("click", () => {
-      const icon = this.querySelector("actionbar-icon");
-
-      if (icon.isActive()) {
-        icon.deactivate();
-      } else {
-        icon.activate("Sort", this.html());
-      }
-    });
-  }
-
-  html() {
-    return `
-      <div class="flex gap-4">
-        <label class="flex select-none items-center gap-2">
-          <input
-            type="radio"
-            class="w-5 h-5 border border-gray-400 text-blue-600 focus:ring-0 focus:ring-offset-0"
-            name="same"
-          />
-          Testing
-        </label>
-        <label class="flex select-none items-center gap-2">
-          <input
-            type="radio"
-            class="w-5 h-5 border border-gray-400 text-blue-600 focus:ring-0 focus:ring-offset-0"
-            name="same"
-          />
-          Testing
-        </label>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-sort", ActionbarSort);
-
-class ActionbarColumns2 extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex gap-8">
-        <checkbox-item name="test" label="id" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="title" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="slug" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="description" checked="true"></checkbox-item>
-        <checkbox-item name="test" label="categories" checked="true"></checkbox-item>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-columns2", ActionbarColumns2);
-
-class ActionbarSort2 extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex gap-4">
-        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
-        <radio-item name="test" label="Hegllo" checked="true"></radio-item>
-      </div>
-    `;
-  }
-}
-
-customElements.define("actionbar-sort2", ActionbarSort2);
-
-class PaneColumns extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-4", "flex", "hidden", "text-sm");
-    this.innerHTML = this.template("Columns");
-  }
-
-  checkboxes() {
-    return this.partCheckbox("test23", true) + this.partCheckbox("test");
-  }
-
-  template(title) {
-    return `
-      <div class="flex flex-col gap-2 p-4 flex-1">
-        <div class="font-bold">${title}</div>
-        <div class="flex gap-2">
-          ${this.checkboxes()}
-        </div>
-      </div>
-      <pane-close hide="pane-columns"></pane-close>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.classesActivate();
-        } else {
-          this.classesDeactivate();
-        }
-      }
-    }
-  }
-
-  classesActivate(el = this) {
-    el.classList.remove("hidden");
-  }
-
-  classesDeactivate(el = this) {
-    el.classList.add("hidden");
-  }
-
-  partCheckbox(name, checked) {
-    return `
-    <checkbox-item class="bg-gray-50 px-3 py-1.5 rounded border border-gray-200" name="${name}" label="${name}" checked="${checked}"></checkbox-item>
-    `;
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("pane-columns", PaneColumns);
-
-class PaneFilter extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-4", "flex", "hidden", "text-sm");
-    this.innerHTML = this.template("Filter");
-  }
-
-  filters() {
-    return this.partFilter("test23", true) + this.partFilter("test");
-  }
-
-  template(title) {
-    return `
-      <div class="flex flex-col gap-2 p-4 flex-1">
-        <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content),1fr] gap-2 flex-col">
-          <div class="contents">
-            ${this.partHeading("Column")}
-            ${this.partHeading("Match")}
-            ${this.partHeading("Value")}
-          </div>
-          ${this.filters()}
-        </div>
-        <button-item style="action" title="Filter data" class="ml-auto"></button-item>
-      </div>
-      <pane-close hide="pane-filter"></pane-close>
-    `;
-  }
-
-  partHeading(label) {
-    return `<div class="font-bold text-sm">${label}</div>`;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.classesActivate();
-        } else {
-          this.classesDeactivate();
-        }
-      }
-    }
-  }
-
-  classesActivate(el = this) {
-    el.classList.remove("hidden");
-  }
-
-  classesDeactivate(el = this) {
-    el.classList.add("hidden");
-  }
-
-  partFilter(name, checked) {
-    //&filter[]=slug%20equals%202
-    return `
-    <div class="contents">
-      <select class="actionbar-select">
-        <option>hello</option>
-        <option>hello2</option>
-      </select>
-      <select class="actionbar-select">
-        ${this.partMatches()}
-      </select>
-      <input type="text" class="actionbar-select">
-    </div>
-    `;
-  }
-
-  partMatches() {
-    const matches = [
-      {
-        name: "contains",
-        label: "Contains",
-      },
-      {
-        name: "not_contains",
-        label: "Not contains",
-      },
-      {
-        name: "starts_with",
-        label: "Starts with",
-      },
-      {
-        name: "ends_with",
-        label: "Ends with",
-      },
-      {
-        name: "equals",
-        label: "Equals",
-      },
-      {
-        name: "not_equals",
-        label: "Not equals",
-      },
-      {
-        name: "less_than",
-        label: "Less than",
-      },
-      {
-        name: "larger_than",
-        label: "Larger than",
-      },
-    ];
-
-    let html_part = [];
-
-    matches.forEach((item) => {
-      html_part.push(`<option value="${item.name}">${item.label}</option>`);
-    });
-
-    return html_part.join(" ");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("pane-filter", PaneFilter);
-
-class PaneSort extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-4", "flex", "hidden", "text-sm");
-    this.innerHTML = this.template("Sort by");
-    //this.activate();
-  }
-
-  filters() {
-    return this.partFilter("test23", true) + this.partFilter("test");
-  }
-
-  template(title) {
-    return `
-      <div class="flex flex-col gap-6 p-4 flex-1">
-        <div class="flex flex-col gap-2">
-          <div class="font-bold">Order by</div>
-          <div class="flex gap-8">
-            <radio-item name="order_by" label="Unsorted" checked=""></radio-item>
-            <radio-item name="order_by" label="id" checked=""></radio-item>
-            <radio-item name="order_by" label="title" checked=""></radio-item>
-            <radio-item name="order_by" label="slug" checked=""></radio-item>
-            <radio-item name="order_by" label="description" checked=""></radio-item>
-          </div>
-        </div>
-        <div class="flex flex-col gap-2">
-          <div class="font-bold">Order direction</div>
-          <div class="flex gap-8">
-            <radio-item name="order" label="Unsorted" checked=""></radio-item>
-            <radio-item name="order" label="Ascending" checked=""></radio-item>
-            <radio-item name="order" label="Descending" checked=""></radio-item>
-          </div>
-        </div>
-      </div>
-      <pane-close hide="pane-filter"></pane-close>
-    `;
-  }
-
-  partHeading(label) {
-    return `<div class="font-bold text-sm uppercase">${label}</div>`;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.classesActivate();
-        } else {
-          this.classesDeactivate();
-        }
-      }
-    }
-  }
-
-  classesActivate(el = this) {
-    el.classList.remove("hidden");
-  }
-
-  classesDeactivate(el = this) {
-    el.classList.add("hidden");
-  }
-
-  partFilter(name, checked) {
-    //&filter[]=slug%20equals%202
-    return `
-    <div class="contents">
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
-        <option>hello</option>
-        <option>hello2</option>
-      </select>
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
-        ${this.partMatches()}
-      </select>
-    </div>
-    `;
-  }
-
-  partMatches() {
-    const matches = [
-      {
-        name: "asc",
-        label: "Ascending",
-      },
-      {
-        name: "desc",
-        label: "Descending",
-      },
-    ];
-
-    let html_part = [];
-
-    matches.forEach((item) => {
-      html_part.push(`<option value="${item.name}">${item.label}</option>`);
-    });
-
-    return html_part.join(" ");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("pane-sort", PaneSort);
-
 class ButtonItem extends HTMLElement {
   constructor() {
     super();
@@ -2687,7 +2573,7 @@ class PaneMain extends HTMLElement {
   connectedCallback() {
     this.classList.add("flex", "flex-col", "overflow-auto", "gap-2");
     this.innerHTML = `
-      <actions-wrap></actions-wrap>
+      <actions-x></actions-x>
       <div class="flex-1 flex overflow-auto">
         <div class="flex-1 overflow-x-auto border border-gray-200 rounded">
           <div class="flex-1 text-13 w-[1300px]">
@@ -2698,7 +2584,7 @@ class PaneMain extends HTMLElement {
           </div>
         </div>
       </div>
-      <prev-next></prev-next>
+      <pagination-x></pagination-x>
     `;
     let parts = "";
     for (let i = 0; i < 100; i++) {
@@ -2730,32 +2616,6 @@ class PaneMain extends HTMLElement {
 }
 
 customElements.define("pane-main", PaneMain);
-
-class PrevNext extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-    <div class="flex justify-between gap-8 px-4 pb-2 bg-gray-50">
-      <div class="flex gap-2 items-center text-sm">
-        <!--1-100 of 12,300-->
-      </div>
-      <div class="flex gap-4">
-        <div class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-grayExtra rounded">
-          <img-svg src="remixicon/arrow-left-s-line.svg" classes="w-5 h-5">
-        </div>
-        <div class="text-13 items-center flex">1-100 of 12,300</div>
-        <div class="py-1.5 px-2 select-none flex gap-1 items-center hover:bg-grayExtra rounded">
-          <img-svg src="remixicon/arrow-right-s-line.svg" classes="w-5 h-5">
-        </div>
-      </div>
-    </div>
-    `;
-  }
-}
-customElements.define("prev-next", PrevNext);
 
 class RadioItem extends HTMLElement {
   constructor() {

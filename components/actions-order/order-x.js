@@ -1,4 +1,4 @@
-class PaneSort extends HTMLElement {
+class OrderX extends HTMLElement {
   constructor() {
     super();
   }
@@ -8,9 +8,9 @@ class PaneSort extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("gap-4", "flex", "hidden", "text-sm");
+    this.classList.add("gap-4", "flex", "text-sm");
+    this.setAttribute("hidden", "");
     this.innerHTML = this.template("Sort by");
-    //this.activate();
   }
 
   filters() {
@@ -51,20 +51,20 @@ class PaneSort extends HTMLElement {
     if (oldValue !== newValue) {
       if (attr == "active") {
         if (newValue == "true") {
-          this.classesActivate();
+          this.thisActivate();
         } else {
-          this.classesDeactivate();
+          this.thisDeactivate();
         }
       }
     }
   }
 
-  classesActivate(el = this) {
-    el.classList.remove("hidden");
+  thisActivate() {
+    this.removeAttribute("hidden");
   }
 
-  classesDeactivate(el = this) {
-    el.classList.add("hidden");
+  thisDeactivate() {
+    this.removeAttribute("hidden", "");
   }
 
   partFilter(name, checked) {
@@ -112,4 +112,4 @@ class PaneSort extends HTMLElement {
   }
 }
 
-customElements.define("pane-sort", PaneSort);
+customElements.define("order-x", OrderX);

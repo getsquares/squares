@@ -1,4 +1,4 @@
-class ActionItem extends HTMLElement {
+class ActionsTab extends HTMLElement {
   constructor() {
     super();
   }
@@ -11,19 +11,7 @@ class ActionItem extends HTMLElement {
     const label = this.getAttribute("label");
     const icon = this.getAttribute("icon");
 
-    this.classList.add(
-      ...tabClassInactive(),
-      "flex",
-      "cursor-default",
-      "items-center",
-      "px-3",
-      "py-1.5",
-      "text-sm",
-      "select-none",
-      "gap-2",
-      "rounded",
-      "border"
-    );
+    this.classList.add("btn", "btn-default");
 
     this.innerHTML = `
       <img-svg src="${icon}" classes="w-5 h-5"></img-svg>
@@ -36,9 +24,19 @@ class ActionItem extends HTMLElement {
   onClick() {
     this.addEventListener("click", () => {
       const active = this.getAttribute("active") == "true";
+      const name = this.getAttribute("name");
+
+      $("actions-tabs").deactivate();
+      $("actions-panes").deactivate();
+
+      if (!active) {
+        this.activate();
+        $("actions-panes").activate(name);
+      }
+      /*
       const pane = $(`pane-${this.getAttribute("name")}`);
 
-      $$("action-item").forEach((el) => {
+      $$("actions-tab").forEach((el) => {
         this.deactivate(el);
       });
 
@@ -47,12 +45,10 @@ class ActionItem extends HTMLElement {
       });
 
       if (active) {
-        this.deactivate();
         pane.deactivate();
       } else {
-        this.activate();
         pane.activate();
-      }
+      }*/
     });
   }
 
@@ -60,31 +56,29 @@ class ActionItem extends HTMLElement {
     if (oldValue !== newValue) {
       if (attr == "active") {
         if (newValue == "true") {
-          this.classesActivate();
+          this.thisActivate();
         } else {
-          this.classesDeactivate();
+          this.thisDeactivate();
         }
       }
     }
   }
 
-  classesActivate() {
-    this.classList.add(...tabClassActive());
-    this.classList.remove(...tabClassInactive());
+  thisActivate() {
+    this.classList.replace("btn-default", "btn-default-active");
   }
 
-  classesDeactivate(el = this) {
-    el.classList.remove(...tabClassActive());
-    el.classList.add(...tabClassInactive());
+  thisDeactivate() {
+    this.classList.replace("btn-default-active", "btn-default");
   }
 
   activate() {
     this.setAttribute("active", "true");
   }
 
-  deactivate(el = this) {
-    el.removeAttribute("active");
+  deactivate() {
+    this.removeAttribute("active");
   }
 }
 
-customElements.define("action-item", ActionItem);
+customElements.define("actions-tab", ActionsTab);

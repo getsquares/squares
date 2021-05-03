@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Beedle demo</h1>
+    <p>
+      A simple demo to show how
+      <a href="https://github.com/hankchizljaw/beedle">Beedle</a> manages your
+      state and how the state changes are cascaded. View
+      <a href="/main.js">source</a>.
+    </p>
+    <p>
+      <b>Live Message:</b>
+      <span aria-live="polite" class="js-message-element">Hello, world</span>
+    </p>
+    <form class="boilerform" action="" method="post">
+      <div>
+        <label for="message" class="c-label">Update the live message</label>
+        <textarea
+          name="message"
+          id="message"
+          class="c-input-field c-input-field--multiline"
+          rows="10"
+        ></textarea>
+      </div>
+    </form>
+  </body>
+
+  <script src="beedle.js"></script>
+  <script src="store.js"></script>
+</html>

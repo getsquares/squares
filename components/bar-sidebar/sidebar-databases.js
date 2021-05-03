@@ -17,7 +17,6 @@ class SidebarDatabases extends HTMLElement {
       .get("http://localhost/tools/squares/server/php/queries/databases.php")
       .then((response) => {
         if (response.status !== 200) return;
-        console.log(response.data);
 
         let html = "";
 

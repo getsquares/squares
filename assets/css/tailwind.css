@@ -1,6 +1,10 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+
+@import "./test.css";
+@import "./buttons.css";
+
+@import "tailwindcss/utilities";
 
 @layer components {
   /*[type="checkbox"]:checked {

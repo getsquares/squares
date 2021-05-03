@@ -10,7 +10,7 @@ class PaneMain extends HTMLElement {
   connectedCallback() {
     this.classList.add("flex", "flex-col", "overflow-auto", "gap-2");
     this.innerHTML = `
-      <actions-wrap></actions-wrap>
+      <actions-x></actions-x>
       <div class="flex-1 flex overflow-auto">
         <div class="flex-1 overflow-x-auto border border-gray-200 rounded">
           <div class="flex-1 text-13 w-[1300px]">
@@ -21,7 +21,7 @@ class PaneMain extends HTMLElement {
           </div>
         </div>
       </div>
-      <prev-next></prev-next>
+      <pagination-x></pagination-x>
     `;
     let parts = "";
     for (let i = 0; i < 100; i++) {
