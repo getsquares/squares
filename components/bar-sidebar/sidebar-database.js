@@ -14,7 +14,7 @@ class SidebarDatabase extends HTMLElement {
     this.innerHTML = `
       <div data-database class="${hollowClassInactive().join(
         " "
-      )} flex gap-2 px-4 py-1 cursor-default select-none fill-current items-center">
+      )} flex gap-2 px-2 py-1 cursor-default select-none fill-current items-center">
         <img-svg src="remixicon/database-2-fill.svg" classes="w-4 h-4 text-yellow-500"></img-svg>
         <div data-local-database class="flex-1 truncate font-bold text-sm">${title}</div>
         <img-svg data-arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-4 h-4"></img-svg>
@@ -125,13 +125,13 @@ class SidebarDatabase extends HTMLElement {
         this.deactivateAllTables();
         el.activate();
 
-        const offset = 1;
+        /*const offset = 1;
         const rows = 300;
-        const total = 1235;
+        const total = 1235;*/
 
         //$("bar-footer-items").setAttribute("database", this.getValue());
         //$("bar-footer-items").setAttribute("table", el.getValue());
-        $("bar-footer-items").setRecords(offset, rows, total);
+        //$("bar-footer-items").setRecords(offset, rows, total);
       });
     });
   }

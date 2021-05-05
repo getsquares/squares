@@ -38,6 +38,7 @@ class SidebarWrap extends HTMLElement {
         "bg-gray-50",
         "w-80",
         "gap-4",
+        "pl-4",
       ]
     );
     this.innerHTML = `

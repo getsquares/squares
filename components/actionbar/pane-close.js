@@ -14,10 +14,11 @@ class PaneClose extends HTMLElement {
   }
 
   onClick() {
-    const hide = this.getAttribute("hide");
-
     $("button", this).addEventListener("click", () => {
-      this.closest(hide).deactivate();
+      //this.closest(hide).deactivate();
+      $("actions-panes > *:not([hidden])").setAttribute("hidden", "");
+      $("actions-panes").removeAttribute("active");
+      $(`actions-tab[active="true"]`).deactivate();
     });
   }
 }

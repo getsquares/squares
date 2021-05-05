@@ -6,14 +6,14 @@ class FilterItem extends HTMLElement {
   connectedCallback() {
     this.classList.add("contents");
     this.innerHTML = `
-      <select class="actionbar-select">
+      <select class="form-select actionbar-select">
         <option>hello</option>
         <option>hello2</option>
       </select>
-      <select class="actionbar-select">
+      <select class="form-select actionbar-select">
         ${this.matchesOptions()}
       </select>
-      <input type="text" class="actionbar-select" />
+      <input type="text" class="form-input actionbar-select" />
       <filter-delete class="btn btn-default">
         <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
       </filter-delete>

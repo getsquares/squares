@@ -30,3 +30,6 @@ phpmyadmin:
     hidden: true
   pma__users:
     hidden: true
+world:
+  city:
+  country:

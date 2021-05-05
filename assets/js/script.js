@@ -73,7 +73,13 @@ function tabClassInactive() {
 }
 
 function hollowClassActive() {
-  return ["bg-navy-100", "text-navy-900", "shadow-navy"];
+  return [
+    "bg-navy-100",
+    "text-navy-900",
+    "border",
+    "border-navy-300",
+    "rounded",
+  ];
 }
 
 function hollowClassInactive() {
@@ -445,6 +451,133 @@ class tabs {
   }
 }
 
+class ColumnsItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const checked = this.getAttribute("checked");
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, checked);
+    this.onClick();
+  }
+
+  template(name, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${name}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange();
+      }
+    }
+  }
+
+  onClick() {
+    this.querySelector("input").addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange() {
+    console.log("Something has changed");
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("columns-item", ColumnsItem);
+
+class ColumnsX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-4", "flex", "text-sm");
+    this.setAttribute("hidden", "");
+    this.innerHTML = this.template("Columns");
+  }
+
+  checkboxes() {
+    return `
+      <columns-item name="alright" checked="true"></columns-item>
+      <columns-item name="asd"></columns-item>
+    `;
+  }
+
+  template(title) {
+    return `
+      <div class="flex flex-col gap-2 p-4 flex-1">
+        <div class="font-bold">${title}</div>
+        <div class="flex gap-4">
+          ${this.checkboxes()}
+        </div>
+      </div>
+      <pane-close hide="pane-columns"></pane-close>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("columns-x", ColumnsX);
+
 class ActionsPanes extends HTMLElement {
   constructor() {
     super();
@@ -464,6 +597,7 @@ class ActionsPanes extends HTMLElement {
     );
     this.setAttribute("hidden", "");
     this.innerHTML = `
+      <panes-x></panes-x>
       <columns-x></columns-x>
       <filter-x></filter-x>
       <order-x></order-x>
@@ -492,7 +626,7 @@ class ActionsPanes extends HTMLElement {
 
   activate(name) {
     this.setAttribute("active", "true");
-    console.log(name);
+
     this.querySelector(name).removeAttribute("hidden");
   }
 
@@ -632,7 +766,7 @@ class ActionsX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("flex", "flex-col", "gap-2");
+    this.classList.add("flex", "flex-col", "gap-2", "-mb-2");
     this.innerHTML = `      
       <actions-tabs></actions-tabs>
       <actions-panes></actions-panes>
@@ -658,138 +792,16 @@ class PaneClose extends HTMLElement {
   }
 
   onClick() {
-    const hide = this.getAttribute("hide");
-
     $("button", this).addEventListener("click", () => {
-      this.closest(hide).deactivate();
+      //this.closest(hide).deactivate();
+      $("actions-panes > *:not([hidden])").setAttribute("hidden", "");
+      $("actions-panes").removeAttribute("active");
+      $(`actions-tab[active="true"]`).deactivate();
     });
   }
 }
 
 customElements.define("pane-close", PaneClose);
-
-class ColumnsItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["checked"];
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const checked = this.getAttribute("checked");
-    this.classList.add("flex");
-
-    this.innerHTML = this.template(name, checked);
-    this.onClick();
-  }
-
-  template(name, checked) {
-    return `
-      <checkbox-item class="bg-gray-50 px-3 py-1.5 rounded border border-gray-200" name="${name}" label="${name}" checked="${checked}"></checkbox-item>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "checked") {
-        this.onChange();
-      }
-    }
-  }
-
-  onClick() {
-    this.querySelector("input").addEventListener("change", (e) => {
-      console.log("clicked");
-      if (e.currentTarget.checked) {
-        this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-  }
-
-  onChange() {
-    console.log("Something has changed");
-  }
-
-  activate() {
-    this.setAttribute("checked", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("checked");
-  }
-}
-
-customElements.define("columns-item", ColumnsItem);
-
-class ColumnsX extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-4", "flex", "text-sm");
-    this.setAttribute("hidden", "");
-    this.innerHTML = this.template("Columns");
-  }
-
-  checkboxes() {
-    return `
-      <columns-item name="alright" checked="true"></columns-item>
-      <columns-item name="asd"></columns-item>
-    `;
-  }
-
-  template(title) {
-    return `
-      <div class="flex flex-col gap-2 p-4 flex-1">
-        <div class="font-bold">${title}</div>
-        <div class="flex gap-2">
-          ${this.checkboxes()}
-        </div>
-      </div>
-      <pane-close hide="pane-columns"></pane-close>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.classList.remove("hidden");
-  }
-
-  thisDeactivate() {
-    this.classList.add("hidden");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("columns-x", ColumnsX);
 
 class FilterItem extends HTMLElement {
   constructor() {
@@ -799,14 +811,14 @@ class FilterItem extends HTMLElement {
   connectedCallback() {
     this.classList.add("contents");
     this.innerHTML = `
-      <select class="actionbar-select">
+      <select class="form-select actionbar-select">
         <option>hello</option>
         <option>hello2</option>
       </select>
-      <select class="actionbar-select">
+      <select class="form-select actionbar-select">
         ${this.matchesOptions()}
       </select>
-      <input type="text" class="actionbar-select" />
+      <input type="text" class="form-input actionbar-select" />
       <filter-delete class="btn btn-default">
         <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
       </filter-delete>
@@ -957,6 +969,58 @@ class FilterX extends HTMLElement {
 
 customElements.define("filter-x", FilterX);
 
+class OrderItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.classList.add("contents");
+    this.innerHTML = `
+      <select class="form-select actionbar-select">
+        <option>hello</option>
+        <option>hello2</option>
+      </select>
+      <select class="form-select actionbar-select">
+        ${this.matchesOptions()}
+      </select>
+      <order-delete class="btn btn-default">
+        <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
+      </order-delete>
+    `;
+    this.onRemove();
+  }
+
+  onRemove() {
+    this.querySelector("order-delete").addEventListener("click", (e) => {
+      e.currentTarget.closest("order-item").remove();
+    });
+  }
+
+  matchesOptions() {
+    const matches = [
+      {
+        name: "ASC",
+        label: "Ascending",
+      },
+      {
+        name: "DESC",
+        label: "Descending",
+      },
+    ];
+
+    let html_part = [];
+
+    matches.forEach((item) => {
+      html_part.push(`<option value="${item.name}">${item.label}</option>`);
+    });
+
+    return html_part.join(" ");
+  }
+}
+
+customElements.define("order-item", OrderItem);
+
 class OrderX extends HTMLElement {
   constructor() {
     super();
@@ -969,41 +1033,49 @@ class OrderX extends HTMLElement {
   connectedCallback() {
     this.classList.add("gap-4", "flex", "text-sm");
     this.setAttribute("hidden", "");
-    this.innerHTML = this.template("Sort by");
-  }
-
-  filters() {
-    return this.partFilter("test23", true) + this.partFilter("test");
+    this.innerHTML = this.template("Filter");
+    this.onAdd();
   }
 
   template(title) {
     return `
-      <div class="flex flex-col gap-6 p-4 flex-1">
-        <div class="flex flex-col gap-2">
-          <div class="font-bold">Order by</div>
-          <div class="flex gap-8">
-            <radio-item name="order_by" label="Unsorted" checked=""></radio-item>
-            <radio-item name="order_by" label="id" checked=""></radio-item>
-            <radio-item name="order_by" label="title" checked=""></radio-item>
-            <radio-item name="order_by" label="slug" checked=""></radio-item>
-            <radio-item name="order_by" label="description" checked=""></radio-item>
+      <div class="flex flex-col gap-4 p-4 pr-0 flex-1">
+        <div class="grid grid-cols-[minmax(200px,max-content),1fr,auto] gap-2 flex-col">
+          <div class="contents">
+            ${this.heading("Order by")}
+            ${this.heading("Order")}
+            ${this.heading("")}
           </div>
+          <order-items class="contents"></order-items>
         </div>
-        <div class="flex flex-col gap-2">
-          <div class="font-bold">Order direction</div>
-          <div class="flex gap-8">
-            <radio-item name="order" label="Unsorted" checked=""></radio-item>
-            <radio-item name="order" label="Ascending" checked=""></radio-item>
-            <radio-item name="order" label="Descending" checked=""></radio-item>
-          </div>
+        <div class="flex gap-2 justify-between">
+          <order-add class="btn btn-default">
+            <img-svg src="remixicon/add.svg" classes="w-5 h-5"></img-svg>
+            <div>Add new</div>
+          </order-add>
+          <button class="btn btn-primary">
+            <img-svg src="remixicon/arrow-up-down.svg" classes="w-5 h-5"></img-svg>
+            <div>Order rows</div>
+          </button>
         </div>
       </div>
       <pane-close hide="pane-filter"></pane-close>
     `;
   }
 
-  partHeading(label) {
-    return `<div class="font-bold text-sm uppercase">${label}</div>`;
+  onAdd() {
+    $("order-add").addEventListener("click", () => {
+      this.appendItem();
+    });
+  }
+
+  appendItem() {
+    const el = "<order-item></order-item>";
+    $("order-items").insertAdjacentHTML("beforeend", el);
+  }
+
+  heading(label) {
+    return `<div class="font-bold text-sm">${label}</div>`;
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
@@ -1023,43 +1095,7 @@ class OrderX extends HTMLElement {
   }
 
   thisDeactivate() {
-    this.removeAttribute("hidden", "");
-  }
-
-  partFilter(name, checked) {
-    //&filter[]=slug%20equals%202
-    return `
-    <div class="contents">
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
-        <option>hello</option>
-        <option>hello2</option>
-      </select>
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
-        ${this.partMatches()}
-      </select>
-    </div>
-    `;
-  }
-
-  partMatches() {
-    const matches = [
-      {
-        name: "asc",
-        label: "Ascending",
-      },
-      {
-        name: "desc",
-        label: "Descending",
-      },
-    ];
-
-    let html_part = [];
-
-    matches.forEach((item) => {
-      html_part.push(`<option value="${item.name}">${item.label}</option>`);
-    });
-
-    return html_part.join(" ");
+    this.setAttribute("hidden", "");
   }
 
   activate() {
@@ -1073,6 +1109,157 @@ class OrderX extends HTMLElement {
 
 customElements.define("order-x", OrderX);
 
+class PanesItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const label = this.getAttribute("label");
+    const checked = this.getAttribute("checked");
+
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, label, checked);
+    this.onClick();
+  }
+
+  template(name, label, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${label}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange(newValue);
+      }
+    }
+  }
+
+  onClick() {
+    this.querySelector("input").addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange(checked) {
+    const name = this.getAttribute("name");
+
+    if (!checked) {
+      $(name).setAttribute("hidden", "");
+    } else {
+      $(name).removeAttribute("hidden", "");
+    }
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("panes-item", PanesItem);
+
+class PanesX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-4", "flex", "text-sm");
+    this.setAttribute("hidden", "");
+    this.innerHTML = this.template();
+    this.onClose();
+  }
+
+  checkboxes() {
+    return `
+      <panes-item name="topbar-wrap" label="Top" checked="true"></panes-item>
+      <panes-item name="sidebar-wrap" label="Sidebar" checked="true"></panes-item>
+      <panes-item name="pagination-x" label="Footer" checked="true"></panes-item>
+    `;
+  }
+
+  template() {
+    return `
+      <div class="flex flex-col gap-2 p-4 flex-1">
+        <div class="font-bold">Panes</div>
+        <div class="flex gap-4">
+          ${this.checkboxes()}
+        </div>
+        <div class="mt-2">
+          <button-done class="btn btn-default">
+            <img-svg src="remixicon/close.svg" classes="w-5 h-5"></img-svg>
+            <div>Close</div>
+          </button-done>
+        </div>
+      </div>
+      <pane-close></pane-close>
+    `;
+  }
+
+  onClose() {
+    $("button-done", this).addEventListener("click", () => {
+      $("actions-panes > *:not([hidden])").setAttribute("hidden", "");
+      $("actions-panes").removeAttribute("active");
+      $(`actions-tab[name="${this.tagName.toLowerCase()}"]`).deactivate();
+    });
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("panes-x", PanesX);
+
 class PaginationX extends HTMLElement {
   constructor() {
     super();
@@ -1080,7 +1267,7 @@ class PaginationX extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-    <div class="flex py-2 bg-gray-50">
+    <div class="flex -mt-2 pb-2 bg-gray-50">
       <div class="flex gap-4 ml-auto">
         ${this.buttonTemplate("prev", "remixicon/arrow-left-s-line.svg")}
         <records-x offset="101" rows="100" total="120234233"></records-x>
@@ -1102,6 +1289,10 @@ customElements.define("pagination-x", PaginationX);
 class RecordsX extends HTMLElement {
   constructor() {
     super();
+  }
+
+  static get observedAttributes() {
+    return ["limit", "rows", "total"];
   }
 
   connectedCallback() {
@@ -1143,7 +1334,7 @@ class SidebarDatabaseLoading extends HTMLElement {
       "flex",
       "gap-2",
       "py-1",
-      "px-4",
+      "px-2",
       "cursor-default",
       "select-none",
       "fill-current",
@@ -1169,7 +1360,7 @@ class SidebarDatabaseRefresh extends HTMLElement {
       "flex",
       "gap-2",
       "py-1",
-      "px-4",
+      "px-2",
       "cursor-default",
       "select-none",
       "fill-current",
@@ -1200,7 +1391,7 @@ class SidebarDatabase extends HTMLElement {
     this.innerHTML = `
       <div data-database class="${hollowClassInactive().join(
         " "
-      )} flex gap-2 px-4 py-1 cursor-default select-none fill-current items-center">
+      )} flex gap-2 px-2 py-1 cursor-default select-none fill-current items-center">
         <img-svg src="remixicon/database-2-fill.svg" classes="w-4 h-4 text-yellow-500"></img-svg>
         <div data-local-database class="flex-1 truncate font-bold text-sm">${title}</div>
         <img-svg data-arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-4 h-4"></img-svg>
@@ -1311,13 +1502,13 @@ class SidebarDatabase extends HTMLElement {
         this.deactivateAllTables();
         el.activate();
 
-        const offset = 1;
+        /*const offset = 1;
         const rows = 300;
-        const total = 1235;
+        const total = 1235;*/
 
         //$("bar-footer-items").setAttribute("database", this.getValue());
         //$("bar-footer-items").setAttribute("table", el.getValue());
-        $("bar-footer-items").setRecords(offset, rows, total);
+        //$("bar-footer-items").setRecords(offset, rows, total);
       });
     });
   }
@@ -1382,9 +1573,9 @@ class SidebarFilter extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-      <label class="flex flex-col gap-2 mx-4">
+      <label class="flex flex-col gap-2">
         <div class="uppercase font-bold text-sm">Filter tables</div>
-        <input spellcheck="false" placeholder="Show matching tables..." type="text" class="bg-white border-gray-200 text-sm rounded focus:ring-0 focus:border-gray-400">
+        <input spellcheck="false" placeholder="Show matching tables..." type="text" class="form-input bg-white border-gray-200 text-sm rounded focus:ring-0 focus:border-gray-400">
       </label>
     `;
     this.onChange();
@@ -1429,7 +1620,7 @@ class SidebarTable extends HTMLElement {
       "flex",
       "gap-2",
       "py-1",
-      "px-4",
+      "px-2",
       "cursor-default",
       "select-none",
       "fill-current",
@@ -1479,10 +1670,26 @@ class SidebarTable extends HTMLElement {
     } else {
       tab.add(current.database, current.table);
 
-      //$("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
       syncSidebarLogo();
       // Fetch
-      this.test(current.database, current.table).then((test) => {});
+      this.test(current.database, current.table).then((test) => {
+        data[current.database + " " + current.table] = test;
+
+        const html = `
+          <pane-main database="${current.database}" table="${current.table}" active="true"></pane-main>
+        `;
+
+        $$("pane-main").forEach((item) => {
+          item.deactivate();
+        });
+
+        $("main-x").insertAdjacentHTML("beforeend", html);
+        $("select-table").setAttribute("hidden", "");
+
+        $("records-x").setAttribute("rows", test.meta.limit);
+        $("records-x").setAttribute("offset", test.meta.offset);
+        $("records-x").setAttribute("total", test.meta.total);
+      });
     }
   }
 
@@ -1564,6 +1771,7 @@ class SidebarWrap extends HTMLElement {
         "bg-gray-50",
         "w-80",
         "gap-4",
+        "pl-4",
       ]
     );
     this.innerHTML = `
@@ -1908,7 +2116,7 @@ class RowSelect extends HTMLElement {
     );
     this.innerHTML = `
       <label class="tp relative">
-        <input type="checkbox" class="checkstyle" name="test" />
+        <input type="checkbox" class="checkstyle form-checkbox" name="test" />
         <div class="absolute block inset-0 shadow-y"></div>
       </label>
     `;
@@ -1961,11 +2169,12 @@ class TableCell extends HTMLElement {
 
   connectedCallback() {
     this.classList.add("relative", "bg-white");
+    const value = this.getAttribute("value");
     this.innerHTML = `
       <cell-ring state="default"></cell-ring>
       <cell-edit></cell-edit>
       <cell-preview active="true" class="select-none">
-        ${this.value}
+        ${value}
       </cell-preview>
     `;
   }
@@ -1978,6 +2187,44 @@ Bostav eller siffra - om allowKeypress från fält options
 
 customElements.define("table-cell", TableCell);
 
+class TableCells extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["value"];
+  }
+
+  connectedCallback() {
+    this.classList.add("contents");
+    this.innerHTML = this.template();
+  }
+
+  template() {
+    const main = this.closest("pane-main");
+    const this_data =
+      data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
+    const cols = this_data.cols_order;
+    let html = "";
+
+    this_data.rows.forEach((row) => {
+      html += `
+        <div class="contents">
+          <row-select></row-select>`;
+      cols.forEach((item) => {
+        const value = row[item];
+        html += `<table-cell value="${value}"></table-cell>`;
+      });
+      html += `</div>`;
+    });
+
+    return html;
+  }
+}
+
+customElements.define("table-cells", TableCells);
+
 class TableHeadingCheck extends HTMLElement {
   constructor() {
     super();
@@ -1985,19 +2232,19 @@ class TableHeadingCheck extends HTMLElement {
 
   connectedCallback() {
     this.classList.add(
-      //"ring-1",
-      //"ring-gray-100",
       "sticky",
       "top-0",
-      "left-0",
-      "z-50",
+      "z-[600]",
       "flex",
-      "sticky"
+      "sticky",
+      "bg-gray-100",
+      "heading-bkg",
+      "left-0"
     );
+
     this.innerHTML = `
-      <label class="tp relative heading-bkg flex items-center">
-        <input type="checkbox" class="checkstyle" name="test" />
-        <div class="absolute block inset-0 ring-1 ring-gray-100"></div>
+      <label class="tp relative heading-bkg flex items-center bg-gray-100">
+        <input type="checkbox" class="form-checkbox checkstyle-white" name="test" />
       </label>
     `;
     this.onChange();
@@ -2069,6 +2316,7 @@ class TableHeading extends HTMLElement {
   connectedCallback() {
     const id = this.getAttribute("key");
     const title = this.getAttribute("title");
+    const type = this.getAttribute("fieldtype");
     const key_html = id ? this.keyHtml() : "";
 
     this.classList.add(
@@ -2081,11 +2329,17 @@ class TableHeading extends HTMLElement {
       "text-sm",
       "sticky",
       "top-0",
-      "z-50"
+      "z-[500]",
+      "bg-gray-100"
     );
     this.innerHTML = `
       ${key_html}
-      ${title}
+      <div class="flex flex-col gap-1">
+        <div>
+          <div class="text-opacity-60 text-black inline-block py-0.5 text-xs font-normal rounded">${type}</div>
+        </div>
+        ${title}
+      </div>
     `;
   }
 
@@ -2102,6 +2356,54 @@ class TableHeading extends HTMLElement {
 }
 
 customElements.define("table-heading", TableHeading);
+
+class TableHeadings extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("z-40", "contents");
+
+    this.innerHTML = this.template();
+  }
+
+  template() {
+    const main = this.closest("pane-main");
+    const this_data =
+      data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
+    const cols = this_data.cols_order;
+    let html = `<table-heading-check></table-heading-check>`;
+
+    cols.forEach((item) => {
+      const col = this_data.cols[item];
+      const key = col.config && col.config.id ? `key="true"` : "";
+      html += `
+        <table-heading title="${item}" fieldtype="${col.meta.Type}" ${key}></table-heading>
+      `;
+    });
+
+    return html;
+  }
+
+  /*attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }*/
+}
+
+customElements.define("table-headings", TableHeadings);
 
 class TabItem extends HTMLElement {
   constructor() {
@@ -2287,7 +2589,7 @@ class TopbarWrap extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
     <div
-      class="flex items-center justify-between pr-2 text-gray-200 bg-navy-600"
+      class="flex items-center justify-between pr-2 text-gray-200 bg-blueGray-700 border-b-2 border-blueGray-800"
     >
       <resize-logo>
         <div class="pl-4 pr-8 flex items-center gap-2 text-2xl text-white uppercase">
@@ -2444,7 +2746,7 @@ class CheckboxItem extends HTMLElement {
 
     this.innerHTML = `
       <label class="flex select-none items-center gap-2">
-        <input type="checkbox" class="w-4 h-4 rounded focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
+        <input type="checkbox" class="form-checkbox w-4 h-4 rounded focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
         ${label ? label : ""}
       </label>
     `;
@@ -2571,37 +2873,58 @@ class PaneMain extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("flex", "flex-col", "overflow-auto", "gap-2");
+    this.classList.add("flex", "flex-col", "overflow-auto", "flex-1");
+
+    const grid_cols = this.gridCols();
+    const grid_cols_class = `auto ${grid_cols.widths.join("px ")}px`;
+    console.log(JSON.stringify(grid_cols_class));
+
     this.innerHTML = `
       <actions-x></actions-x>
       <div class="flex-1 flex overflow-auto">
-        <div class="flex-1 overflow-x-auto border border-gray-200 rounded">
-          <div class="flex-1 text-13 w-[1300px]">
-            <div data-table class="grid gap-y-px bg-white grid-cols-[auto,1200px,300px,300px]">
-              ${this.headings()}
-              <div data-cells class="contents"></div>
+        <div class="flex-1 overflow-x-auto my-4 border border-gray-200 rounded bg-white">
+          <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
+            <div data-table class="grid gap-y-px bg-white" style="grid-template-columns: ${grid_cols_class};">
+              <table-headings></table-headings>
+              <table-cells></table-cells>
             </div>
           </div>
         </div>
       </div>
       <pagination-x></pagination-x>
     `;
-    let parts = "";
-    for (let i = 0; i < 100; i++) {
-      parts += this.part();
-    }
-
-    $("[data-cells]").innerHTML = parts;
   }
 
-  headings() {
-    return `
-    <div data-headings class="z-40 contents">
-      <table-heading-check></table-heading-check>
-      <table-heading title="id" key="true"></table-heading>
-      <table-heading title="title"></table-heading>
-      <table-heading title="description"></table-heading>
-    </div>`;
+  gridCols() {
+    const this_data =
+      data[`${this.getAttribute("database")} ${this.getAttribute("table")}`];
+
+    let sum = 0;
+    let widths = [];
+
+    this_data.cols_order.forEach((item) => {
+      let width = null;
+      const item_obj = this_data.cols[item];
+
+      if (item_obj.config && item_obj.config.hasOwnProperty("width")) {
+        width = item_obj.config.width;
+      } else {
+        width = 300;
+      }
+
+      widths.push(width);
+
+      sum += width;
+
+      console.log(width);
+      //console.log(item);
+      //console.log(this_data.cols[item].config);
+    });
+
+    return {
+      sum: sum,
+      widths: widths,
+    };
   }
 
   part() {
@@ -2612,6 +2935,34 @@ class PaneMain extends HTMLElement {
         <table-cell></table-cell>
         <table-cell></table-cell>
       </div>`;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.setAttribute("hidden", "");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
   }
 }
 
@@ -2651,7 +3002,7 @@ class FieldText extends HTMLElement {
   connectedCallback() {
     const value = "test";
     this.innerHTML = `
-      <input value="${value}" type="text" class="focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
+      <input value="${value}" type="text" class="form-input focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
     `;
 
     this.onKeyup();

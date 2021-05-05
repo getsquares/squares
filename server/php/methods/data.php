@@ -24,6 +24,11 @@ class Data {
     $this->cols = [];
     $this->cols_order = [];
     $this->rows = [];
+    $this->meta = [
+      'limit' => $this->limit,
+      'offset' => $this->offset,
+      'total' => $this->getTotal()
+    ];
   }
 
   function rows() {
@@ -36,6 +41,10 @@ class Data {
 
   function cols_order() {
     return $this->cols_order;
+  }
+
+  function meta() {
+    return $this->meta;
   }
 
   // Get args
@@ -123,6 +132,18 @@ class Data {
         $this->rows[$i][$key] = $value;
       }
     }
+  }
+
+  function getTotal() {
+    $column_names = [];
+    foreach($this->cols_order as $name) {
+      // Skip passive
+      if(!empty($this->cols[$name]['config']['passive'])) continue;
+      $column_names[] = $name;
+    }
+    $data = $this->queryTotal($column_names);
+
+    return $data[0]['COUNT(*)'];
   }
 
   function orderByToString() {
@@ -226,6 +247,25 @@ class Data {
     $db->connect($this->database);
     $db->sql($sql);
     $db->attr(PDO::FETCH_OBJ);
+    $db->query($filter_values);
+
+    return $db->results;
+  }
+
+  function queryTotal($visible_columns) {
+    $filter_sql = (isset($this->filters['sql']) && !empty($this->filters['sql'])) ? $this->filters['sql'] : '';
+    $filter_values = (isset($this->filters['values']) && !empty($this->filters['values'])) ? $this->filters['values'] : [];
+    
+    $sql = "
+      SELECT COUNT(*)
+      FROM $this->table
+      $filter_sql
+    ";
+
+    $db = new db();
+    $db->connect($this->database);
+    $db->sql($sql);
+    $db->attr(PDO::FETCH_ASSOC);
     $db->query($filter_values);
 
     return $db->results;

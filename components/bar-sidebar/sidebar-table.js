@@ -16,7 +16,7 @@ class SidebarTable extends HTMLElement {
       "flex",
       "gap-2",
       "py-1",
-      "px-4",
+      "px-2",
       "cursor-default",
       "select-none",
       "fill-current",
@@ -66,10 +66,26 @@ class SidebarTable extends HTMLElement {
     } else {
       tab.add(current.database, current.table);
 
-      //$("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
       syncSidebarLogo();
       // Fetch
-      this.test(current.database, current.table).then((test) => {});
+      this.test(current.database, current.table).then((test) => {
+        data[current.database + " " + current.table] = test;
+
+        const html = `
+          <pane-main database="${current.database}" table="${current.table}" active="true"></pane-main>
+        `;
+
+        $$("pane-main").forEach((item) => {
+          item.deactivate();
+        });
+
+        $("main-x").insertAdjacentHTML("beforeend", html);
+        $("select-table").setAttribute("hidden", "");
+
+        $("records-x").setAttribute("rows", test.meta.limit);
+        $("records-x").setAttribute("offset", test.meta.offset);
+        $("records-x").setAttribute("total", test.meta.total);
+      });
     }
   }
 

@@ -10,41 +10,49 @@ class OrderX extends HTMLElement {
   connectedCallback() {
     this.classList.add("gap-4", "flex", "text-sm");
     this.setAttribute("hidden", "");
-    this.innerHTML = this.template("Sort by");
-  }
-
-  filters() {
-    return this.partFilter("test23", true) + this.partFilter("test");
+    this.innerHTML = this.template("Filter");
+    this.onAdd();
   }
 
   template(title) {
     return `
-      <div class="flex flex-col gap-6 p-4 flex-1">
-        <div class="flex flex-col gap-2">
-          <div class="font-bold">Order by</div>
-          <div class="flex gap-8">
-            <radio-item name="order_by" label="Unsorted" checked=""></radio-item>
-            <radio-item name="order_by" label="id" checked=""></radio-item>
-            <radio-item name="order_by" label="title" checked=""></radio-item>
-            <radio-item name="order_by" label="slug" checked=""></radio-item>
-            <radio-item name="order_by" label="description" checked=""></radio-item>
+      <div class="flex flex-col gap-4 p-4 pr-0 flex-1">
+        <div class="grid grid-cols-[minmax(200px,max-content),1fr,auto] gap-2 flex-col">
+          <div class="contents">
+            ${this.heading("Order by")}
+            ${this.heading("Order")}
+            ${this.heading("")}
           </div>
+          <order-items class="contents"></order-items>
         </div>
-        <div class="flex flex-col gap-2">
-          <div class="font-bold">Order direction</div>
-          <div class="flex gap-8">
-            <radio-item name="order" label="Unsorted" checked=""></radio-item>
-            <radio-item name="order" label="Ascending" checked=""></radio-item>
-            <radio-item name="order" label="Descending" checked=""></radio-item>
-          </div>
+        <div class="flex gap-2 justify-between">
+          <order-add class="btn btn-default">
+            <img-svg src="remixicon/add.svg" classes="w-5 h-5"></img-svg>
+            <div>Add new</div>
+          </order-add>
+          <button class="btn btn-primary">
+            <img-svg src="remixicon/arrow-up-down.svg" classes="w-5 h-5"></img-svg>
+            <div>Order rows</div>
+          </button>
         </div>
       </div>
       <pane-close hide="pane-filter"></pane-close>
     `;
   }
 
-  partHeading(label) {
-    return `<div class="font-bold text-sm uppercase">${label}</div>`;
+  onAdd() {
+    $("order-add").addEventListener("click", () => {
+      this.appendItem();
+    });
+  }
+
+  appendItem() {
+    const el = "<order-item></order-item>";
+    $("order-items").insertAdjacentHTML("beforeend", el);
+  }
+
+  heading(label) {
+    return `<div class="font-bold text-sm">${label}</div>`;
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
@@ -64,43 +72,7 @@ class OrderX extends HTMLElement {
   }
 
   thisDeactivate() {
-    this.removeAttribute("hidden", "");
-  }
-
-  partFilter(name, checked) {
-    //&filter[]=slug%20equals%202
-    return `
-    <div class="contents">
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
-        <option>hello</option>
-        <option>hello2</option>
-      </select>
-      <select class="bg-white border-gray-300 rounded focus:ring-0 focus:border-gray-400 text-sm">
-        ${this.partMatches()}
-      </select>
-    </div>
-    `;
-  }
-
-  partMatches() {
-    const matches = [
-      {
-        name: "asc",
-        label: "Ascending",
-      },
-      {
-        name: "desc",
-        label: "Descending",
-      },
-    ];
-
-    let html_part = [];
-
-    matches.forEach((item) => {
-      html_part.push(`<option value="${item.name}">${item.label}</option>`);
-    });
-
-    return html_part.join(" ");
+    this.setAttribute("hidden", "");
   }
 
   activate() {

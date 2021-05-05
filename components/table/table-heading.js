@@ -10,6 +10,7 @@ class TableHeading extends HTMLElement {
   connectedCallback() {
     const id = this.getAttribute("key");
     const title = this.getAttribute("title");
+    const type = this.getAttribute("fieldtype");
     const key_html = id ? this.keyHtml() : "";
 
     this.classList.add(
@@ -22,11 +23,17 @@ class TableHeading extends HTMLElement {
       "text-sm",
       "sticky",
       "top-0",
-      "z-50"
+      "z-[500]",
+      "bg-gray-100"
     );
     this.innerHTML = `
       ${key_html}
-      ${title}
+      <div class="flex flex-col gap-1">
+        <div>
+          <div class="text-opacity-60 text-black inline-block py-0.5 text-xs font-normal rounded">${type}</div>
+        </div>
+        ${title}
+      </div>
     `;
   }
 

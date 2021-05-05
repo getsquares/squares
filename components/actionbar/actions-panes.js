@@ -17,6 +17,7 @@ class ActionsPanes extends HTMLElement {
     );
     this.setAttribute("hidden", "");
     this.innerHTML = `
+      <panes-x></panes-x>
       <columns-x></columns-x>
       <filter-x></filter-x>
       <order-x></order-x>
@@ -45,7 +46,7 @@ class ActionsPanes extends HTMLElement {
 
   activate(name) {
     this.setAttribute("active", "true");
-    console.log(name);
+
     this.querySelector(name).removeAttribute("hidden");
   }
 

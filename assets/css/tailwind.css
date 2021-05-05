@@ -3,6 +3,7 @@
 
 @import "./test.css";
 @import "./buttons.css";
+@import "./form.css";
 
 @import "tailwindcss/utilities";
 
@@ -89,6 +90,10 @@
 
   .checkstyle {
     @apply w-4 h-4 border-none rounded-sm bg-grayExtra text-navy-600 focus:ring-0 focus:ring-offset-0;
+  }
+
+  .checkstyle-white {
+    @apply w-4 h-4 bg-white border border-gray-300 rounded-sm text-navy-600 focus:ring-0 focus:ring-offset-0;
   }
 
   .actionbar-select {

@@ -1,4 +1,4 @@
-class ColumnsItem extends HTMLElement {
+class PanesItem extends HTMLElement {
   constructor() {
     super();
   }
@@ -9,20 +9,22 @@ class ColumnsItem extends HTMLElement {
 
   connectedCallback() {
     const name = this.getAttribute("name");
+    const label = this.getAttribute("label");
     const checked = this.getAttribute("checked");
+
     this.classList.add("flex");
 
-    this.innerHTML = this.template(name, checked);
+    this.innerHTML = this.template(name, label, checked);
     this.onClick();
   }
 
-  template(name, checked) {
+  template(name, label, checked) {
     return `
       <label class="btn btn-borderless">
         <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
       checked ? "checked" : ""
     }>
-        ${name}
+        ${label}
       </label>
     `;
   }
@@ -30,7 +32,7 @@ class ColumnsItem extends HTMLElement {
   attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
       if (attr == "checked") {
-        this.onChange();
+        this.onChange(newValue);
       }
     }
   }
@@ -45,8 +47,14 @@ class ColumnsItem extends HTMLElement {
     });
   }
 
-  onChange() {
-    console.log("Something has changed");
+  onChange(checked) {
+    const name = this.getAttribute("name");
+
+    if (!checked) {
+      $(name).setAttribute("hidden", "");
+    } else {
+      $(name).removeAttribute("hidden", "");
+    }
   }
 
   activate() {
@@ -58,4 +66,4 @@ class ColumnsItem extends HTMLElement {
   }
 }
 
-customElements.define("columns-item", ColumnsItem);
+customElements.define("panes-item", PanesItem);

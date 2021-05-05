@@ -8,7 +8,7 @@ class SidebarDatabaseLoading extends HTMLElement {
       "flex",
       "gap-2",
       "py-1",
-      "px-4",
+      "px-2",
       "cursor-default",
       "select-none",
       "fill-current",

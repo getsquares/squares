@@ -12,6 +12,7 @@ $data_class = new Data();
 $data_class->setColumns();
 $data_class->setRows();
 
+$results['meta'] = $data_class->meta();
 $results['cols_order'] = $data_class->cols_order();
 $results['cols'] = $data_class->cols();
 $results['rows'] = $data_class->rows();

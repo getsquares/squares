@@ -6,7 +6,7 @@ class TopbarWrap extends HTMLElement {
   connectedCallback() {
     this.innerHTML = `
     <div
-      class="flex items-center justify-between pr-2 text-gray-200 bg-navy-600"
+      class="flex items-center justify-between pr-2 text-gray-200 bg-blueGray-700 border-b-2 border-blueGray-800"
     >
       <resize-logo>
         <div class="pl-4 pr-8 flex items-center gap-2 text-2xl text-white uppercase">

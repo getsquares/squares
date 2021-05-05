@@ -5,19 +5,19 @@ class TableHeadingCheck extends HTMLElement {
 
   connectedCallback() {
     this.classList.add(
-      //"ring-1",
-      //"ring-gray-100",
       "sticky",
       "top-0",
-      "left-0",
-      "z-50",
+      "z-[600]",
       "flex",
-      "sticky"
+      "sticky",
+      "bg-gray-100",
+      "heading-bkg",
+      "left-0"
     );
+
     this.innerHTML = `
-      <label class="tp relative heading-bkg flex items-center">
-        <input type="checkbox" class="checkstyle" name="test" />
-        <div class="absolute block inset-0 ring-1 ring-gray-100"></div>
+      <label class="tp relative heading-bkg flex items-center bg-gray-100">
+        <input type="checkbox" class="form-checkbox checkstyle-white" name="test" />
       </label>
     `;
     this.onChange();

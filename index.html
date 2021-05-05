@@ -22,9 +22,12 @@
       <!-- Sidebar -->
       <sidebar-wrap></sidebar-wrap>
       <!-- Main -->
-      <div class="flex flex-col flex-1 pr-4 overflow-hidden bg-gray-50">
-        <pane-main></pane-main>
-      </div>
+      <main-x class="flex flex-col flex-1 px-4 overflow-hidden bg-gray-50">
+        <select-table class="flex items-center justify-center flex-1 w-full gap-2 text-2xl bg-white border-l">
+          <img-svg src="remixicon/arrow-left-s-line.svg" classes="w-7 h-7 opacity-25"></img-svg>
+          Select a table...
+        </select-table>
+      </main>
     </div>
 
     <modal-box></modal-box>
@@ -53,6 +56,8 @@
         database: null,
         table: null,
       };
+
+      var data = {};
 
       var tables = {};
 

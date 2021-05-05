@@ -14,5 +14,10 @@ return [
     'host' => 'localhost',
     'user' => 'root',
     'password' => ''
+  ],
+  'world' => [
+    'host' => 'localhost',
+    'user' => 'root',
+    'password' => ''
   ]
 ];

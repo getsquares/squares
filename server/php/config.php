@@ -1,6 +1,24 @@
 <?php
 return [
   'databases' => [
+    'world' => [
+      'city' => [
+        'id' => 'ID',
+        'fields' => [
+          'id' => [
+            'type' => 'int'
+          ]
+        ]
+      ],
+      'country' => [
+        'id' => 'Code',
+        'fields' => [
+          'Code' => [
+            'type' => 'text'
+          ]
+        ]
+      ]
+    ],
     'test' => [
       'a_table_with_a_really_long_name' => [
         'id' => 'id',

@@ -8,37 +8,58 @@ class PaneMain extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("flex", "flex-col", "overflow-auto", "gap-2");
+    this.classList.add("flex", "flex-col", "overflow-auto", "flex-1");
+
+    const grid_cols = this.gridCols();
+    const grid_cols_class = `auto ${grid_cols.widths.join("px ")}px`;
+    console.log(JSON.stringify(grid_cols_class));
+
     this.innerHTML = `
       <actions-x></actions-x>
       <div class="flex-1 flex overflow-auto">
-        <div class="flex-1 overflow-x-auto border border-gray-200 rounded">
-          <div class="flex-1 text-13 w-[1300px]">
-            <div data-table class="grid gap-y-px bg-white grid-cols-[auto,1200px,300px,300px]">
-              ${this.headings()}
-              <div data-cells class="contents"></div>
+        <div class="flex-1 overflow-x-auto my-4 border border-gray-200 rounded bg-white">
+          <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
+            <div data-table class="grid gap-y-px bg-white" style="grid-template-columns: ${grid_cols_class};">
+              <table-headings></table-headings>
+              <table-cells></table-cells>
             </div>
           </div>
         </div>
       </div>
       <pagination-x></pagination-x>
     `;
-    let parts = "";
-    for (let i = 0; i < 100; i++) {
-      parts += this.part();
-    }
-
-    $("[data-cells]").innerHTML = parts;
   }
 
-  headings() {
-    return `
-    <div data-headings class="z-40 contents">
-      <table-heading-check></table-heading-check>
-      <table-heading title="id" key="true"></table-heading>
-      <table-heading title="title"></table-heading>
-      <table-heading title="description"></table-heading>
-    </div>`;
+  gridCols() {
+    const this_data =
+      data[`${this.getAttribute("database")} ${this.getAttribute("table")}`];
+
+    let sum = 0;
+    let widths = [];
+
+    this_data.cols_order.forEach((item) => {
+      let width = null;
+      const item_obj = this_data.cols[item];
+
+      if (item_obj.config && item_obj.config.hasOwnProperty("width")) {
+        width = item_obj.config.width;
+      } else {
+        width = 300;
+      }
+
+      widths.push(width);
+
+      sum += width;
+
+      console.log(width);
+      //console.log(item);
+      //console.log(this_data.cols[item].config);
+    });
+
+    return {
+      sum: sum,
+      widths: widths,
+    };
   }
 
   part() {
@@ -49,6 +70,34 @@ class PaneMain extends HTMLElement {
         <table-cell></table-cell>
         <table-cell></table-cell>
       </div>`;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.setAttribute("hidden", "");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
   }
 }
 

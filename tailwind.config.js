@@ -1,12 +1,17 @@
 const colors = require("tailwindcss/colors");
 
 module.exports = {
-  purge: [
-    "./components/**/*.js",
-    "./field/**/*.js",
-    "./methods/**/*.js",
-    "index.html",
-  ],
+  purge: {
+    content: [
+      "./components/**/*.js",
+      "./field/**/*.js",
+      "./methods/**/*.js",
+      "index.html",
+    ],
+    options: {
+      safelist: [/^grid-cols/],
+    },
+  },
   darkMode: false, // or 'media' or 'class'
   mode: "jit",
   theme: {
@@ -45,7 +50,8 @@ module.exports = {
       },
       boxShadow: {
         y: "0 -1px 0px 0px #e5e5e5, 0 1px 0px 0px #e5e5e5",
-        navy: "0 -1px 0px 0px #afcdef, 0 1px 0px 0px #afcdef",
+        navy:
+          "0 -1px 0px 0px #afcdef, 0 1px 0px 0px #afcdef, -1px -1px 0 0px #afcdef",
       },
       fontSize: {
         13: "0.813rem",
@@ -60,5 +66,9 @@ module.exports = {
       borderStyle: ["hover"],
     },
   },
-  plugins: [require("@tailwindcss/forms")],
+  plugins: [
+    require("@tailwindcss/forms")({
+      strategy: "class",
+    }),
+  ],
 };

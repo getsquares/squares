@@ -1,5 +1,5 @@
 .btn {
-  @apply border border-b-2 cursor-default flex gap-2 items-center px-3 py-1.5 rounded select-none text-sm;
+  @apply border border-b-2 cursor-default inline-flex gap-2 items-center py-1.5 rounded select-none text-sm;
 }
 
 /* Default */
@@ -16,6 +16,12 @@
   @apply bg-navy-100 text-navy-900 border-navy-300;
 }
 
+/* Borderless */
+
+.btn-borderless {
+  @apply border-transparent;
+}
+
 /* Primary */
 .btn-primary {
   @apply text-white border-navy-600 bg-navy-500 hover:border-navy-800;
@@ -23,4 +29,10 @@
 
 .btn-primary:hover {
   @apply hover:border-navy-800;
+}
+
+.btn-default,
+.btn-default-active,
+.btn-primary {
+  @apply px-3;
 }

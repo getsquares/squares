@@ -9,11 +9,12 @@ class TableCell extends HTMLElement {
 
   connectedCallback() {
     this.classList.add("relative", "bg-white");
+    const value = this.getAttribute("value");
     this.innerHTML = `
       <cell-ring state="default"></cell-ring>
       <cell-edit></cell-edit>
       <cell-preview active="true" class="select-none">
-        ${this.value}
+        ${value}
       </cell-preview>
     `;
   }

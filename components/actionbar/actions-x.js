@@ -4,7 +4,7 @@ class ActionsX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("flex", "flex-col", "gap-2");
+    this.classList.add("flex", "flex-col", "gap-2", "-mb-2");
     this.innerHTML = `      
       <actions-tabs></actions-tabs>
       <actions-panes></actions-panes>

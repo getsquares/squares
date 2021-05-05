@@ -3,6 +3,10 @@ class RecordsX extends HTMLElement {
     super();
   }
 
+  static get observedAttributes() {
+    return ["limit", "rows", "total"];
+  }
+
   connectedCallback() {
     this.classList.add("text-13", "items-center", "flex");
     this.update();

@@ -24,7 +24,7 @@ class ColumnsX extends HTMLElement {
     return `
       <div class="flex flex-col gap-2 p-4 flex-1">
         <div class="font-bold">${title}</div>
-        <div class="flex gap-2">
+        <div class="flex gap-4">
           ${this.checkboxes()}
         </div>
       </div>

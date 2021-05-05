@@ -73,7 +73,13 @@ function tabClassInactive() {
 }
 
 function hollowClassActive() {
-  return ["bg-navy-100", "text-navy-900", "shadow-navy"];
+  return [
+    "bg-navy-100",
+    "text-navy-900",
+    "border",
+    "border-navy-300",
+    "rounded",
+  ];
 }
 
 function hollowClassInactive() {
