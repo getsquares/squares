@@ -13,7 +13,7 @@ class TabItem extends HTMLElement {
         "rounded-t",
         "px-4",
         "pr-2",
-        "py-1.5",
+        "py-2",
         "cursor-default",
         "select-none",
         "focus:outline-none",

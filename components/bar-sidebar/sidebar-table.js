@@ -63,6 +63,16 @@ class SidebarTable extends HTMLElement {
     if (el) {
       tabs.deactivate();
       el.activate();
+
+      $$("pane-main").forEach((item) => {
+        item.deactivate();
+      });
+
+      const current_el = $(
+        `pane-main[database="${current.database}"][table="${current.table}"]`
+      );
+
+      current_el.activate();
     } else {
       tab.add(current.database, current.table);
 
@@ -80,11 +90,16 @@ class SidebarTable extends HTMLElement {
         });
 
         $("main-x").insertAdjacentHTML("beforeend", html);
+
+        const current_el = $(
+          `pane-main[database="${current.database}"][table="${current.table}"]`
+        );
+
         $("select-table").setAttribute("hidden", "");
 
-        $("records-x").setAttribute("rows", test.meta.limit);
-        $("records-x").setAttribute("offset", test.meta.offset);
-        $("records-x").setAttribute("total", test.meta.total);
+        $("records-x", current_el).setAttribute("rows", test.meta.limit);
+        $("records-x", current_el).setAttribute("offset", test.meta.offset);
+        $("records-x", current_el).setAttribute("total", test.meta.total);
       });
     }
   }

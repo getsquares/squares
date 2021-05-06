@@ -25,13 +25,16 @@ class ActionsTab extends HTMLElement {
     this.addEventListener("click", () => {
       const active = this.getAttribute("active") == "true";
       const name = this.getAttribute("name");
+      const panes_el = this.closest("pane-main").querySelector("actions-panes");
 
-      $("actions-tabs").deactivate();
-      $("actions-panes").deactivate();
+      console.log(panes_el);
+
+      this.closest("pane-main").querySelector("actions-tabs").deactivate();
+      panes_el.deactivate();
 
       if (!active) {
         this.activate();
-        $("actions-panes").activate(name);
+        panes_el.activate(name);
       }
       /*
       const pane = $(`pane-${this.getAttribute("name")}`);

@@ -17,7 +17,7 @@ class PaneMain extends HTMLElement {
     this.innerHTML = `
       <actions-x></actions-x>
       <div class="flex-1 flex overflow-auto">
-        <div class="flex-1 overflow-x-auto my-4 border border-gray-200 rounded bg-white">
+        <div class="overflow-x-auto flex-1 my-4 border border-gray-200 rounded bg-white">
           <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
             <div data-table class="grid gap-y-px bg-white" style="grid-template-columns: ${grid_cols_class};">
               <table-headings></table-headings>

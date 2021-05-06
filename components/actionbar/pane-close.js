@@ -16,9 +16,9 @@ class PaneClose extends HTMLElement {
   onClick() {
     $("button", this).addEventListener("click", () => {
       //this.closest(hide).deactivate();
-      $("actions-panes > *:not([hidden])").setAttribute("hidden", "");
-      $("actions-panes").removeAttribute("active");
-      $(`actions-tab[active="true"]`).deactivate();
+      $("actions-panes > *:not([hidden])", this).setAttribute("hidden", "");
+      $("actions-panes", this).removeAttribute("active");
+      $(`actions-tab[active="true"]`, this).deactivate();
     });
   }
 }

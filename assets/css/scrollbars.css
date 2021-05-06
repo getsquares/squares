@@ -1,0 +1,15 @@
+::-webkit-scrollbar {
+  @apply w-4 h-4;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-50;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 !border-2 rounded border-gray-50;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400;
+}

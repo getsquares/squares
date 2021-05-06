@@ -4,6 +4,7 @@
 @import "./test.css";
 @import "./buttons.css";
 @import "./form.css";
+@import "./scrollbars.css";
 
 @import "tailwindcss/utilities";
 
@@ -46,28 +47,6 @@
     @apply px-3 py-1.5;
   }
 
-  /*
-  ::-webkit-scrollbar {
-    @apply w-3 h-3;
-  }
-
-  
-  ::-webkit-scrollbar-track {
-    @apply bg-white;
-  }
-
-  
-  ::-webkit-scrollbar-thumb {
-    @apply bg-gray-300;
-  }
-
-  
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-400;
-  }
-
-  
-*/
   tab-items::-webkit-scrollbar {
     @apply w-2 h-2;
   }

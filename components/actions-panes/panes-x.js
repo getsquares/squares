@@ -42,9 +42,14 @@ class PanesX extends HTMLElement {
 
   onClose() {
     $("button-done", this).addEventListener("click", () => {
-      $("actions-panes > *:not([hidden])").setAttribute("hidden", "");
-      $("actions-panes").removeAttribute("active");
-      $(`actions-tab[name="${this.tagName.toLowerCase()}"]`).deactivate();
+      const main_el = this.closest("pane-main");
+      main_el
+        .querySelector("actions-panes > *:not([hidden])")
+        .setAttribute("hidden", "");
+      main_el.querySelector("actions-panes").removeAttribute("active");
+      main_el
+        .querySelector(`actions-tab[name="${this.tagName.toLowerCase()}"]`)
+        .deactivate();
     });
   }
 

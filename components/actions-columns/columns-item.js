@@ -36,7 +36,7 @@ class ColumnsItem extends HTMLElement {
   }
 
   onClick() {
-    this.querySelector("input").addEventListener("change", (e) => {
+    $("input", this).addEventListener("change", (e) => {
       if (e.currentTarget.checked) {
         this.activate();
       } else {

@@ -22,6 +22,11 @@
   @apply border-transparent;
 }
 
+/* Delete */
+.btn-delete {
+  @apply text-white bg-red-600 border-red-700 filter saturate-50;
+}
+
 /* Primary */
 .btn-primary {
   @apply text-white border-navy-600 bg-navy-500 hover:border-navy-800;
@@ -33,6 +38,7 @@
 
 .btn-default,
 .btn-default-active,
-.btn-primary {
+.btn-primary,
+.btn-delete {
   @apply px-3;
 }

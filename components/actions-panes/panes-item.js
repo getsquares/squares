@@ -50,11 +50,23 @@ class PanesItem extends HTMLElement {
   onChange(checked) {
     const name = this.getAttribute("name");
 
-    if (!checked) {
-      $(name).setAttribute("hidden", "");
-    } else {
-      $(name).removeAttribute("hidden", "");
-    }
+    $$(name).forEach((el) => {
+      if (!checked) {
+        el.setAttribute("hidden", "");
+      } else {
+        el.removeAttribute("hidden", "");
+      }
+
+      // Sync
+      $$(`panes-item[name="${name}"]`).forEach((item) => {
+        if (!checked) {
+          item.removeAttribute("checked");
+        } else {
+          item.setAttribute("checked", "true");
+        }
+        item.querySelector("input").checked = checked;
+      });
+    });
   }
 
   activate() {

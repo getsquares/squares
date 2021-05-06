@@ -14,10 +14,19 @@ class ColumnsX extends HTMLElement {
   }
 
   checkboxes() {
-    return `
-      <columns-item name="alright" checked="true"></columns-item>
-      <columns-item name="asd"></columns-item>
-    `;
+    const database = this.closest("pane-main").getAttribute("database");
+    const table = this.closest("pane-main").getAttribute("table");
+    const data_cols_all = data[`${database} ${table}`].cols_all;
+    const data_cols_active = data[`${database} ${table}`].cols_order;
+    let html = "";
+
+    data_cols_all.forEach((item) => {
+      const checked = data_cols_active.includes(item);
+      const checked_html = checked ? `checked="true"` : "";
+      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
+    });
+
+    return html;
   }
 
   template(title) {

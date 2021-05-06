@@ -10,7 +10,6 @@ class TabItems extends HTMLElement {
       "items-center",
       "gap-2",
       "text-white",
-      "bg-navy-600",
       "overflow-auto",
       "w-full",
       "self-end"

@@ -63,15 +63,16 @@
 
       window.addEventListener("DOMContentLoaded", () => {
         eventCellKeydown();
-        outsideClick();
+        //outsideClick();
         eventCellClick();
         eventCellDoubleclick();
-      });
 
-      new ResizeObserver(() => {
-        //$("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
+        new ResizeObserver(() => {
         syncSidebarLogo();
       }).observe($("sidebar-wrap"));
+      });
+
+      
     </script>
 
     <script src="assets/js/axios.min.js"></script>

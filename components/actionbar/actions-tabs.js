@@ -22,7 +22,7 @@ class ActionsTabs extends HTMLElement {
   }
 
   deactivate() {
-    $$("actions-tab").forEach((el) => {
+    $$("actions-tab", this).forEach((el) => {
       el.deactivate();
     });
   }

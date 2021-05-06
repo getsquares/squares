@@ -36,5 +36,5 @@ function setCellActiveToEl(el, state = "active") {
 }
 
 function syncSidebarLogo() {
-  $("resize-logo").style.width = $("sidebar-wrap").offsetWidth + "px";
+  $("resize-logo").style.width = $("sidebar-wrap").offsetWidth + 16 + "px";
 }

@@ -21,6 +21,7 @@ class Data {
     $this->config_table = $this->config[$this->database][$this->table];
 
     $this->limit = $this->getLimit();
+    $this->all_cols = [];
     $this->cols = [];
     $this->cols_order = [];
     $this->rows = [];
@@ -33,6 +34,10 @@ class Data {
 
   function rows() {
     return $this->rows;
+  }
+
+  function cols_all() {
+    return $this->all_cols;
   }
 
   function cols() {
@@ -104,6 +109,8 @@ class Data {
       if(isset($this->config_table['columns'][$item['Field']])) {
         $config_field = $this->config_table['columns'][$item['Field']];
       }
+
+      $this->all_cols[] = $item['Field'];
 
       if(!empty($config_field['hidden'])) continue;
 

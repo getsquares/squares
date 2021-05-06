@@ -88,11 +88,11 @@ class tab {
   }
 
   static classesActive() {
-    return ["bg-white", "text-gray-800"];
+    return ["bg-gray-50", "text-gray-800"];
   }
 
   static classesInactive() {
-    return ["bg-navy-700", "text-navy-200", "hover:bg-navy-800"];
+    return ["bg-blueGray-800", "text-blueGray-200", "hover:bg-blueGray-800"];
   }
 
   static classesActiveClose() {
@@ -100,7 +100,7 @@ class tab {
   }
 
   static classesInactiveClose() {
-    return ["hover:bg-navy-600"];
+    return ["hover:bg-blueGray-600"];
   }
 
   // tab.hasActive()
