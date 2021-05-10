@@ -16,6 +16,7 @@ class ActionsTab extends HTMLElement {
     this.innerHTML = `
       <img-svg src="${icon}" classes="w-5 h-5"></img-svg>
       <div>${label}</div>
+      <img-svg src="remixicon/arrow-down-s.svg" classes="w-5 h-5 fill-current opacity-30"></img-svg>
     `;
 
     this.onClick();

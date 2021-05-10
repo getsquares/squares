@@ -1,0 +1,12 @@
+sidebar-table {
+  @apply flex items-center gap-2 px-2 py-1 border border-transparent rounded cursor-default select-none fill-current;
+}
+
+sidebar-table:hover {
+  @apply bg-gray-200;
+}
+
+sidebar-table[active="true"],
+sidebar-table[active="true"]:hover {
+  @apply bg-navy-100 text-navy-900 border-navy-300;
+}

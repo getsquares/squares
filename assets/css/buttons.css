@@ -24,7 +24,20 @@
 
 /* Delete */
 .btn-delete {
-  @apply text-white bg-red-600 border-red-700 filter saturate-50;
+  @apply text-red-900 bg-red-200 border-red-300;
+}
+
+.btn-delete:hover {
+  @apply border-red-400;
+}
+
+/* Clone */
+.btn-clone {
+  @apply text-yellow-900 bg-yellow-200 border-yellow-300;
+}
+
+.btn-clone:hover {
+  @apply border-yellow-400;
 }
 
 /* Primary */
@@ -39,6 +52,7 @@
 .btn-default,
 .btn-default-active,
 .btn-primary,
-.btn-delete {
+.btn-delete,
+.btn-clone {
   @apply px-3;
 }

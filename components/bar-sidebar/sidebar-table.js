@@ -11,18 +11,6 @@ class SidebarTable extends HTMLElement {
     const title = this.getAttribute("title");
     this.removeAttribute("title");
 
-    this.classList.add(
-      ...hollowClassInactive(),
-      "flex",
-      "gap-2",
-      "py-1",
-      "px-2",
-      "cursor-default",
-      "select-none",
-      "fill-current",
-      "items-center"
-    );
-
     this.innerHTML = `
       <img-svg src="boxicons/bx-table.svg" classes="w-4 h-4 text-navy-400"></img-svg>
       <div data-local-table class="flex-1 truncate text-13" title="${title}">${title}</div>
@@ -32,23 +20,6 @@ class SidebarTable extends HTMLElement {
 
   attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
-      if (attr == "active" && newValue == "true") {
-        this.classList.add(...hollowClassActive());
-        this.classList.remove(...hollowClassInactive());
-
-        this.querySelector("svg").classList.replace(
-          "text-navy-300",
-          "text-navy-500"
-        );
-      } else {
-        this.classList.remove(...hollowClassActive());
-        this.classList.add(...hollowClassInactive());
-
-        this.querySelector("svg").classList.replace(
-          "text-navy-500",
-          "text-navy-300"
-        );
-      }
     }
   }
 

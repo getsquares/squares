@@ -5,10 +5,8 @@ class PaginationX extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-    <div class="flex justify-between -mt-2 pb-2 bg-gray-50">
-      <div>
-        <delete-x class="btn btn-delete">Delete selected</delete-x>
-      </div>
+    <div class="flex justify-between pb-4 bg-gray-50">
+      <row-actions></row-actions>
       <div class="flex gap-4">
         ${this.buttonTemplate("prev", "remixicon/arrow-left-s-line.svg")}
         <records-x offset="101" rows="100" total="120234233"></records-x>
@@ -17,6 +15,28 @@ class PaginationX extends HTMLElement {
     </div>
     `;
   }
+
+  /*
+bg-red-100
+bg-red-200
+bg-red-300
+bg-red-400
+bg-red-500
+bg-red-600
+bg-red-700
+bg-red-800
+bg-red-900
+
+border-red-100
+border-red-200
+border-red-300
+border-red-400
+border-red-500
+border-red-600
+border-red-700
+border-red-800
+border-red-900
+*/
 
   buttonTemplate(direction, icon) {
     return `

@@ -19,6 +19,14 @@ class SidebarDatabaseRefresh extends HTMLElement {
       <img-svg src="material-icons/refresh.svg" classes="w-4 h-4 text-gray-400"></img-svg>
       <div data-local-table class="flex-1 truncate text-13">Refresh</div>
     `;
+
+    this.onClick();
+  }
+
+  onClick() {
+    this.addEventListener("click", () => {
+      this.closest("sidebar-database").populate();
+    });
   }
 }
 

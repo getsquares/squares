@@ -5,6 +5,8 @@
 @import "./buttons.css";
 @import "./form.css";
 @import "./scrollbars.css";
+@import "./sidebar.css";
+@import "./row.css";
 
 @import "tailwindcss/utilities";
 

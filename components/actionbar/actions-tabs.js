@@ -6,17 +6,22 @@ class ActionsTabs extends HTMLElement {
   connectedCallback() {
     this.classList.add(
       "flex",
-      "justify-between",
       "gap-4",
-      "pt-2",
-      "bg-gray-50"
+      "pt-4",
+      "bg-gray-50",
+      "justify-between",
+      "gap-1"
     );
     this.innerHTML = `
-      <div data-items class="flex rounded overflow-hidden gap-1">
+      <div class="flex gap-1">
         <actions-tab name="panes-x" label="Panes" icon="remixicon/layout-5-line.svg"></actions-tab>
         <actions-tab name="columns-x" label="Columns" icon="remixicon/layout-column-line.svg"></actions-tab>
         <actions-tab name="filter-x" label="Filter" icon="remixicon/filter-3-line.svg"></actions-tab>
         <actions-tab name="order-x" label="Order" icon="remixicon/arrow-up-down.svg"></actions-tab>
+      </div>
+      <div class="flex gap-1">
+        <actions-btn name="refresh" label="Refresh" icon="material-icons/refresh.svg"></actions-btn>
+        <actions-add></actions-add>
       </div>
     `;
   }

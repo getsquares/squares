@@ -42,7 +42,7 @@ class SidebarWrap extends HTMLElement {
       ]
     );
     this.innerHTML = `
-      <h2 class="p-4 pb-0 text-sm text-gray-400 uppercase">Databases and tables</h2>
+      <h2 class="pt-4 text-sm text-gray-400 uppercase">Databases and tables</h2>
       <sidebar-filter></sidebar-filter>
       <sidebar-databases></sidebar-databases>
     `;

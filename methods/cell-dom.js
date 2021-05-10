@@ -83,7 +83,7 @@ function hollowClassActive() {
 }
 
 function hollowClassInactive() {
-  return ["hover:bg-grayExtra"];
+  return ["hover:bg-grayExtra", "border", "border-transparent"];
 }
 
 function resetDomCells() {

@@ -83,7 +83,7 @@ function hollowClassActive() {
 }
 
 function hollowClassInactive() {
-  return ["hover:bg-grayExtra"];
+  return ["hover:bg-grayExtra", "border", "border-transparent"];
 }
 
 function resetDomCells() {
@@ -451,6 +451,97 @@ class tabs {
   }
 }
 
+class ActionsAdd extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("btn", "btn-primary");
+
+    this.innerHTML = `
+      <img-svg src="remixicon/add-circle-line.svg" classes="w-5 h-5"></img-svg>
+      <div>Add</div>
+    `;
+
+    this.onClick();
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+      }
+    }
+  }
+
+  onClick() {
+    this.addEventListener("click", () => {
+      //data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
+      console.log(current.database);
+      this.closest("pane-main").querySelector("table-cells").addRow();
+    });
+  }
+}
+
+customElements.define("actions-add", ActionsAdd);
+
+class ActionsBtn extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    const label = this.getAttribute("label");
+    const icon = this.getAttribute("icon");
+
+    this.classList.add("btn");
+    this.classList.add("btn-default");
+
+    this.innerHTML = `
+      <img-svg src="${icon}" classes="w-5 h-5"></img-svg>
+      <div>${label}</div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.replace("btn-default", "btn-default-active");
+  }
+
+  thisDeactivate() {
+    this.classList.replace("btn-default-active", "btn-default");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("actions-btn", ActionsBtn);
+
 class ActionsPanes extends HTMLElement {
   constructor() {
     super();
@@ -534,6 +625,7 @@ class ActionsTab extends HTMLElement {
     this.innerHTML = `
       <img-svg src="${icon}" classes="w-5 h-5"></img-svg>
       <div>${label}</div>
+      <img-svg src="remixicon/arrow-down-s.svg" classes="w-5 h-5 fill-current opacity-30"></img-svg>
     `;
 
     this.onClick();
@@ -612,17 +704,22 @@ class ActionsTabs extends HTMLElement {
   connectedCallback() {
     this.classList.add(
       "flex",
-      "justify-between",
       "gap-4",
-      "pt-2",
-      "bg-gray-50"
+      "pt-4",
+      "bg-gray-50",
+      "justify-between",
+      "gap-1"
     );
     this.innerHTML = `
-      <div data-items class="flex rounded overflow-hidden gap-1">
+      <div class="flex gap-1">
         <actions-tab name="panes-x" label="Panes" icon="remixicon/layout-5-line.svg"></actions-tab>
         <actions-tab name="columns-x" label="Columns" icon="remixicon/layout-column-line.svg"></actions-tab>
         <actions-tab name="filter-x" label="Filter" icon="remixicon/filter-3-line.svg"></actions-tab>
         <actions-tab name="order-x" label="Order" icon="remixicon/arrow-up-down.svg"></actions-tab>
+      </div>
+      <div class="flex gap-1">
+        <actions-btn name="refresh" label="Refresh" icon="material-icons/refresh.svg"></actions-btn>
+        <actions-add></actions-add>
       </div>
     `;
   }
@@ -642,7 +739,7 @@ class ActionsX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("flex", "flex-col", "gap-2", "-mb-2");
+    this.classList.add("flex", "flex-col", "gap-4");
     this.innerHTML = `      
       <actions-tabs></actions-tabs>
       <actions-panes></actions-panes>
@@ -776,7 +873,7 @@ class ColumnsX extends HTMLElement {
     return `
       <div class="flex flex-col gap-2 p-4 flex-1">
         <div class="font-bold">${title}</div>
-        <div class="flex gap-4">
+        <div class="flex gap-x-4 gap-y-1 flex-wrap">
           ${this.checkboxes()}
         </div>
       </div>
@@ -1296,10 +1393,8 @@ class PaginationX extends HTMLElement {
 
   connectedCallback() {
     this.innerHTML = `
-    <div class="flex justify-between -mt-2 pb-2 bg-gray-50">
-      <div>
-        <delete-x class="btn btn-delete">Delete selected</delete-x>
-      </div>
+    <div class="flex justify-between pb-4 bg-gray-50">
+      <row-actions></row-actions>
       <div class="flex gap-4">
         ${this.buttonTemplate("prev", "remixicon/arrow-left-s-line.svg")}
         <records-x offset="101" rows="100" total="120234233"></records-x>
@@ -1308,6 +1403,28 @@ class PaginationX extends HTMLElement {
     </div>
     `;
   }
+
+  /*
+bg-red-100
+bg-red-200
+bg-red-300
+bg-red-400
+bg-red-500
+bg-red-600
+bg-red-700
+bg-red-800
+bg-red-900
+
+border-red-100
+border-red-200
+border-red-300
+border-red-400
+border-red-500
+border-red-600
+border-red-700
+border-red-800
+border-red-900
+*/
 
   buttonTemplate(direction, icon) {
     return `
@@ -1356,6 +1473,57 @@ class RecordsX extends HTMLElement {
 }
 customElements.define("records-x", RecordsX);
 
+class RowActions extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.setAttribute("hidden", "");
+    this.innerHTML = `
+      <delete-x class="btn btn-delete">
+        <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
+        Delete</delete-x>
+      <delete-x class="btn btn-clone">
+        <img-svg src="remixicon/file-copy-2-line.svg" classes="w-5 h-5"></img-svg>
+        Clone</delete-x>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.setAttribute("hidden", "");
+  }
+
+  activate() {
+    this.removeAttribute("hidden");
+  }
+
+  deactivate() {
+    this.setAttribute("hidden", "");
+  }
+}
+customElements.define("row-actions", RowActions);
+
 class SidebarDatabaseLoading extends HTMLElement {
   constructor() {
     super();
@@ -1402,6 +1570,14 @@ class SidebarDatabaseRefresh extends HTMLElement {
       <img-svg src="material-icons/refresh.svg" classes="w-4 h-4 text-gray-400"></img-svg>
       <div data-local-table class="flex-1 truncate text-13">Refresh</div>
     `;
+
+    this.onClick();
+  }
+
+  onClick() {
+    this.addEventListener("click", () => {
+      this.closest("sidebar-database").populate();
+    });
   }
 }
 
@@ -1647,18 +1823,6 @@ class SidebarTable extends HTMLElement {
     const title = this.getAttribute("title");
     this.removeAttribute("title");
 
-    this.classList.add(
-      ...hollowClassInactive(),
-      "flex",
-      "gap-2",
-      "py-1",
-      "px-2",
-      "cursor-default",
-      "select-none",
-      "fill-current",
-      "items-center"
-    );
-
     this.innerHTML = `
       <img-svg src="boxicons/bx-table.svg" classes="w-4 h-4 text-navy-400"></img-svg>
       <div data-local-table class="flex-1 truncate text-13" title="${title}">${title}</div>
@@ -1668,23 +1832,6 @@ class SidebarTable extends HTMLElement {
 
   attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
-      if (attr == "active" && newValue == "true") {
-        this.classList.add(...hollowClassActive());
-        this.classList.remove(...hollowClassInactive());
-
-        this.querySelector("svg").classList.replace(
-          "text-navy-300",
-          "text-navy-500"
-        );
-      } else {
-        this.classList.remove(...hollowClassActive());
-        this.classList.add(...hollowClassInactive());
-
-        this.querySelector("svg").classList.replace(
-          "text-navy-500",
-          "text-navy-300"
-        );
-      }
     }
   }
 
@@ -1822,7 +1969,7 @@ class SidebarWrap extends HTMLElement {
       ]
     );
     this.innerHTML = `
-      <h2 class="p-4 pb-0 text-sm text-gray-400 uppercase">Databases and tables</h2>
+      <h2 class="pt-4 text-sm text-gray-400 uppercase">Databases and tables</h2>
       <sidebar-filter></sidebar-filter>
       <sidebar-databases></sidebar-databases>
     `;
@@ -2253,6 +2400,7 @@ class TableCells extends HTMLElement {
     const this_data =
       data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
     const cols = this_data.cols_order;
+
     let html = "";
 
     this_data.rows.forEach((row) => {
@@ -2266,7 +2414,33 @@ class TableCells extends HTMLElement {
       html += `</div>`;
     });
 
-    return html;
+    return this.templateFirst(this_data) + html;
+  }
+
+  templateFirst(this_data) {
+    let html_first = "";
+
+    this_data.cols_order.forEach((item) => {
+      html_first += `
+        <table-cell value="null"></table-cell>
+      `;
+    });
+
+    html_first = `
+      <template data-first>
+        <div class="contents row-add">
+          <row-select></row-select>
+          ${html_first}
+        </div>
+      </template>
+    `;
+    return html_first;
+  }
+
+  addRow() {
+    const row = $("[data-first]", this).innerHTML;
+
+    $("[data-first]", this).insertAdjacentHTML("afterend", row);
   }
 }
 
