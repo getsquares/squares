@@ -8,7 +8,7 @@ class ActionsAdd extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("btn", "btn-primary");
+    this.classList.add("btn", "btn-success");
 
     this.innerHTML = `
       <img-svg src="remixicon/add-circle-line.svg" classes="w-5 h-5"></img-svg>
@@ -29,7 +29,17 @@ class ActionsAdd extends HTMLElement {
     this.addEventListener("click", () => {
       //data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
       console.log(current.database);
-      this.closest("pane-main").querySelector("table-cells").addRow();
+      const el_cell_active = $(
+        `cell-ring[state="active"]`,
+        this.closest("pane-main")
+      );
+
+      console.log("dooo2");
+      if (!el_cell_active) return;
+
+      console.log("dooo");
+
+      el_cell_active.closest("table-row").addRow();
     });
   }
 }

@@ -10,6 +10,11 @@ class TableCells extends HTMLElement {
   connectedCallback() {
     this.classList.add("contents");
     this.innerHTML = this.template();
+
+    const el_first_ring = $("cell-ring", this.closest("table-cells"));
+    if (!el_first_ring) return;
+
+    el_first_ring.setAttribute("state", "active");
   }
 
   template() {
@@ -19,16 +24,20 @@ class TableCells extends HTMLElement {
     const cols = this_data.cols_order;
 
     let html = "";
+    let table_cols = "";
 
     this_data.rows.forEach((row) => {
-      html += `
-        <div class="contents">
-          <row-select></row-select>`;
+      table_cols = "";
       cols.forEach((item) => {
         const value = row[item];
-        html += `<table-cell value="${value}"></table-cell>`;
+        table_cols += `<table-cell value="${value}"></table-cell>`;
       });
-      html += `</div>`;
+      html += `
+        <table-row>
+          <row-select></row-select>
+          ${table_cols}
+        </table-row>
+      `;
     });
 
     return this.templateFirst(this_data) + html;
@@ -45,19 +54,38 @@ class TableCells extends HTMLElement {
 
     html_first = `
       <template data-first>
-        <div class="contents row-add">
+        <table-row class="contents row-new">
           <row-select></row-select>
           ${html_first}
-        </div>
+        </table-row>
       </template>
     `;
     return html_first;
   }
 
-  addRow() {
-    const row = $("[data-first]", this).innerHTML;
+  deactivateCells() {
+    this.deactivateCellEdit();
+    this.deactivateCellRing();
+  }
 
-    $("[data-first]", this).insertAdjacentHTML("afterend", row);
+  deactivateCellRing() {
+    const el_cell = $(
+      'cell-ring[state="active"], cell-ring[state="edit"]',
+      this
+    );
+
+    if (!el_cell) return;
+
+    el_cell.setAttribute("state", "default");
+  }
+
+  deactivateCellEdit() {
+    const el_edit = $("cell-edit[active]", this);
+
+    if (!el_edit) return;
+
+    el_edit.innerHTML = "";
+    el_edit.removeAttribute("active");
   }
 }
 

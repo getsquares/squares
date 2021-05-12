@@ -8,10 +8,9 @@ class CellEdit extends HTMLElement {
   }
 
   connectedCallback() {
-    this.setAttribute("active", "false");
+    this.setAttribute("hidden", "");
     this.classList.add(
       "z-20",
-      "hidden",
       "block",
       "absolute",
       "bg-gray-100",
@@ -27,11 +26,27 @@ class CellEdit extends HTMLElement {
     if (attr != "active") return;
     if (oldValue !== newValue) {
       if (newValue == "true") {
-        this.classList.remove("hidden");
+        this.thisActivate();
       } else {
-        this.classList.add("hidden");
+        this.thisDeactivate();
       }
     }
+  }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.setAttribute("hidden", "");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
   }
 }
 

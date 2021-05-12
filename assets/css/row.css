@@ -1,16 +1,16 @@
-.row-add table-cell,
-.row-add row-select {
+.row-new table-cell,
+.row-new row-select {
   @apply bg-green-50;
 }
 
-.row-add .checkstyle {
+.row-new .checkstyle {
   @apply text-green-600 bg-green-200;
 }
 
-.row-add .checkstyle:checked {
+.row-new .checkstyle:checked {
   background-color: currentColor;
 }
 
-.row-add .checkbox {
+.row-new .checkbox {
   @apply text-green-600;
 }

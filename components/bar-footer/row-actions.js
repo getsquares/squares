@@ -8,14 +8,12 @@ class RowActions extends HTMLElement {
   }
 
   connectedCallback() {
-    this.setAttribute("hidden", "");
+    this.classList.add("invisible");
     this.innerHTML = `
-      <delete-x class="btn btn-delete">
-        <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
-        Delete</delete-x>
-      <delete-x class="btn btn-clone">
+      <delete-x></delete-x>
+      <clone-x class="btn btn-success">
         <img-svg src="remixicon/file-copy-2-line.svg" classes="w-5 h-5"></img-svg>
-        Clone</delete-x>
+        Clone</clone-x>
     `;
   }
 
@@ -31,20 +29,29 @@ class RowActions extends HTMLElement {
     }
   }
 
+  toggle() {
+    const is_checked = $("row-select input:checked", this.closest("pane-main"));
+    if (!is_checked) {
+      this.deactivate();
+    } else {
+      this.activate();
+    }
+  }
+
   thisActivate() {
-    this.removeAttribute("hidden");
+    this.classList.remove("invisible");
   }
 
   thisDeactivate() {
-    this.setAttribute("hidden", "");
+    this.classList.add("invisible");
   }
 
   activate() {
-    this.removeAttribute("hidden");
+    this.setAttribute("active", "true");
   }
 
   deactivate() {
-    this.setAttribute("hidden", "");
+    this.removeAttribute("active");
   }
 }
 customElements.define("row-actions", RowActions);

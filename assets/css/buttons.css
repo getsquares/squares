@@ -2,6 +2,10 @@
   @apply border border-b-2 cursor-default inline-flex gap-2 items-center py-1.5 rounded select-none text-sm;
 }
 
+.btn:not(.btn-borderless) {
+  @apply px-3;
+}
+
 /* Default */
 
 .btn-default {
@@ -24,7 +28,7 @@
 
 /* Delete */
 .btn-delete {
-  @apply text-red-900 bg-red-200 border-red-300;
+  @apply text-red-800 bg-red-100 border-red-300;
 }
 
 .btn-delete:hover {
@@ -33,7 +37,7 @@
 
 /* Clone */
 .btn-clone {
-  @apply text-yellow-900 bg-yellow-200 border-yellow-300;
+  @apply text-yellow-800 bg-yellow-100 border-yellow-300;
 }
 
 .btn-clone:hover {
@@ -49,10 +53,11 @@
   @apply hover:border-navy-800;
 }
 
-.btn-default,
-.btn-default-active,
-.btn-primary,
-.btn-delete,
-.btn-clone {
-  @apply px-3;
+/* Success */
+.btn-success {
+  @apply text-green-800 bg-green-100 border-green-300;
+}
+
+.btn-success:hover {
+  @apply border-green-400;
 }

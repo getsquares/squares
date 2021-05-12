@@ -8,7 +8,7 @@ class ColumnsX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("gap-4", "flex", "text-sm");
+    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
     this.setAttribute("hidden", "");
     this.innerHTML = this.template("Columns");
   }
@@ -31,13 +31,10 @@ class ColumnsX extends HTMLElement {
 
   template(title) {
     return `
-      <div class="flex flex-col gap-2 p-4 flex-1">
-        <div class="font-bold">${title}</div>
-        <div class="flex gap-x-4 gap-y-1 flex-wrap">
-          ${this.checkboxes()}
-        </div>
+      <div class="font-bold">${title}</div>
+      <div class="flex gap-x-4 gap-y-1 flex-wrap">
+        ${this.checkboxes()}
       </div>
-      <pane-close hide="pane-columns"></pane-close>
     `;
   }
 

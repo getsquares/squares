@@ -33,13 +33,17 @@ class FieldText extends HTMLElement {
     this.querySelector("input").addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       e.preventDefault();
-      leaveEdit();
+      leaveEdit(e);
     });
   }
 
   onEscape() {
     window.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
+
+      const el_cell_ring = $('cell-ring[state="edit"]');
+      if (!el_cell_ring) return;
+
       e.preventDefault();
       fieldClose();
     });

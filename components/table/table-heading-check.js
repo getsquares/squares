@@ -45,11 +45,7 @@ class TableHeadingCheck extends HTMLElement {
 
   selectAll() {
     $$("[data-cells] row-select").forEach((item) => {
-      const el_cells = item
-        .closest(".contents")
-        .querySelectorAll("row-select, table-cell");
-
-      el_cells.forEach((el) => {
+      $$("row-select, table-cell", item.closest("table-row")).forEach((el) => {
         item.selectOne(el);
       });
     });

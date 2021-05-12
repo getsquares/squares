@@ -32,6 +32,12 @@ class RowSelect extends HTMLElement {
         "row-select, table-cell"
       );
 
+      if (checked) {
+        this.closest("table-row").setAttribute("active", "true");
+      } else {
+        this.closest("table-row").removeAttribute("active");
+      }
+
       el_cells.forEach((el) => {
         if (checked) {
           this.selectOne(el);
@@ -39,6 +45,7 @@ class RowSelect extends HTMLElement {
           this.deselectOne(el);
         }
       });
+      $("row-actions").toggle();
     });
   }
 

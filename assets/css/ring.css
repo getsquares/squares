@@ -1,0 +1,19 @@
+cell-ring {
+  @apply absolute inset-0 z-10 block;
+}
+
+cell-ring[state="default"] {
+  @apply z-10 shadow-y;
+}
+
+cell-ring[state="active"] {
+  @apply z-30 ring-2 ring-gray-500;
+}
+
+cell-ring[state="changed"] {
+  @apply z-30 ring-2 ring-yellow-500;
+}
+
+cell-ring[state="edit"] {
+  @apply z-30 ring-2 ring-blue-500;
+}

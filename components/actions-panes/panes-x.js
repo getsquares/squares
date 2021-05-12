@@ -8,10 +8,9 @@ class PanesX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("gap-4", "flex", "text-sm");
+    this.classList.add("gap-2", "flex", "flex-col", "p-4", "text-sm");
     this.setAttribute("hidden", "");
     this.innerHTML = this.template();
-    this.onClose();
   }
 
   checkboxes() {
@@ -24,33 +23,11 @@ class PanesX extends HTMLElement {
 
   template() {
     return `
-      <div class="flex flex-col gap-2 p-4 flex-1">
-        <div class="font-bold">Panes</div>
-        <div class="flex gap-4">
-          ${this.checkboxes()}
-        </div>
-        <div class="mt-2">
-          <button-done class="btn btn-default">
-            <img-svg src="remixicon/close.svg" classes="w-5 h-5"></img-svg>
-            <div>Close</div>
-          </button-done>
-        </div>
+      <div class="font-bold">Panes</div>
+      <div class="flex gap-4">
+        ${this.checkboxes()}
       </div>
-      <pane-close></pane-close>
     `;
-  }
-
-  onClose() {
-    $("button-done", this).addEventListener("click", () => {
-      const main_el = this.closest("pane-main");
-      main_el
-        .querySelector("actions-panes > *:not([hidden])")
-        .setAttribute("hidden", "");
-      main_el.querySelector("actions-panes").removeAttribute("active");
-      main_el
-        .querySelector(`actions-tab[name="${this.tagName.toLowerCase()}"]`)
-        .deactivate();
-    });
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {

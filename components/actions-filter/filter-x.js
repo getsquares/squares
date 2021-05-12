@@ -8,36 +8,33 @@ class FilterX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("gap-4", "flex", "text-sm");
+    this.classList.add("gap-4", "flex", "flex-col", "p-4", "text-sm");
     this.setAttribute("hidden", "");
     this.innerHTML = this.template("Filter");
     this.onAdd();
   }
 
   template(title) {
-    return `
-      <div class="flex flex-col gap-4 p-4 pr-0 flex-1">
-        <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content),1fr,auto] gap-2 flex-col">
-          <div class="contents">
-            ${this.heading("Column")}
-            ${this.heading("Match")}
-            ${this.heading("Value")}
-            ${this.heading("")}
-          </div>
-          <filter-items class="contents"></filter-items>
+    return `      
+      <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content),1fr,auto] gap-2 flex-col">
+        <div class="contents">
+          ${this.heading("Column")}
+          ${this.heading("Match")}
+          ${this.heading("Value")}
+          ${this.heading("")}
         </div>
-        <div class="flex gap-2 justify-between">
-          <filter-add class="btn btn-default">
-            <img-svg src="remixicon/add.svg" classes="w-5 h-5"></img-svg>
-            <div>Add new</div>
-          </filter-add>
-          <button class="btn btn-primary">
-            <img-svg src="remixicon/filter-3-line.svg" classes="w-5 h-5"></img-svg>
-            <div>Filter rows</div>
-          </button>
-        </div>
+        <filter-items class="contents"></filter-items>
       </div>
-      <pane-close hide="pane-filter"></pane-close>
+      <div class="flex gap-2 justify-between">
+        <filter-add class="btn btn-default">
+          <img-svg src="remixicon/add.svg" classes="w-5 h-5"></img-svg>
+          <div>Add new</div>
+        </filter-add>
+        <button class="btn btn-primary">
+          <img-svg src="remixicon/filter-3-line.svg" classes="w-5 h-5"></img-svg>
+          <div>Filter rows</div>
+        </button>
+      </div>
     `;
   }
 

@@ -1,62 +1,3 @@
-// Get dom cell rings
-function getDomCellRings() {
-  return document.querySelectorAll("cell-ring");
-}
-
-// Get dom cell prev
-function getDomCellLeft() {
-  const prev = dom.current.table_cell.previousElementSibling;
-
-  if (prev && prev.tagName == "TABLE-CELL") return prev;
-  return dom.current.table_cell.closest("div").lastElementChild;
-}
-
-// Get dom cell next
-function getDomCellRight() {
-  const next = dom.current.table_cell.nextElementSibling;
-
-  if (next && next.tagName == "TABLE-CELL") return next;
-  return dom.current.table_cell.closest("div").querySelector("table-cell");
-}
-
-// Get dom cell down
-function getDomCellDown() {
-  const el_table = dom.current.table_cell;
-  const index = cellActiveIndex(el_table);
-  const down = el_table.parentElement.nextElementSibling;
-
-  if (down) return down.querySelector(`table-cell:nth-child(${index})`);
-  return document.querySelector(
-    `[data-cells] div.contents:first-child table-cell:nth-child(${index})`
-  );
-}
-
-// Get dom cell up
-function getDomCellUp() {
-  const el_table = dom.current.table_cell;
-  const index = cellActiveIndex(el_table);
-  const up = el_table.parentElement.previousElementSibling;
-
-  if (up) return up.querySelector(`table-cell:nth-child(${index})`);
-  return document.querySelector(
-    `[data-cells] div.contents:last-child table-cell:nth-child(${index})`
-  );
-}
-
-// Reset dom cell rings
-function resetDomCellRings() {
-  getDomCellRings().forEach((el) => {
-    el.setAttribute("state", "default");
-  });
-}
-
-// Reset dom cell edit
-function resetDomCellEdits() {
-  document.querySelectorAll("cell-edit").forEach((el) => {
-    el.setAttribute("active", "false");
-  });
-}
-
 function tabClassActive() {
   return ["bg-navy-100", "text-navy-900", "border-navy-300"];
 }
@@ -86,59 +27,31 @@ function hollowClassInactive() {
   return ["hover:bg-grayExtra", "border", "border-transparent"];
 }
 
-function resetDomCells() {
-  resetDomCellRings();
-  resetDomCellEdits();
-}
-
-// Event cell click
-function eventCellClick() {
-  getDomCellRings().forEach((el) => {
-    el.addEventListener("click", (e) => {
-      handleCellActive(e);
-    });
-  });
-}
-
-// Event cell doubleclick
-function eventCellDoubleclick() {
-  getDomCellRings().forEach((el) => {
-    el.addEventListener("dblclick", () => {
-      handleCellEdit();
-    });
-  });
-}
-
 // Event cell step
 function eventCellKeydown() {
   window.addEventListener("keydown", (e) => {
+    let cell_active = $('cell-ring[state="active"]');
+    if (!cell_active) return;
+
     switch (e.key) {
       case "ArrowLeft":
-        handleCellStep("left");
-        break;
       case "ArrowRight":
-        handleCellStep("right");
-        break;
       case "ArrowDown":
-        handleCellStep("down");
-        break;
       case "ArrowUp":
-        handleCellStep("up");
-        break;
-      case "Escape":
-        handleCellEscape(e);
+        cell_active.handleStep(e.key);
         break;
       case "Tab":
-        handleCellTab(e);
+        cell_active.handleCellTab(e);
         break;
       case "Enter":
-        handleCellEdit();
+        cell_active.handleCellEdit();
         break;
     }
   });
 }
 
 // KOPPLA IN
+/*
 function outsideClick() {
   document.addEventListener("click", (event) => {
     const el = document.querySelector(`[data-table]`);
@@ -152,33 +65,7 @@ function outsideClick() {
       el_edit.setAttribute("state", "active");
     }
   });
-}
-
-// Handle cell active
-function handleCellActive(e) {
-  storeDomCell(e.currentTarget.closest("table-cell"));
-  resetDomCells();
-  dom.current.cell_ring.setAttribute("state", "active");
-}
-
-// Handle cell step
-function handleCellStep(direction) {
-  if (!isCellActive()) return;
-
-  storeDomCell(dom[direction].table_cell);
-  resetDomCells();
-  dom.current.cell_ring.setAttribute("state", "active");
-}
-
-// Handle cell escape
-function handleCellEscape(e) {
-  if (!isCellActive()) return;
-
-  e.preventDefault();
-
-  dom.current.cell_ring.setAttribute("state", "default");
-  resetStore();
-}
+}*/
 
 function handleCellClose() {
   if (!isCellState("edit")) return;
@@ -187,48 +74,24 @@ function handleCellClose() {
   resetEdit();
 }
 
-// Handle cell tab
-function handleCellTab(e) {
-  if (!isCellActive()) return;
-
-  e.preventDefault();
-
-  handleCellStep(e.shiftKey ? "left" : "right");
-}
-
-// Handle cell edit
-// Enter and doubleclick
-function handleCellEdit() {
-  if (in_field) {
-    in_field = false;
-    return;
-  }
-  if (!isCellActive()) return;
-
-  resetDomCells();
-  dom.current.cell_ring.setAttribute("state", "edit");
-  dom.current.cell_edit.setAttribute("active", "true");
-  dom.current.cell_edit.innerHTML = `<field-text></field-text>`;
-}
-
-function resetEdit() {
-  dom.current.cell_ring.setAttribute("state", "active");
-  dom.current.cell_edit.setAttribute("active", "false");
-  dom.current.cell_edit.innerHTML = "";
-}
-
 // Leave edit
 function leaveEdit() {
   in_field = true;
-  resetDomCellEdits();
-  const el_edit = document.querySelector(`cell-ring[state="edit"]`);
-  if (!el_edit) return;
-  el_edit.setAttribute("state", "active");
+
+  fieldClose();
 }
 
 // Field close helper
 function fieldClose() {
-  handleCellClose();
+  const el_cell_ring = $('cell-ring[state="edit"]');
+
+  if (!el_cell_ring) return;
+
+  const el_table_cell = el_cell_ring.closest("table-cell");
+  const el_cell_edit = $("cell-edit", el_table_cell);
+
+  el_cell_ring.setAttribute("state", "active");
+  el_cell_edit.removeAttribute("active");
 }
 
 // Update preview
@@ -461,7 +324,7 @@ class ActionsAdd extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("btn", "btn-primary");
+    this.classList.add("btn", "btn-success");
 
     this.innerHTML = `
       <img-svg src="remixicon/add-circle-line.svg" classes="w-5 h-5"></img-svg>
@@ -482,7 +345,17 @@ class ActionsAdd extends HTMLElement {
     this.addEventListener("click", () => {
       //data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
       console.log(current.database);
-      this.closest("pane-main").querySelector("table-cells").addRow();
+      const el_cell_active = $(
+        `cell-ring[state="active"]`,
+        this.closest("pane-main")
+      );
+
+      console.log("dooo2");
+      if (!el_cell_active) return;
+
+      console.log("dooo");
+
+      el_cell_active.closest("table-row").addRow();
     });
   }
 }
@@ -848,7 +721,7 @@ class ColumnsX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("gap-4", "flex", "text-sm");
+    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
     this.setAttribute("hidden", "");
     this.innerHTML = this.template("Columns");
   }
@@ -871,13 +744,10 @@ class ColumnsX extends HTMLElement {
 
   template(title) {
     return `
-      <div class="flex flex-col gap-2 p-4 flex-1">
-        <div class="font-bold">${title}</div>
-        <div class="flex gap-x-4 gap-y-1 flex-wrap">
-          ${this.checkboxes()}
-        </div>
+      <div class="font-bold">${title}</div>
+      <div class="flex gap-x-4 gap-y-1 flex-wrap">
+        ${this.checkboxes()}
       </div>
-      <pane-close hide="pane-columns"></pane-close>
     `;
   }
 
@@ -999,36 +869,33 @@ class FilterX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("gap-4", "flex", "text-sm");
+    this.classList.add("gap-4", "flex", "flex-col", "p-4", "text-sm");
     this.setAttribute("hidden", "");
     this.innerHTML = this.template("Filter");
     this.onAdd();
   }
 
   template(title) {
-    return `
-      <div class="flex flex-col gap-4 p-4 pr-0 flex-1">
-        <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content),1fr,auto] gap-2 flex-col">
-          <div class="contents">
-            ${this.heading("Column")}
-            ${this.heading("Match")}
-            ${this.heading("Value")}
-            ${this.heading("")}
-          </div>
-          <filter-items class="contents"></filter-items>
+    return `      
+      <div class="grid grid-cols-[minmax(200px,max-content),minmax(200px,max-content),1fr,auto] gap-2 flex-col">
+        <div class="contents">
+          ${this.heading("Column")}
+          ${this.heading("Match")}
+          ${this.heading("Value")}
+          ${this.heading("")}
         </div>
-        <div class="flex gap-2 justify-between">
-          <filter-add class="btn btn-default">
-            <img-svg src="remixicon/add.svg" classes="w-5 h-5"></img-svg>
-            <div>Add new</div>
-          </filter-add>
-          <button class="btn btn-primary">
-            <img-svg src="remixicon/filter-3-line.svg" classes="w-5 h-5"></img-svg>
-            <div>Filter rows</div>
-          </button>
-        </div>
+        <filter-items class="contents"></filter-items>
       </div>
-      <pane-close hide="pane-filter"></pane-close>
+      <div class="flex gap-2 justify-between">
+        <filter-add class="btn btn-default">
+          <img-svg src="remixicon/add.svg" classes="w-5 h-5"></img-svg>
+          <div>Add new</div>
+        </filter-add>
+        <button class="btn btn-primary">
+          <img-svg src="remixicon/filter-3-line.svg" classes="w-5 h-5"></img-svg>
+          <div>Filter rows</div>
+        </button>
+      </div>
     `;
   }
 
@@ -1140,35 +1007,32 @@ class OrderX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("gap-4", "flex", "text-sm");
+    this.classList.add("gap-4", "flex", "flex-col", "p-4", "text-sm");
     this.setAttribute("hidden", "");
-    this.innerHTML = this.template("Filter");
+    this.innerHTML = this.template();
     this.onAdd();
   }
 
-  template(title) {
+  template() {
     return `
-      <div class="flex flex-col gap-4 p-4 pr-0 flex-1">
-        <div class="grid grid-cols-[minmax(200px,max-content),1fr,auto] gap-2 flex-col">
-          <div class="contents">
-            ${this.heading("Order by")}
-            ${this.heading("Order")}
-            ${this.heading("")}
-          </div>
-          <order-items class="contents"></order-items>
+      <div class="grid grid-cols-[minmax(200px,max-content),1fr,auto] gap-2 flex-col">
+        <div class="contents">
+          ${this.heading("Order by")}
+          ${this.heading("Order")}
+          ${this.heading("")}
         </div>
-        <div class="flex gap-2 justify-between">
-          <order-add class="btn btn-default">
-            <img-svg src="remixicon/add.svg" classes="w-5 h-5"></img-svg>
-            <div>Add new</div>
-          </order-add>
-          <button class="btn btn-primary">
-            <img-svg src="remixicon/arrow-up-down.svg" classes="w-5 h-5"></img-svg>
-            <div>Order rows</div>
-          </button>
-        </div>
+        <order-items class="contents"></order-items>
       </div>
-      <pane-close hide="pane-filter"></pane-close>
+      <div class="flex gap-2 justify-between">
+        <order-add class="btn btn-default">
+          <img-svg src="remixicon/add.svg" classes="w-5 h-5"></img-svg>
+          <div>Add new</div>
+        </order-add>
+        <button class="btn btn-primary">
+          <img-svg src="remixicon/arrow-up-down.svg" classes="w-5 h-5"></img-svg>
+          <div>Order rows</div>
+        </button>
+      </div>
     `;
   }
 
@@ -1218,89 +1082,7 @@ class OrderX extends HTMLElement {
 
 customElements.define("order-x", OrderX);
 
-class PanesItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["checked"];
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const label = this.getAttribute("label");
-    const checked = this.getAttribute("checked");
-
-    this.classList.add("flex");
-
-    this.innerHTML = this.template(name, label, checked);
-    this.onClick();
-  }
-
-  template(name, label, checked) {
-    return `
-      <label class="btn btn-borderless">
-        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
-      checked ? "checked" : ""
-    }>
-        ${label}
-      </label>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "checked") {
-        this.onChange(newValue);
-      }
-    }
-  }
-
-  onClick() {
-    this.querySelector("input").addEventListener("change", (e) => {
-      if (e.currentTarget.checked) {
-        this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-  }
-
-  onChange(checked) {
-    const name = this.getAttribute("name");
-
-    $$(name).forEach((el) => {
-      if (!checked) {
-        el.setAttribute("hidden", "");
-      } else {
-        el.removeAttribute("hidden", "");
-      }
-
-      // Sync
-      $$(`panes-item[name="${name}"]`).forEach((item) => {
-        if (!checked) {
-          item.removeAttribute("checked");
-        } else {
-          item.setAttribute("checked", "true");
-        }
-        item.querySelector("input").checked = checked;
-      });
-    });
-  }
-
-  activate() {
-    this.setAttribute("checked", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("checked");
-  }
-}
-
-customElements.define("panes-item", PanesItem);
-
-class PanesX extends HTMLElement {
+class DeleteX extends HTMLElement {
   constructor() {
     super();
   }
@@ -1310,81 +1092,57 @@ class PanesX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("gap-4", "flex", "text-sm");
-    this.setAttribute("hidden", "");
-    this.innerHTML = this.template();
-    this.onClose();
-  }
-
-  checkboxes() {
-    return `
-      <panes-item name="topbar-wrap" label="Top" checked="true"></panes-item>
-      <panes-item name="sidebar-wrap" label="Sidebar" checked="true"></panes-item>
-      <panes-item name="pagination-x" label="Footer" checked="true"></panes-item>
+    this.classList.add("btn", "btn-delete");
+    this.innerHTML = `
+      <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
+      Delete
     `;
+    this.onClick();
   }
 
-  template() {
-    return `
-      <div class="flex flex-col gap-2 p-4 flex-1">
-        <div class="font-bold">Panes</div>
-        <div class="flex gap-4">
-          ${this.checkboxes()}
-        </div>
-        <div class="mt-2">
-          <button-done class="btn btn-default">
-            <img-svg src="remixicon/close.svg" classes="w-5 h-5"></img-svg>
-            <div>Close</div>
-          </button-done>
-        </div>
-      </div>
-      <pane-close></pane-close>
-    `;
-  }
+  onClick() {
+    this.addEventListener("click", () => {
+      $$(".row-new[active]").forEach((el) => {
+        el.remove();
+      });
 
-  onClose() {
-    $("button-done", this).addEventListener("click", () => {
-      const main_el = this.closest("pane-main");
-      main_el
-        .querySelector("actions-panes > *:not([hidden])")
-        .setAttribute("hidden", "");
-      main_el.querySelector("actions-panes").removeAttribute("active");
-      main_el
-        .querySelector(`actions-tab[name="${this.tagName.toLowerCase()}"]`)
-        .deactivate();
+      this.delete();
+
+      /* {
+        id: 3
+        database: asdas
+        table: asdas
+      }
+      {
+        id: 3
+        database: asdas
+        table: asdas
+      }
+      */
     });
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
+  async delete() {
+    const ids = [1, 2, 3];
+    try {
+      const resp = await axios.post(
+        `http://localhost/tools/squares/server/php/queries/delete.php?database=asda&table=asda`,
+        {
+          ids: ids,
         }
-      }
+      );
+
+      console.log(resp.data);
+
+      return resp.data;
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
     }
-  }
-
-  thisActivate() {
-    this.classList.remove("hidden");
-  }
-
-  thisDeactivate() {
-    this.classList.add("hidden");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
   }
 }
 
-customElements.define("panes-x", PanesX);
+customElements.define("delete-x", DeleteX);
 
 class PaginationX extends HTMLElement {
   constructor() {
@@ -1483,14 +1241,165 @@ class RowActions extends HTMLElement {
   }
 
   connectedCallback() {
-    this.setAttribute("hidden", "");
+    this.classList.add("invisible");
     this.innerHTML = `
-      <delete-x class="btn btn-delete">
-        <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
-        Delete</delete-x>
-      <delete-x class="btn btn-clone">
+      <delete-x></delete-x>
+      <clone-x class="btn btn-success">
         <img-svg src="remixicon/file-copy-2-line.svg" classes="w-5 h-5"></img-svg>
-        Clone</delete-x>
+        Clone</clone-x>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  toggle() {
+    const is_checked = $("row-select input:checked", this.closest("pane-main"));
+    if (!is_checked) {
+      this.deactivate();
+    } else {
+      this.activate();
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("invisible");
+  }
+
+  thisDeactivate() {
+    this.classList.add("invisible");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+customElements.define("row-actions", RowActions);
+
+class PanesItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const label = this.getAttribute("label");
+    const checked = this.getAttribute("checked");
+
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, label, checked);
+    this.onClick();
+  }
+
+  template(name, label, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${label}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange(newValue);
+      }
+    }
+  }
+
+  onClick() {
+    this.querySelector("input").addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange(checked) {
+    const name = this.getAttribute("name");
+
+    $$(name).forEach((el) => {
+      if (!checked) {
+        el.setAttribute("hidden", "");
+      } else {
+        el.removeAttribute("hidden", "");
+      }
+
+      // Sync
+      $$(`panes-item[name="${name}"]`).forEach((item) => {
+        if (!checked) {
+          item.removeAttribute("checked");
+        } else {
+          item.setAttribute("checked", "true");
+        }
+        item.querySelector("input").checked = checked;
+      });
+    });
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("panes-item", PanesItem);
+
+class PanesX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-2", "flex", "flex-col", "p-4", "text-sm");
+    this.setAttribute("hidden", "");
+    this.innerHTML = this.template();
+  }
+
+  checkboxes() {
+    return `
+      <panes-item name="topbar-wrap" label="Top" checked="true"></panes-item>
+      <panes-item name="sidebar-wrap" label="Sidebar" checked="true"></panes-item>
+      <panes-item name="pagination-x" label="Footer" checked="true"></panes-item>
+    `;
+  }
+
+  template() {
+    return `
+      <div class="font-bold">Panes</div>
+      <div class="flex gap-4">
+        ${this.checkboxes()}
+      </div>
     `;
   }
 
@@ -1507,22 +1416,23 @@ class RowActions extends HTMLElement {
   }
 
   thisActivate() {
-    this.removeAttribute("hidden");
+    this.classList.remove("hidden");
   }
 
   thisDeactivate() {
-    this.setAttribute("hidden", "");
+    this.classList.add("hidden");
   }
 
   activate() {
-    this.removeAttribute("hidden");
+    this.setAttribute("active", "true");
   }
 
   deactivate() {
-    this.setAttribute("hidden", "");
+    this.removeAttribute("active");
   }
 }
-customElements.define("row-actions", RowActions);
+
+customElements.define("panes-x", PanesX);
 
 class SidebarDatabaseLoading extends HTMLElement {
   constructor() {
@@ -2178,10 +2088,9 @@ class CellEdit extends HTMLElement {
   }
 
   connectedCallback() {
-    this.setAttribute("active", "false");
+    this.setAttribute("hidden", "");
     this.classList.add(
       "z-20",
-      "hidden",
       "block",
       "absolute",
       "bg-gray-100",
@@ -2197,11 +2106,27 @@ class CellEdit extends HTMLElement {
     if (attr != "active") return;
     if (oldValue !== newValue) {
       if (newValue == "true") {
-        this.classList.remove("hidden");
+        this.thisActivate();
       } else {
-        this.classList.add("hidden");
+        this.thisDeactivate();
       }
     }
+  }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.setAttribute("hidden", "");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
   }
 }
 
@@ -2244,47 +2169,127 @@ class CellRing extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("absolute", "block", "inset-0", "z-10");
+    this.onClick();
+    this.onDblClick();
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
     if (attr != "state") return;
     if (oldValue !== newValue) {
-      this.classList.remove(
-        "ring-1",
-        "ring-2",
-        "ring-gray-500",
-        "ring-blue-500",
-        "ring-orange-500",
-        "z-10",
-        "z-30",
-        "shadow-y",
-        "ml-2px"
-      );
-      const prev_el = this.closest("table-cell").previousElementSibling;
-      const next_el = this.closest("table-cell").nextElementSibling;
-
-      switch (newValue) {
-        case "default":
-          this.classList.add("shadow-y");
-          this.classList.add("z-10");
-          break;
-        case "active":
-          this.classList.add("ring-2", "ring-gray-500", "z-30");
-          break;
-        case "changed":
-          this.classList.add("ring-2", "ring-orange-500", "z-30");
-          break;
-        case "edit":
-          this.classList.add("ring-2", "ring-blue-500", "z-30");
-          break;
-      }
-
       if (newValue != "default") {
-        if (prev_el.tagName == "ROW-SELECT") this.classList.add("ml-2px");
-        if (!next_el) this.classList.add("mr-2px");
+        this.xEdges();
       }
     }
+  }
+
+  // Events
+
+  onClick() {
+    this.addEventListener("click", (e) => {
+      this.handleCellActive(e);
+    });
+  }
+
+  onDblClick() {
+    this.addEventListener("dblclick", () => {
+      this.handleCellEdit();
+    });
+  }
+
+  handleStep(key) {
+    switch (key) {
+      case "ArrowLeft":
+        this.stepLeft();
+        break;
+      case "ArrowRight":
+        this.stepRight();
+        break;
+      case "ArrowUp":
+        this.stepUp();
+        break;
+      case "ArrowDown":
+        this.stepDown();
+        break;
+    }
+  }
+
+  stepLeft() {
+    const prev = this.closest("table-cell").previousElementSibling;
+
+    if (!prev) return;
+    if (prev.tagName !== "TABLE-CELL") return;
+
+    $("cell-ring", prev).handleCellActive();
+  }
+
+  stepRight() {
+    const next = this.closest("table-cell").nextElementSibling;
+
+    if (!next) return;
+    if (next.tagName !== "TABLE-CELL") return;
+
+    $("cell-ring", next).handleCellActive();
+  }
+
+  stepDown() {
+    const el_table = this.closest("table-cell");
+    const index = cellActiveIndex(el_table);
+    const down = el_table.parentElement.nextElementSibling;
+
+    if (!down) return;
+    if (down.tagName !== "TABLE-ROW") return;
+    $(`table-cell:nth-child(${index}) cell-ring`, down).handleCellActive();
+  }
+
+  stepUp() {
+    const el_table = this.closest("table-cell");
+    const index = cellActiveIndex(el_table);
+    const up = el_table.parentElement.previousElementSibling;
+
+    if (!up) return;
+    if (up.tagName !== "TABLE-ROW") return;
+    $(`table-cell:nth-child(${index}) cell-ring`, up).handleCellActive();
+  }
+
+  handleCellTab(e) {
+    e.preventDefault();
+    this.handleStep(e.shiftKey ? "ArrowLeft" : "ArrowRight");
+  }
+
+  /*handleCellEscape() {
+    e.preventDefault();
+  
+    dom.current.cell_ring.setAttribute("state", "default");
+    resetStore();
+  }*/
+
+  // Handlers
+
+  handleCellActive() {
+    const is_active = this.getAttribute("state") == "active";
+    if (is_active) return;
+    this.closest("table-cells").deactivateCells();
+    this.setAttribute("state", "active");
+  }
+
+  handleCellEdit() {
+    if (in_field) {
+      in_field = false;
+      return;
+    }
+    this.setAttribute("state", "edit");
+
+    const el_edit = $("cell-edit", this.closest("table-cell"));
+    el_edit.activate();
+    el_edit.innerHTML = `<field-text></field-text>`;
+  }
+
+  xEdges() {
+    const prev_el = this.closest("table-cell").previousElementSibling;
+    const next_el = this.closest("table-cell").nextElementSibling;
+
+    if (prev_el.tagName == "ROW-SELECT") this.classList.add("ml-2px");
+    if (!next_el) this.classList.add("mr-2px");
   }
 }
 
@@ -2324,6 +2329,12 @@ class RowSelect extends HTMLElement {
         "row-select, table-cell"
       );
 
+      if (checked) {
+        this.closest("table-row").setAttribute("active", "true");
+      } else {
+        this.closest("table-row").removeAttribute("active");
+      }
+
       el_cells.forEach((el) => {
         if (checked) {
           this.selectOne(el);
@@ -2331,6 +2342,7 @@ class RowSelect extends HTMLElement {
           this.deselectOne(el);
         }
       });
+      $("row-actions").toggle();
     });
   }
 
@@ -2393,6 +2405,11 @@ class TableCells extends HTMLElement {
   connectedCallback() {
     this.classList.add("contents");
     this.innerHTML = this.template();
+
+    const el_first_ring = $("cell-ring", this.closest("table-cells"));
+    if (!el_first_ring) return;
+
+    el_first_ring.setAttribute("state", "active");
   }
 
   template() {
@@ -2402,16 +2419,20 @@ class TableCells extends HTMLElement {
     const cols = this_data.cols_order;
 
     let html = "";
+    let table_cols = "";
 
     this_data.rows.forEach((row) => {
-      html += `
-        <div class="contents">
-          <row-select></row-select>`;
+      table_cols = "";
       cols.forEach((item) => {
         const value = row[item];
-        html += `<table-cell value="${value}"></table-cell>`;
+        table_cols += `<table-cell value="${value}"></table-cell>`;
       });
-      html += `</div>`;
+      html += `
+        <table-row>
+          <row-select></row-select>
+          ${table_cols}
+        </table-row>
+      `;
     });
 
     return this.templateFirst(this_data) + html;
@@ -2428,19 +2449,38 @@ class TableCells extends HTMLElement {
 
     html_first = `
       <template data-first>
-        <div class="contents row-add">
+        <table-row class="contents row-new">
           <row-select></row-select>
           ${html_first}
-        </div>
+        </table-row>
       </template>
     `;
     return html_first;
   }
 
-  addRow() {
-    const row = $("[data-first]", this).innerHTML;
+  deactivateCells() {
+    this.deactivateCellEdit();
+    this.deactivateCellRing();
+  }
 
-    $("[data-first]", this).insertAdjacentHTML("afterend", row);
+  deactivateCellRing() {
+    const el_cell = $(
+      'cell-ring[state="active"], cell-ring[state="edit"]',
+      this
+    );
+
+    if (!el_cell) return;
+
+    el_cell.setAttribute("state", "default");
+  }
+
+  deactivateCellEdit() {
+    const el_edit = $("cell-edit[active]", this);
+
+    if (!el_edit) return;
+
+    el_edit.innerHTML = "";
+    el_edit.removeAttribute("active");
   }
 }
 
@@ -2493,11 +2533,7 @@ class TableHeadingCheck extends HTMLElement {
 
   selectAll() {
     $$("[data-cells] row-select").forEach((item) => {
-      const el_cells = item
-        .closest(".contents")
-        .querySelectorAll("row-select, table-cell");
-
-      el_cells.forEach((el) => {
+      $$("row-select, table-cell", item.closest("table-row")).forEach((el) => {
         item.selectOne(el);
       });
     });
@@ -2625,6 +2661,52 @@ class TableHeadings extends HTMLElement {
 }
 
 customElements.define("table-headings", TableHeadings);
+
+class TableRow extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.classList.add("contents");
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  addRow() {
+    const row = $("[data-first]", this.closest("pane-main")).innerHTML;
+
+    this.insertAdjacentHTML("afterend", row);
+  }
+
+  thisActivate() {
+    this.classList.add("row-primary");
+  }
+
+  thisDeactivate() {
+    this.classList.remove("row-primary");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("table-row", TableRow);
 
 class TabItem extends HTMLElement {
   constructor() {
@@ -3245,13 +3327,17 @@ class FieldText extends HTMLElement {
     this.querySelector("input").addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       e.preventDefault();
-      leaveEdit();
+      leaveEdit(e);
     });
   }
 
   onEscape() {
     window.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
+
+      const el_cell_ring = $('cell-ring[state="edit"]');
+      if (!el_cell_ring) return;
+
       e.preventDefault();
       fieldClose();
     });
