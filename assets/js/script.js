@@ -96,9 +96,17 @@ function fieldClose() {
 
 // Update preview
 function updatePreview(html, obj) {
-  const preview = obj.closest("table-cell").querySelector("cell-preview");
+  $("preview-value", obj.closest("table-cell")).innerHTML = html;
+}
+
+function updateNull(obj) {
+  const preview = $("preview", obj.closest("table-cell"));
+  const preview_value = $("preview-value", obj.closest("table-cell"));
+  preview_value.setAttribute("hidden", "");
   preview.setAttribute("active", "true");
-  preview.innerHTML = html;
+
+  const el_null = $("preview-null", obj.closest("table-cell"));
+  el_null.removeAttribute("hidden");
 }
 
 // Set cell field state
@@ -1082,6 +1090,151 @@ class OrderX extends HTMLElement {
 
 customElements.define("order-x", OrderX);
 
+class PanesItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const label = this.getAttribute("label");
+    const checked = this.getAttribute("checked");
+
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, label, checked);
+    this.onClick();
+  }
+
+  template(name, label, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${label}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange(newValue);
+      }
+    }
+  }
+
+  onClick() {
+    this.querySelector("input").addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange(checked) {
+    const name = this.getAttribute("name");
+
+    $$(name).forEach((el) => {
+      if (!checked) {
+        el.setAttribute("hidden", "");
+      } else {
+        el.removeAttribute("hidden", "");
+      }
+
+      // Sync
+      $$(`panes-item[name="${name}"]`).forEach((item) => {
+        if (!checked) {
+          item.removeAttribute("checked");
+        } else {
+          item.setAttribute("checked", "true");
+        }
+        item.querySelector("input").checked = checked;
+      });
+    });
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("panes-item", PanesItem);
+
+class PanesX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-2", "flex", "flex-col", "p-4", "text-sm");
+    this.setAttribute("hidden", "");
+    this.innerHTML = this.template();
+  }
+
+  checkboxes() {
+    return `
+      <panes-item name="topbar-wrap" label="Top" checked="true"></panes-item>
+      <panes-item name="sidebar-wrap" label="Sidebar" checked="true"></panes-item>
+      <panes-item name="pagination-x" label="Footer" checked="true"></panes-item>
+    `;
+  }
+
+  template() {
+    return `
+      <div class="font-bold">Panes</div>
+      <div class="flex gap-4">
+        ${this.checkboxes()}
+      </div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("panes-x", PanesX);
+
 class DeleteX extends HTMLElement {
   constructor() {
     super();
@@ -1288,151 +1441,6 @@ class RowActions extends HTMLElement {
   }
 }
 customElements.define("row-actions", RowActions);
-
-class PanesItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["checked"];
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const label = this.getAttribute("label");
-    const checked = this.getAttribute("checked");
-
-    this.classList.add("flex");
-
-    this.innerHTML = this.template(name, label, checked);
-    this.onClick();
-  }
-
-  template(name, label, checked) {
-    return `
-      <label class="btn btn-borderless">
-        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
-      checked ? "checked" : ""
-    }>
-        ${label}
-      </label>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "checked") {
-        this.onChange(newValue);
-      }
-    }
-  }
-
-  onClick() {
-    this.querySelector("input").addEventListener("change", (e) => {
-      if (e.currentTarget.checked) {
-        this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-  }
-
-  onChange(checked) {
-    const name = this.getAttribute("name");
-
-    $$(name).forEach((el) => {
-      if (!checked) {
-        el.setAttribute("hidden", "");
-      } else {
-        el.removeAttribute("hidden", "");
-      }
-
-      // Sync
-      $$(`panes-item[name="${name}"]`).forEach((item) => {
-        if (!checked) {
-          item.removeAttribute("checked");
-        } else {
-          item.setAttribute("checked", "true");
-        }
-        item.querySelector("input").checked = checked;
-      });
-    });
-  }
-
-  activate() {
-    this.setAttribute("checked", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("checked");
-  }
-}
-
-customElements.define("panes-item", PanesItem);
-
-class PanesX extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-2", "flex", "flex-col", "p-4", "text-sm");
-    this.setAttribute("hidden", "");
-    this.innerHTML = this.template();
-  }
-
-  checkboxes() {
-    return `
-      <panes-item name="topbar-wrap" label="Top" checked="true"></panes-item>
-      <panes-item name="sidebar-wrap" label="Sidebar" checked="true"></panes-item>
-      <panes-item name="pagination-x" label="Footer" checked="true"></panes-item>
-    `;
-  }
-
-  template() {
-    return `
-      <div class="font-bold">Panes</div>
-      <div class="flex gap-4">
-        ${this.checkboxes()}
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.classList.remove("hidden");
-  }
-
-  thisDeactivate() {
-    this.classList.add("hidden");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("panes-x", PanesX);
 
 class SidebarDatabaseLoading extends HTMLElement {
   constructor() {
@@ -2078,43 +2086,297 @@ class ModalLogout extends HTMLElement {
 
 customElements.define("modal-logout", ModalLogout);
 
-class CellEdit extends HTMLElement {
+class TabItem extends HTMLElement {
   constructor() {
     super();
   }
 
   static get observedAttributes() {
-    return ["active"];
+    return ["title", "label", "active"];
   }
 
   connectedCallback() {
-    this.setAttribute("hidden", "");
     this.classList.add(
-      "z-20",
-      "block",
-      "absolute",
-      "bg-gray-100",
-      "shadow-md",
-      "top-full",
-      "p-4",
-      "left-0",
-      "mt-0.5"
+      ...[
+        "rounded-t",
+        "px-4",
+        "pr-2",
+        "py-2",
+        "cursor-default",
+        "select-none",
+        "focus:outline-none",
+        "flex",
+        "gap-3",
+        "items-center",
+        "text-sm",
+      ],
+      ...tab.classesInactive()
     );
+
+    this.setAttribute(
+      "title",
+      this.getAttribute("database") + "/" + this.getAttribute("table")
+    );
+
+    this.innerHTML = `
+      ${this.getAttribute("table")}
+      <img-svg src="remixicon/close.svg" classes="rounded w-5 h-5">
+    `;
+
+    tab.onClose(this);
+    tab.onClick(this);
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue === newValue) return;
+
+    switch (attr) {
+      case "active":
+        if (newValue == "true") {
+          tab.activate(this);
+        } else {
+          tab.deactivate(this);
+        }
+        break;
+    }
+  }
+}
+
+customElements.define("tab-item", TabItem);
+
+class TabItems extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.classList.add(
+      "flex",
+      "flex-1",
+      "items-center",
+      "gap-2",
+      "text-white",
+      "overflow-auto",
+      "w-full",
+      "self-end"
+    );
+  }
+}
+
+customElements.define("tab-items", TabItems);
+
+class ActionbarInfo extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    //return ["active"];
+  }
+
+  connectedCallback() {
+    this.innerHTML =
+      `
+      <div data-action>
+        <img-svg src="remixicon/info.svg" classes="w-5 h-5">
+        <div>Info</div>
+      </div>kkk
+    ` + this.modal();
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
     if (attr != "active") return;
     if (oldValue !== newValue) {
       if (newValue == "true") {
-        this.thisActivate();
+        this.classList.remove("hidden");
       } else {
-        this.thisDeactivate();
+        this.classList.add("hidden");
       }
     }
   }
 
+  onClick() {}
+
+  modal() {
+    return `
+    <div class="bg-black inset-0">test</div>
+    `;
+  }
+}
+
+customElements.define("actionbar-info", ActionbarInfo);
+
+class TopbarItems extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div class="flex gap-2 text-sm text-white py-2">
+        ${this.itemHtml("info", "Info", "remixicon/question-fill.svg")}
+        ${this.itemHtml(
+          "logout",
+          "Logout",
+          "material-icons/logout_black_24dp.svg"
+        )}
+      </div>
+    `;
+    this.onClick();
+  }
+
+  itemHtml(name, title, src) {
+    return `
+      <div title="${title}" data-action="${name}" class="flex items-center gap-1 fill-current px-2 py-1.5 select-none hover:bg-black hover:bg-opacity-20 rounded"
+      >
+      <img-svg src="${src}"></img-svg>
+    </div>
+    `;
+  }
+
+  onClick() {
+    this.querySelectorAll("[data-action]").forEach((item) => {
+      item.addEventListener("click", (e) => {
+        const el = e.currentTarget;
+        const name = el.getAttribute("data-action");
+
+        if (["info", "logout"].includes(name)) {
+          $(
+            "[data-modal-content]"
+          ).innerHTML = `<modal-${name}></modal-${name}>`;
+          $("modal-box").activate();
+        }
+      });
+    });
+  }
+}
+
+customElements.define("topbar-items", TopbarItems);
+
+class TopbarWrap extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+    <div
+      class="flex items-center justify-between pr-2 text-gray-200 bg-blueGray-700"
+    >
+      <resize-logo>
+        <div class="pl-4 pr-8 flex items-center gap-2 text-2xl text-white uppercase">
+          <img-svg
+            src="remixicon/checkbox-multiple-blank.svg"
+          ></img-svg>
+          <img-svg src="logo.svg" classes="h-5"></img-svg>
+        </div>
+      </resize-logo>
+      <tab-items></tab-items>
+      <topbar-items></topbar-items>
+    </div>
+    `;
+  }
+}
+
+customElements.define("topbar-wrap", TopbarWrap);
+
+class CellEdit extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active", "null"];
+  }
+
+  connectedCallback() {
+    this.setAttribute("hidden", "");
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (attr != "active") return;
+    if (oldValue !== newValue) {
+      switch (attr) {
+        case "active":
+          if (newValue == "true") {
+            this.thisActivate();
+          } else {
+            this.thisDeactivate();
+          }
+          break;
+        case "null":
+          if (newValue == "true") {
+            this.setChecked(true);
+          } else {
+            this.setChecked(false);
+          }
+          break;
+      }
+    }
+  }
+
+  setChecked(value) {
+    $('input[type="checkbox"][name="null"]').checked = value;
+  }
+
+  populate() {
+    const has_null =
+      this.closest("table-cell").getAttribute("nullable") == "YES"
+        ? true
+        : false;
+    let html_null = "";
+    if (has_null) {
+      html_null = `
+        <label class="flex gap-2 items-center">
+          <input type="checkbox" class="checkstyle-white form-checkbox" name="null">
+          <div class="italic">NULL</div>
+        </label>
+      `;
+    }
+    let html = `
+      ${html_null}
+      <field-text></field-text>
+    `;
+
+    this.innerHTML = html;
+
+    if (!has_null) return;
+
+    this.onClickNull();
+  }
+
+  onClickNull() {
+    $('input[type="checkbox"][name="null"]', this).addEventListener(
+      "click",
+      (e) => {
+        if (e.currentTarget.checked) {
+          console.log("checked");
+          console.log($("cell-preview", this.closest("table-cell")));
+          $("cell-preview", this.closest("table-cell")).setAttribute(
+            "null",
+            "true"
+          );
+        } else {
+          $("cell-preview", this.closest("table-cell")).setAttribute(
+            "null",
+            "false"
+          );
+        }
+      }
+    );
+  }
+
   thisActivate() {
     this.removeAttribute("hidden");
+    this.populate();
   }
 
   thisDeactivate() {
@@ -2138,22 +2400,76 @@ class CellPreview extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["active"];
+    return ["active", "null"];
   }
 
   connectedCallback() {
-    this.classList.add("block", "relative", "tp");
+    const has_null =
+      this.closest("table-cell").getAttribute("nullable") == "YES"
+        ? true
+        : false;
+    let html_null = "";
+
+    if (has_null) {
+      html_null = `<preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>`;
+    }
+    this.innerHTML = `
+      ${html_null}
+      <preview-value></preview-value>
+    `;
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
     if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
+      console.log("differ");
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      } else if (attr == "null") {
+        if (newValue == "true") {
+          this.showNull();
+          this.hideValue();
+        } else {
+          this.hideNull();
+          this.showValue();
+        }
       }
     }
+  }
+
+  showNull() {
+    $("preview-null", this).removeAttribute("hidden");
+  }
+
+  hideNull() {
+    $("preview-null", this).setAttribute("hidden", "");
+  }
+
+  showValue() {
+    $("preview-value", this).removeAttribute("hidden");
+  }
+
+  hideValue() {
+    $("preview-value", this).setAttribute("hidden", "");
+  }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.setAttribute("hidden", "");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
   }
 }
 
@@ -2279,9 +2595,7 @@ class CellRing extends HTMLElement {
     }
     this.setAttribute("state", "edit");
 
-    const el_edit = $("cell-edit", this.closest("table-cell"));
-    el_edit.activate();
-    el_edit.innerHTML = `<field-text></field-text>`;
+    $("cell-edit", this.closest("table-cell")).activate();
   }
 
   xEdges() {
@@ -2379,10 +2693,9 @@ class TableCell extends HTMLElement {
     this.innerHTML = `
       <cell-ring state="default"></cell-ring>
       <cell-edit></cell-edit>
-      <cell-preview active="true" class="select-none">
-        ${value}
-      </cell-preview>
+      <cell-preview active="true"></cell-preview>
     `;
+    $("preview-value", this).innerHTML = value;
   }
 }
 
@@ -2443,7 +2756,7 @@ class TableCells extends HTMLElement {
 
     this_data.cols_order.forEach((item) => {
       html_first += `
-        <table-cell value="null"></table-cell>
+        <table-cell nullable="${this_data.cols[item].meta.Null}" value=""></table-cell>
       `;
     });
 
@@ -2707,208 +3020,6 @@ class TableRow extends HTMLElement {
 }
 
 customElements.define("table-row", TableRow);
-
-class TabItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["title", "label", "active"];
-  }
-
-  connectedCallback() {
-    this.classList.add(
-      ...[
-        "rounded-t",
-        "px-4",
-        "pr-2",
-        "py-2",
-        "cursor-default",
-        "select-none",
-        "focus:outline-none",
-        "flex",
-        "gap-3",
-        "items-center",
-        "text-sm",
-      ],
-      ...tab.classesInactive()
-    );
-
-    this.setAttribute(
-      "title",
-      this.getAttribute("database") + "/" + this.getAttribute("table")
-    );
-
-    this.innerHTML = `
-      ${this.getAttribute("table")}
-      <img-svg src="remixicon/close.svg" classes="rounded w-5 h-5">
-    `;
-
-    tab.onClose(this);
-    tab.onClick(this);
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue === newValue) return;
-
-    switch (attr) {
-      case "active":
-        if (newValue == "true") {
-          tab.activate(this);
-        } else {
-          tab.deactivate(this);
-        }
-        break;
-    }
-  }
-}
-
-customElements.define("tab-item", TabItem);
-
-class TabItems extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.classList.add(
-      "flex",
-      "flex-1",
-      "items-center",
-      "gap-2",
-      "text-white",
-      "overflow-auto",
-      "w-full",
-      "self-end"
-    );
-  }
-}
-
-customElements.define("tab-items", TabItems);
-
-class ActionbarInfo extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
-  connectedCallback() {
-    this.innerHTML =
-      `
-      <div data-action>
-        <img-svg src="remixicon/info.svg" classes="w-5 h-5">
-        <div>Info</div>
-      </div>kkk
-    ` + this.modal();
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }
-  }
-
-  onClick() {}
-
-  modal() {
-    return `
-    <div class="bg-black inset-0">test</div>
-    `;
-  }
-}
-
-customElements.define("actionbar-info", ActionbarInfo);
-
-class TopbarItems extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div class="flex gap-2 text-sm text-white py-2">
-        ${this.itemHtml("info", "Info", "remixicon/question-fill.svg")}
-        ${this.itemHtml(
-          "logout",
-          "Logout",
-          "material-icons/logout_black_24dp.svg"
-        )}
-      </div>
-    `;
-    this.onClick();
-  }
-
-  itemHtml(name, title, src) {
-    return `
-      <div title="${title}" data-action="${name}" class="flex items-center gap-1 fill-current px-2 py-1.5 select-none hover:bg-black hover:bg-opacity-20 rounded"
-      >
-      <img-svg src="${src}"></img-svg>
-    </div>
-    `;
-  }
-
-  onClick() {
-    this.querySelectorAll("[data-action]").forEach((item) => {
-      item.addEventListener("click", (e) => {
-        const el = e.currentTarget;
-        const name = el.getAttribute("data-action");
-
-        if (["info", "logout"].includes(name)) {
-          $(
-            "[data-modal-content]"
-          ).innerHTML = `<modal-${name}></modal-${name}>`;
-          $("modal-box").activate();
-        }
-      });
-    });
-  }
-}
-
-customElements.define("topbar-items", TopbarItems);
-
-class TopbarWrap extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-    <div
-      class="flex items-center justify-between pr-2 text-gray-200 bg-blueGray-700"
-    >
-      <resize-logo>
-        <div class="pl-4 pr-8 flex items-center gap-2 text-2xl text-white uppercase">
-          <img-svg
-            src="remixicon/checkbox-multiple-blank.svg"
-          ></img-svg>
-          <img-svg src="logo.svg" classes="h-5"></img-svg>
-        </div>
-      </resize-logo>
-      <tab-items></tab-items>
-      <topbar-items></topbar-items>
-    </div>
-    `;
-  }
-}
-
-customElements.define("topbar-wrap", TopbarWrap);
 
 class ActionbarRefresh extends HTMLElement {
   constructor() {

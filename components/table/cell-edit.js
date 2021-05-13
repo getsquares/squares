@@ -4,37 +4,89 @@ class CellEdit extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["active"];
+    return ["active", "null"];
   }
 
   connectedCallback() {
     this.setAttribute("hidden", "");
-    this.classList.add(
-      "z-20",
-      "block",
-      "absolute",
-      "bg-gray-100",
-      "shadow-md",
-      "top-full",
-      "p-4",
-      "left-0",
-      "mt-0.5"
-    );
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
     if (attr != "active") return;
     if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.thisActivate();
-      } else {
-        this.thisDeactivate();
+      switch (attr) {
+        case "active":
+          if (newValue == "true") {
+            this.thisActivate();
+          } else {
+            this.thisDeactivate();
+          }
+          break;
+        case "null":
+          if (newValue == "true") {
+            this.setChecked(true);
+          } else {
+            this.setChecked(false);
+          }
+          break;
       }
     }
   }
 
+  setChecked(value) {
+    $('input[type="checkbox"][name="null"]').checked = value;
+  }
+
+  populate() {
+    const has_null =
+      this.closest("table-cell").getAttribute("nullable") == "YES"
+        ? true
+        : false;
+    let html_null = "";
+    if (has_null) {
+      html_null = `
+        <label class="flex gap-2 items-center">
+          <input type="checkbox" class="checkstyle-white form-checkbox" name="null">
+          <div class="italic">NULL</div>
+        </label>
+      `;
+    }
+    let html = `
+      ${html_null}
+      <field-text></field-text>
+    `;
+
+    this.innerHTML = html;
+
+    if (!has_null) return;
+
+    this.onClickNull();
+  }
+
+  onClickNull() {
+    $('input[type="checkbox"][name="null"]', this).addEventListener(
+      "click",
+      (e) => {
+        if (e.currentTarget.checked) {
+          console.log("checked");
+          console.log($("cell-preview", this.closest("table-cell")));
+          $("cell-preview", this.closest("table-cell")).setAttribute(
+            "null",
+            "true"
+          );
+        } else {
+          $("cell-preview", this.closest("table-cell")).setAttribute(
+            "null",
+            "false"
+          );
+        }
+      }
+    );
+  }
+
   thisActivate() {
     this.removeAttribute("hidden");
+    this.populate();
   }
 
   thisDeactivate() {

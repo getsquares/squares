@@ -13,10 +13,9 @@ class TableCell extends HTMLElement {
     this.innerHTML = `
       <cell-ring state="default"></cell-ring>
       <cell-edit></cell-edit>
-      <cell-preview active="true" class="select-none">
-        ${value}
-      </cell-preview>
+      <cell-preview active="true"></cell-preview>
     `;
+    $("preview-value", this).innerHTML = value;
   }
 }
 

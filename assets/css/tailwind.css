@@ -7,7 +7,7 @@
 @import "./scrollbars.css";
 @import "./sidebar.css";
 @import "./row.css";
-@import "./ring.css";
+@import "./cell.css";
 
 @import "tailwindcss/utilities";
 

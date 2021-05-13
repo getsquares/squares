@@ -1,0 +1,33 @@
+cell-ring {
+  @apply absolute inset-0 z-10 block;
+
+  &[state="default"] {
+    @apply z-10 shadow-y;
+  }
+
+  &[state="active"] {
+    @apply ring-gray-500;
+  }
+
+  &[state="changed"] {
+    @apply ring-yellow-500;
+  }
+
+  &[state="edit"] {
+    @apply ring-blue-500;
+  }
+
+  &[state="active"],
+  &[state="changed"],
+  &[state="edit"] {
+    @apply z-30 ring-2;
+  }
+}
+
+cell-preview {
+  @apply relative block select-none tp;
+}
+
+cell-edit {
+  @apply z-20 flex flex-col gap-2 absolute bg-gray-100 shadow-md top-full p-4 left-0 mt-0.5;
+}

@@ -1,8 +1,16 @@
 // Update preview
 function updatePreview(html, obj) {
-  const preview = obj.closest("table-cell").querySelector("cell-preview");
+  $("preview-value", obj.closest("table-cell")).innerHTML = html;
+}
+
+function updateNull(obj) {
+  const preview = $("preview", obj.closest("table-cell"));
+  const preview_value = $("preview-value", obj.closest("table-cell"));
+  preview_value.setAttribute("hidden", "");
   preview.setAttribute("active", "true");
-  preview.innerHTML = html;
+
+  const el_null = $("preview-null", obj.closest("table-cell"));
+  el_null.removeAttribute("hidden");
 }
 
 // Set cell field state

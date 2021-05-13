@@ -48,7 +48,7 @@ class TableCells extends HTMLElement {
 
     this_data.cols_order.forEach((item) => {
       html_first += `
-        <table-cell value="null"></table-cell>
+        <table-cell nullable="${this_data.cols[item].meta.Null}" value=""></table-cell>
       `;
     });
 

@@ -118,9 +118,7 @@ class CellRing extends HTMLElement {
     }
     this.setAttribute("state", "edit");
 
-    const el_edit = $("cell-edit", this.closest("table-cell"));
-    el_edit.activate();
-    el_edit.innerHTML = `<field-text></field-text>`;
+    $("cell-edit", this.closest("table-cell")).activate();
   }
 
   xEdges() {
