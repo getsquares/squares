@@ -4,42 +4,79 @@ class CellEdit extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["active", "null"];
+    return ["active", "is_null", "nullable"];
   }
 
   connectedCallback() {
-    this.setAttribute("hidden", "");
+    this.toggleActive();
+  }
+
+  set nullable(value) {
+    this.nullableValue = value;
+  }
+  get nullable() {
+    return this.nullableValue;
+  }
+
+  set active(value) {
+    this.activeValue = value;
+  }
+  get active() {
+    return this.activeValue;
+  }
+
+  set is_null(value) {
+    this.nullValue = value;
+  }
+  get is_null() {
+    return this.nullValue;
+  }
+
+  toggleActive() {
+    if (this.active) {
+      this.thisActivate();
+    } else {
+      this.thisDeactivate();
+    }
+  }
+
+  toggleNull() {
+    if (!this.nullable) return;
+    if (this.is_null) {
+      this.setChecked(true);
+    } else {
+      this.setChecked(false);
+    }
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
     if (oldValue !== newValue) {
       switch (attr) {
         case "active":
-          if (newValue == "true") {
-            this.thisActivate();
-          } else {
-            this.thisDeactivate();
-          }
+          this.active = newValue == "true" ? true : false;
+          this.toggleActive();
           break;
-        case "null":
-          if (newValue == "true") {
-            this.setChecked(true);
-          } else {
-            this.setChecked(false);
-          }
+        case "is_null":
+          this.is_null = newValue == "true" ? true : false;
+          this.toggleNull();
+          break;
+        case "nullable":
+          this.nullable = newValue == "true" ? true : false;
           break;
       }
     }
   }
 
   setChecked(value) {
+    const checkbox = $('input[type="checkbox"][name="null"]');
+    if (!checkbox) return;
+
     $('input[type="checkbox"][name="null"]').checked = value;
   }
 
   populate() {
     const has_null =
-      this.closest("table-cell").getAttribute("nullable") == "YES"
+      this.closest("table-cell").getAttribute("nullable") == "true"
         ? true
         : false;
     let html_null = "";
@@ -67,19 +104,12 @@ class CellEdit extends HTMLElement {
     $('input[type="checkbox"][name="null"]', this).addEventListener(
       "click",
       (e) => {
-        if (e.currentTarget.checked) {
-          console.log("checked");
-          console.log($("cell-preview", this.closest("table-cell")));
-          $("cell-preview", this.closest("table-cell")).setAttribute(
-            "null",
-            "true"
-          );
-        } else {
-          $("cell-preview", this.closest("table-cell")).setAttribute(
-            "null",
-            "false"
-          );
-        }
+        const checked = e.currentTarget.checked ? true : false;
+        $("cell-preview", this.closest("table-cell")).setAttribute(
+          "is_null",
+          checked
+        );
+        this.setAttribute("is_null", checked);
       }
     );
   }
@@ -87,6 +117,7 @@ class CellEdit extends HTMLElement {
   thisActivate() {
     this.removeAttribute("hidden");
     this.populate();
+    this.toggleNull();
   }
 
   thisDeactivate() {

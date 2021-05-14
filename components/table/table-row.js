@@ -23,6 +23,10 @@ class TableRow extends HTMLElement {
     const row = $("[data-first]", this.closest("pane-main")).innerHTML;
 
     this.insertAdjacentHTML("afterend", row);
+
+    const currentDate = new Date();
+    const timestamp = currentDate.getTime();
+    this.nextElementSibling.dataset.index = timestamp;
   }
 
   thisActivate() {

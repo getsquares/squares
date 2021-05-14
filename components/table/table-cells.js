@@ -23,7 +23,7 @@ class TableCells extends HTMLElement {
       data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
     const cols = this_data.cols_order;
 
-    let html = "";
+    let html = "<table-row-ghost></table-row-ghost>";
     let table_cols = "";
 
     this_data.rows.forEach((row) => {
@@ -32,6 +32,7 @@ class TableCells extends HTMLElement {
         const value = row[item];
         table_cols += `<table-cell value="${value}"></table-cell>`;
       });
+
       html += `
         <table-row>
           <row-select></row-select>
@@ -40,27 +41,7 @@ class TableCells extends HTMLElement {
       `;
     });
 
-    return this.templateFirst(this_data) + html;
-  }
-
-  templateFirst(this_data) {
-    let html_first = "";
-
-    this_data.cols_order.forEach((item) => {
-      html_first += `
-        <table-cell nullable="${this_data.cols[item].meta.Null}" value=""></table-cell>
-      `;
-    });
-
-    html_first = `
-      <template data-first>
-        <table-row class="contents row-new">
-          <row-select></row-select>
-          ${html_first}
-        </table-row>
-      </template>
-    `;
-    return html_first;
+    return html;
   }
 
   deactivateCells() {

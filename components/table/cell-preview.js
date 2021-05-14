@@ -4,60 +4,85 @@ class CellPreview extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["active", "null"];
+    return ["active", "is_null", "nullable"];
   }
 
   connectedCallback() {
-    const has_null =
-      this.closest("table-cell").getAttribute("nullable") == "YES"
-        ? true
-        : false;
-    let html_null = "";
-
-    if (has_null) {
-      html_null = `<preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>`;
-    }
     this.innerHTML = `
-      ${html_null}
+      <preview-null class="text-opacity-50 text-gray-800 italic" hidden>NULL</preview-null>
       <preview-value></preview-value>
     `;
+
+    this.toggleActive();
+    this.toggleNull();
+  }
+
+  set nullable(value) {
+    this.nullableValue = value;
+  }
+  get nullable() {
+    return this.nullableValue;
+  }
+
+  set active(value) {
+    this.activeValue = value;
+  }
+  get active() {
+    return this.activeValue;
+  }
+
+  set is_null(value) {
+    this.nullValue = value;
+  }
+  get is_null() {
+    return this.nullValue;
+  }
+
+  toggleNull() {
+    if (!this.nullable) return;
+    if (!$("preview-null", this)) return;
+
+    if (this.is_null) {
+      this.showNull();
+    } else {
+      this.showValue();
+    }
+  }
+
+  toggleActive() {
+    if (this.active) {
+      this.thisActivate();
+    } else {
+      this.thisDeactivate();
+    }
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
-      console.log("differ");
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      } else if (attr == "null") {
-        if (newValue == "true") {
-          this.showNull();
-          this.hideValue();
-        } else {
-          this.hideNull();
-          this.showValue();
-        }
+      switch (attr) {
+        case "active":
+          this.active = newValue == "true" ? true : false;
+          this.toggleActive();
+          break;
+        case "is_null":
+          this.is_null = newValue == "true" ? true : false;
+          this.toggleNull();
+          break;
+        case "nullable":
+          this.nullable = newValue == "true" ? true : false;
+          break;
       }
     }
   }
 
   showNull() {
     $("preview-null", this).removeAttribute("hidden");
-  }
-
-  hideNull() {
-    $("preview-null", this).setAttribute("hidden", "");
+    $("preview-value", this).setAttribute("hidden", "");
   }
 
   showValue() {
+    $("preview-null", this).setAttribute("hidden", "");
     $("preview-value", this).removeAttribute("hidden");
-  }
-
-  hideValue() {
-    $("preview-value", this).setAttribute("hidden", "");
   }
 
   thisActivate() {

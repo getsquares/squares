@@ -9,7 +9,6 @@ global $request;
 $request = $_GET;
 
 $data_class = new Data();
-$data_class->setColumns();
 $data_class->setRows();
 
 $results['meta'] = $data_class->meta();

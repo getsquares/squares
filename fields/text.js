@@ -8,7 +8,7 @@ class FieldText extends HTMLElement {
   }
 
   connectedCallback() {
-    const value = "test";
+    const value = "";
     this.innerHTML = `
       <input value="${value}" type="text" class="form-input focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
     `;
@@ -17,20 +17,20 @@ class FieldText extends HTMLElement {
     this.onEnter();
     this.onEscape();
 
-    updatePreview(this.querySelector("input").value, this);
+    updatePreview($("input", this).value, this);
 
-    this.querySelector("input").select();
+    $("input", this).select();
   }
 
   // On key up
   onKeyup() {
-    this.querySelector("input").addEventListener("keyup", (e) => {
+    $("input", this).addEventListener("keyup", (e) => {
       updatePreview(e.currentTarget.value, this);
     });
   }
 
   onEnter() {
-    this.querySelector("input").addEventListener("keydown", (e) => {
+    $("input", this).addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       e.preventDefault();
       leaveEdit(e);

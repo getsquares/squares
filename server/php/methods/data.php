@@ -25,11 +25,23 @@ class Data {
     $this->cols = [];
     $this->cols_order = [];
     $this->rows = [];
+
+
+    $this->setColumns();
+
     $this->meta = [
       'limit' => $this->limit,
       'offset' => $this->offset,
-      'total' => $this->getTotal()
+      'total' => $this->getTotal(),
+      'id' => $this->getId()
     ];
+  }
+
+  function getId() {
+    foreach($this->cols as $key => $item) {
+      if(!isset($item['config']['id'])) continue;
+      return $key;
+    }
   }
 
   function rows() {

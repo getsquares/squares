@@ -689,11 +689,6 @@ video {
 	border-color: transparent;
 	background-color: currentColor;
 }
-
-* {
-	scrollbar-color: initial;
-	scrollbar-width: initial;
-}
 .container {
 	width: 100%;
 }
