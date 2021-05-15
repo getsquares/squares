@@ -917,15 +917,15 @@ tab-items::-webkit-scrollbar-thumb:hover {
 /* Primary */
 .btn-primary {
 	--tw-border-opacity: 1;
-	border-color: rgba(54, 92, 170, var(--tw-border-opacity));
+	border-color: rgba(40, 71, 150, var(--tw-border-opacity));
 	--tw-bg-opacity: 1;
-	background-color: rgba(80, 123, 192, var(--tw-bg-opacity));
+	background-color: rgba(54, 92, 170, var(--tw-bg-opacity));
 	--tw-text-opacity: 1;
 	color: rgba(255, 255, 255, var(--tw-text-opacity));
 }
 .btn-primary:hover {
-	--tw-border-opacity: 1;
-	border-color: rgba(30, 52, 117, var(--tw-border-opacity));
+	--tw-bg-opacity: 1;
+	background-color: rgba(40, 71, 150, var(--tw-bg-opacity));
 }
 .btn-primary:hover:hover {
 	--tw-border-opacity: 1;
@@ -1724,6 +1724,9 @@ cell-edit {
 }
 .opacity-30 {
 	opacity: 0.3;
+}
+.opacity-50 {
+	opacity: 0.5;
 }
 .shadow-md {
 	--tw-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);

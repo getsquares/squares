@@ -22,6 +22,7 @@ class ActionsTabs extends HTMLElement {
       <div class="flex gap-1">
         <actions-btn name="refresh" label="Refresh" icon="material-icons/refresh.svg"></actions-btn>
         <actions-add></actions-add>
+        <run-x></run-x>
       </div>
     `;
   }

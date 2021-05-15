@@ -74,6 +74,40 @@ function handleCellClose() {
   resetEdit();
 }
 
+class cell {
+  static setPreview(html, obj) {
+    $("preview-value", obj.closest("table-cell")).innerHTML = html;
+  }
+
+  static setTempValue(value, obj) {
+    const db_table = table.get(obj);
+    const temp_data = temp[row.getType(obj)][db_table].data;
+    temp_data[row.getIndex(obj)][cell.getColumn(obj)] = value;
+  }
+
+  static getTempValue(obj) {
+    const db_table = table.get(obj);
+    const temp_data = temp[row.getType(obj)][db_table].data;
+    return temp_data[row.getIndex(obj)][cell.getColumn(obj)];
+  }
+
+  static getColumn(obj) {
+    return obj.closest("table-cell").getAttribute("column");
+  }
+
+  static isNullable() {
+    return obj.closest("table-cell").getAttribute("nullable") == "true"
+      ? true
+      : false;
+  }
+
+  static isNull() {
+    return obj.closest("table-cell").getAttribute("is_null") == "true"
+      ? true
+      : false;
+  }
+}
+
 // Leave edit
 function leaveEdit() {
   in_field = true;
@@ -146,6 +180,20 @@ function syncSidebarLogo() {
 function error(message) {}
 
 function success(message) {}
+
+class row {
+  static isNew(obj) {
+    return obj.closest(".row-new") ? true : false;
+  }
+
+  static getType(obj) {
+    return row.isNew(obj) ? "insert" : "update";
+  }
+
+  static getIndex(obj) {
+    return obj.closest("table-row").dataset.index;
+  }
+}
 
 // Spread dom cell
 function spreadDomCell(el_table_cell) {
@@ -310,6 +358,17 @@ class tab {
   }
 }
 
+class table {
+  static get(obj) {
+    let main = obj;
+    if (obj.tagName != "PANE-MAIN") {
+      main = obj.closest("pane-main");
+    }
+
+    return `${main.getAttribute("database")} ${main.getAttribute("table")}`;
+  }
+}
+
 class tabs {
   // tabs.deactivate()
   static deactivate() {
@@ -332,7 +391,7 @@ class ActionsAdd extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("btn", "btn-success");
+    this.classList.add("btn", "btn-default");
 
     this.innerHTML = `
       <img-svg src="remixicon/add-circle-line.svg" classes="w-5 h-5"></img-svg>
@@ -601,6 +660,7 @@ class ActionsTabs extends HTMLElement {
       <div class="flex gap-1">
         <actions-btn name="refresh" label="Refresh" icon="material-icons/refresh.svg"></actions-btn>
         <actions-add></actions-add>
+        <run-x></run-x>
       </div>
     `;
   }
@@ -1245,10 +1305,10 @@ class DeleteX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("btn", "btn-delete");
+    this.classList.add("btn", "btn-default");
     this.innerHTML = `
       <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
-      Delete
+      Delete checked
     `;
     this.onClick();
   }
@@ -1284,8 +1344,6 @@ class DeleteX extends HTMLElement {
           ids: ids,
         }
       );
-
-      console.log(resp.data);
 
       return resp.data;
     } catch (err) {
@@ -1394,12 +1452,13 @@ class RowActions extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("invisible");
+    this.classList.add("invisible", "flex", "gap-1");
     this.innerHTML = `
       <delete-x></delete-x>
-      <clone-x class="btn btn-success">
+      <clone-x class="btn btn-default">
         <img-svg src="remixicon/file-copy-2-line.svg" classes="w-5 h-5"></img-svg>
-        Clone</clone-x>
+        Duplicate checked
+      </clone-x>
     `;
   }
 
@@ -1441,6 +1500,50 @@ class RowActions extends HTMLElement {
   }
 }
 customElements.define("row-actions", RowActions);
+
+class RunX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("btn", "btn-primary");
+    this.innerHTML = `
+      <img-svg src="remixicon/flashlight-fill.svg" classes="w-5 h-5"></img-svg>
+      Run queries
+    `;
+    //this.onClick();
+  }
+
+  onClick() {
+    this.addEventListener("click", () => {
+      this.run();
+    });
+  }
+
+  async run() {
+    const ids = [1, 2, 3];
+    try {
+      const resp = await axios.post(
+        `http://localhost/tools/squares/server/php/queries/delete.php?database=asda&table=asda`,
+        {
+          ids: ids,
+        }
+      );
+
+      return resp.data;
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
+    }
+  }
+}
+
+customElements.define("run-x", RunX);
 
 class SidebarDatabaseLoading extends HTMLElement {
   constructor() {
@@ -2582,9 +2685,7 @@ class TableCells extends HTMLElement {
   }
 
   template() {
-    const main = this.closest("pane-main");
-    const this_data =
-      data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
+    const this_data = data[table.get(this)];
     const cols = this_data.cols_order;
 
     let html = "<table-row-ghost></table-row-ghost>";
@@ -2594,7 +2695,7 @@ class TableCells extends HTMLElement {
       table_cols = "";
       cols.forEach((item) => {
         const value = row[item];
-        table_cols += `<table-cell value="${value}"></table-cell>`;
+        table_cols += `<table-cell value="${value}" column="${item}"></table-cell>`;
       });
 
       html += `
@@ -2780,9 +2881,7 @@ class TableHeadings extends HTMLElement {
   }
 
   template() {
-    const main = this.closest("pane-main");
-    const this_data =
-      data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
+    const this_data = data[table.get(this)];
     const cols = this_data.cols_order;
     let html = `<table-heading-check></table-heading-check>`;
 
@@ -2832,14 +2931,25 @@ class TableRowGhost extends HTMLElement {
   }
 
   templateTableCells() {
-    const main = this.closest("pane-main");
-    const this_data =
-      data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
+    const table_name = table.get(this);
+    const this_data = data[table_name];
     let html = "";
 
+    temp["insert"][table_name] = {
+      defaults: {},
+      data: [],
+    };
+
     this_data.cols_order.forEach((name) => {
-      const default_value = this.parseDefault(this_data, name);
-      html += this.templateTableCell(this_data, name, default_value);
+      const nullable = this.isNullable(this_data, name);
+      const value = this.parseDefault(this_data, name);
+
+      if (this_data.meta.id !== name) {
+        temp["insert"][table_name]["defaults"][name] =
+          nullable == "true" ? "" : value;
+      }
+
+      html += this.templateTableCell(nullable, value, name);
     });
 
     return html;
@@ -2856,12 +2966,13 @@ class TableRowGhost extends HTMLElement {
     `;
   }
 
-  templateTableCell(this_data, name, default_value) {
+  templateTableCell(nullable, value, column) {
     return `
       <table-cell
-        nullable="${this.isNullable(this_data, name)}"
-        value="${default_value}"
-        null="${this.isNullable(this_data, name)}">
+        nullable="${nullable}"
+        value="${value}"
+        null="${nullable}"
+        column="${column}">
       </table-cell>
     `;
   }
@@ -2916,6 +3027,10 @@ class TableRow extends HTMLElement {
   }
 
   addRow() {
+    const main = this.closest("pane-main");
+    const db_name = `${main.getAttribute("database")} ${main.getAttribute(
+      "table"
+    )}`;
     const row = $("[data-first]", this.closest("pane-main")).innerHTML;
 
     this.insertAdjacentHTML("afterend", row);
@@ -2923,6 +3038,8 @@ class TableRow extends HTMLElement {
     const currentDate = new Date();
     const timestamp = currentDate.getTime();
     this.nextElementSibling.dataset.index = timestamp;
+
+    temp["insert"][db_name].data[timestamp] = temp["insert"][db_name].defaults;
   }
 
   thisActivate() {
@@ -3434,8 +3551,7 @@ class PaneMain extends HTMLElement {
   }
 
   gridCols() {
-    const this_data =
-      data[`${this.getAttribute("database")} ${this.getAttribute("table")}`];
+    const this_data = data[table.get(this)];
 
     let sum = 0;
     let widths = [];
@@ -3538,7 +3654,7 @@ class FieldText extends HTMLElement {
   }
 
   connectedCallback() {
-    const value = "";
+    const value = cell.getTempValue(this);
     this.innerHTML = `
       <input value="${value}" type="text" class="form-input focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
     `;
@@ -3555,7 +3671,11 @@ class FieldText extends HTMLElement {
   // On key up
   onKeyup() {
     $("input", this).addEventListener("keyup", (e) => {
-      updatePreview(e.currentTarget.value, this);
+      const value = e.currentTarget.value;
+      cell.setTempValue(value, this);
+      updatePreview(value, this);
+
+      console.log(temp);
     });
   }
 

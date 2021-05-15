@@ -18,9 +18,7 @@ class TableCells extends HTMLElement {
   }
 
   template() {
-    const main = this.closest("pane-main");
-    const this_data =
-      data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
+    const this_data = data[table.get(this)];
     const cols = this_data.cols_order;
 
     let html = "<table-row-ghost></table-row-ghost>";
@@ -30,7 +28,7 @@ class TableCells extends HTMLElement {
       table_cols = "";
       cols.forEach((item) => {
         const value = row[item];
-        table_cols += `<table-cell value="${value}"></table-cell>`;
+        table_cols += `<table-cell value="${value}" column="${item}"></table-cell>`;
       });
 
       html += `

@@ -31,8 +31,7 @@ class PaneMain extends HTMLElement {
   }
 
   gridCols() {
-    const this_data =
-      data[`${this.getAttribute("database")} ${this.getAttribute("table")}`];
+    const this_data = data[table.get(this)];
 
     let sum = 0;
     let widths = [];

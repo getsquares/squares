@@ -46,7 +46,7 @@
 
 /* Primary */
 .btn-primary {
-  @apply text-white border-navy-600 bg-navy-500 hover:border-navy-800;
+  @apply text-white border-navy-700 bg-navy-600 hover:bg-navy-700;
 }
 
 .btn-primary:hover {

@@ -1,4 +1,4 @@
-class DeleteX extends HTMLElement {
+class RunX extends HTMLElement {
   constructor() {
     super();
   }
@@ -8,37 +8,21 @@ class DeleteX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("btn", "btn-default");
+    this.classList.add("btn", "btn-primary");
     this.innerHTML = `
-      <img-svg src="remixicon/delete-bin-line.svg" classes="w-5 h-5"></img-svg>
-      Delete checked
+      <img-svg src="remixicon/flashlight-fill.svg" classes="w-5 h-5"></img-svg>
+      Run queries
     `;
-    this.onClick();
+    //this.onClick();
   }
 
   onClick() {
     this.addEventListener("click", () => {
-      $$(".row-new[active]").forEach((el) => {
-        el.remove();
-      });
-
-      this.delete();
-
-      /* {
-        id: 3
-        database: asdas
-        table: asdas
-      }
-      {
-        id: 3
-        database: asdas
-        table: asdas
-      }
-      */
+      this.run();
     });
   }
 
-  async delete() {
+  async run() {
     const ids = [1, 2, 3];
     try {
       const resp = await axios.post(
@@ -56,4 +40,4 @@ class DeleteX extends HTMLElement {
   }
 }
 
-customElements.define("delete-x", DeleteX);
+customElements.define("run-x", RunX);

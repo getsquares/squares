@@ -20,6 +20,10 @@ class TableRow extends HTMLElement {
   }
 
   addRow() {
+    const main = this.closest("pane-main");
+    const db_name = `${main.getAttribute("database")} ${main.getAttribute(
+      "table"
+    )}`;
     const row = $("[data-first]", this.closest("pane-main")).innerHTML;
 
     this.insertAdjacentHTML("afterend", row);
@@ -27,6 +31,8 @@ class TableRow extends HTMLElement {
     const currentDate = new Date();
     const timestamp = currentDate.getTime();
     this.nextElementSibling.dataset.index = timestamp;
+
+    temp["insert"][db_name].data[timestamp] = temp["insert"][db_name].defaults;
   }
 
   thisActivate() {

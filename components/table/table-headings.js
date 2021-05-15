@@ -14,9 +14,7 @@ class TableHeadings extends HTMLElement {
   }
 
   template() {
-    const main = this.closest("pane-main");
-    const this_data =
-      data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
+    const this_data = data[table.get(this)];
     const cols = this_data.cols_order;
     let html = `<table-heading-check></table-heading-check>`;
 

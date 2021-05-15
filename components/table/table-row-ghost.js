@@ -18,14 +18,25 @@ class TableRowGhost extends HTMLElement {
   }
 
   templateTableCells() {
-    const main = this.closest("pane-main");
-    const this_data =
-      data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
+    const table_name = table.get(this);
+    const this_data = data[table_name];
     let html = "";
 
+    temp["insert"][table_name] = {
+      defaults: {},
+      data: [],
+    };
+
     this_data.cols_order.forEach((name) => {
-      const default_value = this.parseDefault(this_data, name);
-      html += this.templateTableCell(this_data, name, default_value);
+      const nullable = this.isNullable(this_data, name);
+      const value = this.parseDefault(this_data, name);
+
+      if (this_data.meta.id !== name) {
+        temp["insert"][table_name]["defaults"][name] =
+          nullable == "true" ? "" : value;
+      }
+
+      html += this.templateTableCell(nullable, value, name);
     });
 
     return html;
@@ -42,12 +53,13 @@ class TableRowGhost extends HTMLElement {
     `;
   }
 
-  templateTableCell(this_data, name, default_value) {
+  templateTableCell(nullable, value, column) {
     return `
       <table-cell
-        nullable="${this.isNullable(this_data, name)}"
-        value="${default_value}"
-        null="${this.isNullable(this_data, name)}">
+        nullable="${nullable}"
+        value="${value}"
+        null="${nullable}"
+        column="${column}">
       </table-cell>
     `;
   }

@@ -8,7 +8,7 @@ class ActionsAdd extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("btn", "btn-success");
+    this.classList.add("btn", "btn-default");
 
     this.innerHTML = `
       <img-svg src="remixicon/add-circle-line.svg" classes="w-5 h-5"></img-svg>
