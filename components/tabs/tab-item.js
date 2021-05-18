@@ -4,39 +4,39 @@ class TabItem extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["title", "label", "active"];
+    return ["active"];
+  }
+
+  set database(value) {
+    this.databaseValue = value;
+  }
+
+  get database() {
+    return this.databaseValue;
+  }
+
+  set table(value) {
+    this.tableValue = value;
+  }
+
+  get table() {
+    return this.tableValue;
   }
 
   connectedCallback() {
-    this.classList.add(
-      ...[
-        "rounded-t",
-        "px-4",
-        "pr-2",
-        "py-2",
-        "cursor-default",
-        "select-none",
-        "focus:outline-none",
-        "flex",
-        "gap-3",
-        "items-center",
-        "text-sm",
-      ],
-      ...tab.classesInactive()
-    );
+    this.database = this.getAttribute("database");
+    this.table = this.getAttribute("table");
 
-    this.setAttribute(
-      "title",
-      this.getAttribute("database") + "/" + this.getAttribute("table")
-    );
+    this.setAttribute("title", this.database + "/" + this.table);
 
     this.innerHTML = `
-      ${this.getAttribute("table")}
+      ${this.table}
       <img-svg src="remixicon/close.svg" classes="rounded w-5 h-5">
     `;
 
-    tab.onClose(this);
-    tab.onClick(this);
+    this.onClick();
+    this.onCloseClick();
+    this.onMiddleClick();
   }
 
   deactivate() {
@@ -47,17 +47,37 @@ class TabItem extends HTMLElement {
     this.setAttribute("active", "true");
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue === newValue) return;
+  isActive() {
+    return this.getAttribute("active") == "true";
+  }
 
-    switch (attr) {
-      case "active":
-        if (newValue == "true") {
-          tab.activate(this);
-        } else {
-          tab.deactivate(this);
-        }
-        break;
+  onClick() {
+    this.addEventListener("mousedown", (e) => {
+      if (e.currentTarget !== e.target || e.which !== 1) return;
+
+      store.table.activate(this.database, this.table);
+    });
+  }
+
+  onCloseClick() {
+    $("img-svg", this).on("click", () => {
+      this.handleClose();
+    });
+  }
+
+  onMiddleClick() {
+    this.on("mouseup", (e) => {
+      if (e.button !== 1) return;
+
+      this.handleClose();
+    });
+  }
+
+  handleClose() {
+    if (this.getAttribute("active") == "true") {
+      store.table.close(this.database, this.table);
+    } else {
+      this.remove();
     }
   }
 }

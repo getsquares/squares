@@ -8,6 +8,7 @@
 @import "./sidebar.css";
 @import "./row.css";
 @import "./cell.css";
+@import "./tab.css";
 
 @import "tailwindcss/utilities";
 

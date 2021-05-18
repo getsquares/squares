@@ -16,7 +16,6 @@ class TopbarWrap extends HTMLElement {
           <img-svg src="logo.svg" classes="h-5"></img-svg>
         </div>
       </resize-logo>
-      <tab-items></tab-items>
       <topbar-items></topbar-items>
     </div>
     `;

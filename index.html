@@ -20,9 +20,10 @@
     <!-- Sidebar main -->
     <div class="flex flex-1 overflow-hidden">
       <!-- Sidebar -->
-      <sidebar-wrap></sidebar-wrap>
+      <sidebar-x></sidebar-x>
       <!-- Main -->
       <main-x class="flex flex-col flex-1 px-4 overflow-hidden bg-gray-50">
+        <tab-items></tab-items>
         <select-table class="flex items-center justify-center flex-1 w-full gap-2 text-2xl bg-white border-l">
           <img-svg src="remixicon/arrow-left-s-line.svg" classes="w-7 h-7 opacity-25"></img-svg>
           Select a table...
@@ -33,6 +34,10 @@
     <modal-box></modal-box>
 
     <script>
+      function dump(myObject) {
+        console.log(JSON.stringify(myObject, null, 4));
+      }
+      
       const $ = (selector, base = document) => {
         return base.querySelector(selector);
       };
@@ -42,6 +47,61 @@
 
       Node.prototype.on = function (type, listener) {
         return this.addEventListener(type, listener);
+      };
+
+      var store = {
+        table: {
+          activate: (database, table) => {
+            state.database = database;
+            state.table = table;
+
+            $(`tab-items`).activate(database, table);
+            //$(`sidebar-table[database="${database}"][table="${table}"]`).activate();
+          },
+          close(database, table) {
+            $(`tab-items`).tab(database, table).remove();
+
+            // Inte så snyggt
+            $(`sidebar-table[active="true"]`).deactivate();
+
+            state.database = null;
+            state.table = null;
+          }
+        },
+        tables: {
+          load: () => {
+            axios.get(`server/php/queries/tables.php?database=${state.database}`).then((response) => {
+              if (response.status !== 200) return;
+
+              var index = state.databases.findIndex(p => p.name == state.database);
+              state.databases[index].tables = response.data;
+
+              console.log(response.data);
+
+              $(`sidebar-database[database="${state.database}"] sidebar-tables`).populate(response.data);
+            });
+            console.log('load_tables');
+          }
+        },
+        database: {
+          activate(database) {
+            state.database = database;
+
+            $(`sidebar-database[database="${database}"]`).activate();
+            if($(`sidebar-database[database="${database}"] sidebar-tables`).isEmpty()) {
+              store.tables.load();
+            }
+            //$(`sidebar-tables`, sidebar).deactivate();
+          },
+        },
+      };
+
+      var state = {
+        database: null,
+        table: null,
+        databases_order: [],
+        databases: {},
+        tables: []
       };
 
       var in_field = false;
@@ -70,9 +130,6 @@
         //eventCellClick();
         //eventCellDoubleclick();
 
-        new ResizeObserver(() => {
-        syncSidebarLogo();
-      }).observe($("sidebar-wrap"));
       });
 
       

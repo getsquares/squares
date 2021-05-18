@@ -11,10 +11,10 @@ class RowActions extends HTMLElement {
     this.classList.add("invisible", "flex", "gap-1");
     this.innerHTML = `
       <delete-x></delete-x>
-      <clone-x class="btn btn-default">
+      <duplicate-x class="btn btn-default">
         <img-svg src="remixicon/file-copy-2-line.svg" classes="w-5 h-5"></img-svg>
         Duplicate checked
-      </clone-x>
+      </duplicate-x>
     `;
   }
 

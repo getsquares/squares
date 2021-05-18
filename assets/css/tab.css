@@ -1,0 +1,15 @@
+tab-item {
+  @apply rounded-t px-4 pr-2 py-2 cursor-default select-none focus:outline-none flex gap-3 items-center text-sm text-blueGray-200 bg-blueGray-600;
+
+  & img-svg:hover {
+    @apply bg-blueGray-700;
+  }
+
+  &[active="true"] {
+    @apply bg-gray-50 text-gray-800;
+
+    & img-svg:hover {
+      @apply bg-blueGray-200;
+    }
+  }
+}

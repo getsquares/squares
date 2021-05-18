@@ -1,10 +1,10 @@
 // Set actions, mutations and initial state
-const actions = {
+/*const actions = {
   saySomething(context, payload) {
     console.log(payload.hello);
     context.commit("setMessage", payload.value);
   },
-};
+};*/
 
 const mutations = {
   setMessage(state, payload) {
@@ -28,11 +28,11 @@ const initialState = {
 };
 
 // Create our store instance
-const store = new StoreClass({
+/*const store = new StoreClass({
   actions,
   mutations,
   initialState,
-});
+});*/
 
 // Grab the textearea and dispatch the action on 'input'
 const textElement = document.querySelector("textarea");

@@ -35,6 +35,15 @@
   @apply border-red-400;
 }
 
+/* Danger */
+.btn-danger {
+  @apply bg-red-700 text-white border-red-800;
+}
+
+.btn-danger:hover {
+  @apply bg-red-800;
+}
+
 /* Clone */
 .btn-clone {
   @apply text-yellow-800 bg-yellow-100 border-yellow-300;

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+  </head>
+  <body>
+    <script>
+      let state = {
+        test: {
+          databases: [],
+        },
+      };
+      let storage = {
+        set: (key, value) => {
+          key = value;
+        },
+      };
+
+      storage.set(state.test.databases, ["one", "two"]);
+      console.log(state);
+    </script>
+  </body>
+</html>

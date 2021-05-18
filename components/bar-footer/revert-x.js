@@ -1,4 +1,4 @@
-class RunX extends HTMLElement {
+class RevertX extends HTMLElement {
   constructor() {
     super();
   }
@@ -8,10 +8,10 @@ class RunX extends HTMLElement {
   }
 
   connectedCallback() {
-    this.classList.add("btn", "btn-primary");
+    this.classList.add("btn", "btn-danger");
     this.innerHTML = `
-      <img-svg src="remixicon/flashlight-fill.svg" classes="w-5 h-5"></img-svg>
-      Run queries
+      <img-svg src="material-icons/undo_black_24dp.svg" classes="w-5 h-5"></img-svg>
+      Revert
     `;
     //this.onClick();
   }
@@ -40,4 +40,4 @@ class RunX extends HTMLElement {
   }
 }
 
-customElements.define("run-x", RunX);
+customElements.define("revert-x", RevertX);

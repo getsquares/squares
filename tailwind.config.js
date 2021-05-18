@@ -9,10 +9,11 @@ module.exports = {
       "index.html",
     ],
     options: {
-      safelist: [/^grid-cols/],
+      // Funkar ej med JIT
+      safelist: [/^grid-cols/, /^bg-gray/, /^bg-blueGray/, /^bg-navy/],
     },
   },
-  darkMode: false, // or 'media' or 'class'
+  darkMode: false,
   mode: "jit",
   theme: {
     colors: {

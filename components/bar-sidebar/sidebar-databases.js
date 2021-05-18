@@ -5,27 +5,17 @@ class SidebarDatabases extends HTMLElement {
 
   connectedCallback() {
     this.classList.add(...["flex", "flex-col"]);
-    this.populate();
-  }
-
-  template(title) {
-    return `<sidebar-database title="${title}"></sidebar-database>`;
+    actions.databasesLoad();
   }
 
   populate() {
-    axios
-      .get("http://localhost/tools/squares/server/php/queries/databases.php")
-      .then((response) => {
-        if (response.status !== 200) return;
+    let html = "";
 
-        let html = "";
+    state.databases_order.forEach((name) => {
+      html += `<sidebar-database database="${name}"></sidebar-database>`;
+    });
 
-        response.data.forEach((title) => {
-          html += this.template(title);
-        });
-
-        this.innerHTML += html;
-      });
+    this.innerHTML += html;
   }
 }
 

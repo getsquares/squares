@@ -29,12 +29,14 @@ class SidebarTable extends HTMLElement {
     current.table = this.getValue();
     current.database = this.closest("sidebar-database").getValue();
 
-    const el = tab.getItem(current.database, current.table);
+    store.table.activate(
+      this.closest("sidebar-database").getValue(),
+      this.getValue()
+    );
 
-    if (el) {
-      tabs.deactivate();
-      el.activate();
+    dump(state);
 
+    if ($("tab-items").tab()) {
       $$("pane-main").forEach((item) => {
         item.deactivate();
       });
@@ -45,9 +47,6 @@ class SidebarTable extends HTMLElement {
 
       current_el.activate();
     } else {
-      tab.add(current.database, current.table);
-
-      syncSidebarLogo();
       // Fetch
       this.test(current.database, current.table).then((test) => {
         data[current.database + " " + current.table] = test;

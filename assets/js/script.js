@@ -173,27 +173,9 @@ function setCellActiveToEl(el, state = "active") {
   el.setAttribute("state", state);
 }
 
-function syncSidebarLogo() {
-  $("resize-logo").style.width = $("sidebar-wrap").offsetWidth + 16 + "px";
-}
-
 function error(message) {}
 
 function success(message) {}
-
-class row {
-  static isNew(obj) {
-    return obj.closest(".row-new") ? true : false;
-  }
-
-  static getType(obj) {
-    return row.isNew(obj) ? "insert" : "update";
-  }
-
-  static getIndex(obj) {
-    return obj.closest("table-row").dataset.index;
-  }
-}
 
 // Spread dom cell
 function spreadDomCell(el_table_cell) {
@@ -223,137 +205,122 @@ function storeDomCell(el_table_cell) {
   dom.up = spreadDomCell(getDomCellUp());
 }
 
-class tab {
-  // tab.activateLast()
-  static activateLast() {
-    const el = this.getLast();
-
-    if (!el) return;
-    el.activate();
+class row {
+  static isNew(obj) {
+    return obj.closest(".row-new") ? true : false;
   }
 
-  // tab.add()
-  static add(database, table) {
-    tabs.deactivate();
-    $("tab-items").insertAdjacentHTML(
-      "beforeend",
-      tab.html(database, table, "true")
-    );
-    tab.onClick(tab.getLast());
+  static getType(obj) {
+    return row.isNew(obj) ? "insert" : "update";
   }
 
-  // tab.getItem()
-  static getItem(database, table) {
-    return $(`tab-item[database="${database}"][table="${table}"]`);
+  static getIndex(obj) {
+    return obj.closest("table-row").dataset.index;
   }
+}
 
-  // tab.getLast()
-  static getLast() {
-    return $("tab-item:last-child");
-  }
+var actions = {
+  // Database
+  databasesLoad: () => {
+    axios.get("server/php/queries/databases.php").then((response) => {
+      if (response.status !== 200) return;
 
-  // tab.onClose()
-  static onClose(el) {
-    this.onCloseClick(el);
-    this.onMiddleClick(el);
-  }
+      set.databaseOrder(response.data);
+      set.databaseItems(response.data);
 
-  // tab.onCloseClick()
-  static onCloseClick(el) {
-    $("img-svg", el).on("click", () => {
-      tab.closeHandler(el);
+      triggers.databaseLoad();
     });
-  }
+  },
+  databaseToggle(is_open, database) {
+    set.databaseState(is_open, database);
+    triggers.databaseToggle(database);
+  },
+  // Tables
+  tablesLoad(database) {
+    axios
+      .get(`server/php/queries/tables.php?database=${database}`)
+      .then((response) => {
+        if (response.status !== 200) return;
 
+        set.tableOrder(response.data, database);
+        set.tableItems(response.data, database);
+
+        console.log(state);
+      });
+  },
+};
+
+var set = {
+  // Database
+  databaseItems: (content) => {
+    state.databases = {};
+
+    content.forEach((item) => {
+      state.databases[item] = {
+        open: false,
+        table_order: [],
+        table_items: {},
+      };
+    });
+  },
+  databaseOrder: (content) => {
+    state.databases_order = content;
+  },
+  database: (database) => {
+    state.database = database;
+  },
+  databaseState: (is_open, database) => {
+    state.databases[database].open = is_open;
+  },
+  // Tables
+
+  tableItems: (content, database) => {
+    content.forEach((item) => {
+      state.databases[database].table_items[item] = {
+        name: item,
+      };
+    });
+
+    triggers.tableItems(database);
+  },
+};
+
+set.tableOrder = (content, database) => {
+  state.databases[database].table_order = content;
+};
+
+var triggers = {
+  databaseLoad: () => {
+    $("sidebar-databases").populate();
+  },
+  databaseToggle: (database) => {
+    const current_database = $(`sidebar-database[database="${database}"]`);
+
+    if (state.databases[database].open) {
+      current_database.open();
+      if ($("sidebar-tables", current_database).isEmpty()) {
+        console.log("em");
+        actions.tablesLoad(database);
+      }
+    } else {
+      current_database.close();
+    }
+  },
+};
+
+triggers.tableItems = (database) => {
+  $(`sidebar-database[database="${database}"] sidebar-tables`).populate(
+    database
+  );
+};
+
+class tab {
   // tab.onMiddleClick()
   static onMiddleClick(el) {
     el.on("mouseup", (e) => {
       if (e.button !== 1) return;
 
       tab.closeHandler(el);
-    });
-  }
-
-  // tab.html()
-  static html(database, table, active) {
-    return `
-    <tab-item database="${database}" table="${table}" active="${active}"></tab-item>`;
-  }
-
-  // tab.deactivate()
-  static deactivate(el) {
-    const close_el = $("img-svg", el);
-    if (!close_el) return;
-
-    // Tab classes
-    el.classList.remove(...this.classesActive());
-    el.classList.add(...this.classesInactive());
-
-    // Close classes
-    close_el.classList.remove(...this.classesActiveClose());
-    close_el.classList.add(...this.classesInactiveClose());
-  }
-
-  // tab.activate()
-  static activate(el) {
-    const close_el = $("img-svg", el);
-    if (!close_el) return;
-
-    // Tab classes
-    el.classList.add(...this.classesActive());
-    el.classList.remove(...this.classesInactive());
-
-    // Close classes
-    close_el.classList.add(...this.classesActiveClose());
-    close_el.classList.remove(...this.classesInactiveClose());
-
-    // Set data
-    current.table = el.getAttribute("table");
-    current.database = el.getAttribute("database");
-  }
-
-  static classesActive() {
-    return ["bg-gray-50", "text-gray-800"];
-  }
-
-  static classesInactive() {
-    return ["bg-blueGray-800", "text-blueGray-200", "hover:bg-blueGray-800"];
-  }
-
-  static classesActiveClose() {
-    return ["hover:bg-gray-200"];
-  }
-
-  static classesInactiveClose() {
-    return ["hover:bg-blueGray-600"];
-  }
-
-  // tab.hasActive()
-  static hasActive() {
-    return $('tab-item[active="true"]');
-  }
-
-  // tab.closeHandler()
-  static closeHandler(el) {
-    el.remove();
-
-    // GÖR NÅGOT ÅT DETTA
-    const sidebar_table = $('sidebar-table[active="true"]');
-    if (!sidebar_table) return;
-    sidebar_table.removeAttribute("active", "true");
-
-    if (this.hasActive()) return;
-
-    tab.activateLast();
-  }
-
-  // tab.onClick()
-  static onClick(el) {
-    el.on("mousedown", (e) => {
-      if (e.currentTarget !== e.target || e.which !== 1) return;
-
-      tabs.deactivate();
-      el.activate();
     });
   }
 }
@@ -366,18 +333,6 @@ class table {
     }
 
     return `${main.getAttribute("database")} ${main.getAttribute("table")}`;
-  }
-}
-
-class tabs {
-  // tabs.deactivate()
-  static deactivate() {
-    const tabs = $$("tab-item");
-    if (!tabs) return;
-
-    tabs.forEach((el) => {
-      el.deactivate();
-    });
   }
 }
 
@@ -660,7 +615,8 @@ class ActionsTabs extends HTMLElement {
       <div class="flex gap-1">
         <actions-btn name="refresh" label="Refresh" icon="material-icons/refresh.svg"></actions-btn>
         <actions-add></actions-add>
-        <run-x></run-x>
+        <execute-x></execute-x>
+        <revert-x></revert-x>
       </div>
     `;
   }
@@ -1355,6 +1311,50 @@ class DeleteX extends HTMLElement {
 
 customElements.define("delete-x", DeleteX);
 
+class ExecuteX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("btn", "btn-primary");
+    this.innerHTML = `
+      <img-svg src="remixicon/flashlight-fill.svg" classes="w-5 h-5"></img-svg>
+      Execute
+    `;
+    //this.onClick();
+  }
+
+  onClick() {
+    this.addEventListener("click", () => {
+      this.run();
+    });
+  }
+
+  async run() {
+    const ids = [1, 2, 3];
+    try {
+      const resp = await axios.post(
+        `http://localhost/tools/squares/server/php/queries/delete.php?database=asda&table=asda`,
+        {
+          ids: ids,
+        }
+      );
+
+      return resp.data;
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
+    }
+  }
+}
+
+customElements.define("execute-x", ExecuteX);
+
 class PaginationX extends HTMLElement {
   constructor() {
     super();
@@ -1442,6 +1442,50 @@ class RecordsX extends HTMLElement {
 }
 customElements.define("records-x", RecordsX);
 
+class RevertX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("btn", "btn-danger");
+    this.innerHTML = `
+      <img-svg src="material-icons/undo_black_24dp.svg" classes="w-5 h-5"></img-svg>
+      Revert
+    `;
+    //this.onClick();
+  }
+
+  onClick() {
+    this.addEventListener("click", () => {
+      this.run();
+    });
+  }
+
+  async run() {
+    const ids = [1, 2, 3];
+    try {
+      const resp = await axios.post(
+        `http://localhost/tools/squares/server/php/queries/delete.php?database=asda&table=asda`,
+        {
+          ids: ids,
+        }
+      );
+
+      return resp.data;
+    } catch (err) {
+      // Handle Error Here
+      console.error(err);
+    }
+  }
+}
+
+customElements.define("revert-x", RevertX);
+
 class RowActions extends HTMLElement {
   constructor() {
     super();
@@ -1455,10 +1499,10 @@ class RowActions extends HTMLElement {
     this.classList.add("invisible", "flex", "gap-1");
     this.innerHTML = `
       <delete-x></delete-x>
-      <clone-x class="btn btn-default">
+      <duplicate-x class="btn btn-default">
         <img-svg src="remixicon/file-copy-2-line.svg" classes="w-5 h-5"></img-svg>
         Duplicate checked
-      </clone-x>
+      </duplicate-x>
     `;
   }
 
@@ -1501,49 +1545,53 @@ class RowActions extends HTMLElement {
 }
 customElements.define("row-actions", RowActions);
 
-class RunX extends HTMLElement {
+class SidebarDatabaseItem extends HTMLElement {
   constructor() {
     super();
   }
 
-  static get observedAttributes() {
-    return ["active"];
-  }
-
   connectedCallback() {
-    this.classList.add("btn", "btn-primary");
+    this.classList.add(
+      ...[
+        "flex",
+        "gap-2",
+        "px-2",
+        "py-1",
+        "cursor-default",
+        "select-none",
+        "fill-current",
+        "items-center",
+      ]
+    );
+
     this.innerHTML = `
-      <img-svg src="remixicon/flashlight-fill.svg" classes="w-5 h-5"></img-svg>
-      Run queries
+      <img-svg src="remixicon/database-2-fill.svg" classes="w-4 h-4 text-yellow-500"></img-svg>
+      <div class="flex-1 truncate font-bold text-sm">
+        ${this.closest("sidebar-database").getAttribute("database")}
+      </div>
+      <img-svg arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-4 h-4"></img-svg>
     `;
-    //this.onClick();
   }
 
-  onClick() {
-    this.addEventListener("click", () => {
-      this.run();
-    });
+  open() {
+    $("[arrow] svg", this).classList.remove("rotate-180");
   }
 
-  async run() {
-    const ids = [1, 2, 3];
-    try {
-      const resp = await axios.post(
-        `http://localhost/tools/squares/server/php/queries/delete.php?database=asda&table=asda`,
-        {
-          ids: ids,
-        }
-      );
+  close() {
+    $("[arrow] svg", this).classList.add("rotate-180");
+  }
 
-      return resp.data;
-    } catch (err) {
-      // Handle Error Here
-      console.error(err);
+  /*load() {
+    const tables = this.nextElementSibling;
+    if (tables.innerHTML == "") {
+      tables.load();
+    } else {
+      tables.hide();
     }
-  }
+  }*/
 }
 
-customElements.define("run-x", RunX);
+customElements.define("sidebar-database-item", SidebarDatabaseItem);
 
 class SidebarDatabaseLoading extends HTMLElement {
   constructor() {
@@ -1610,52 +1658,69 @@ class SidebarDatabase extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["active"];
+    return ["open"];
+  }
+
+  set database(value) {
+    this.databaseValue = value;
+  }
+
+  get database() {
+    return this.databaseValue;
   }
 
   connectedCallback() {
-    const title = this.getAttribute("title");
-    this.removeAttribute("title");
+    this.database = this.getAttribute("database");
 
     this.innerHTML = `
-      <div data-database class="${hollowClassInactive().join(
-        " "
-      )} flex gap-2 px-2 py-1 cursor-default select-none fill-current items-center">
-        <img-svg src="remixicon/database-2-fill.svg" classes="w-4 h-4 text-yellow-500"></img-svg>
-        <div data-local-database class="flex-1 truncate font-bold text-sm">${title}</div>
-        <img-svg data-arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-4 h-4"></img-svg>
-      </div>
-
-      <div data-tables hidden></div>
+      <sidebar-database-item database="${this.database}"></sidebar-database-item>
+      <sidebar-tables></sidebar-tables>
       `;
+
     this.onClickDatabase();
+  }
+
+  onClickDatabase() {
+    $("sidebar-database-item", this).on("click", () => {
+      actions.databaseToggle(!this.isOpen(), this.database);
+    });
+  }
+
+  open() {
+    this.setAttribute("open", "true");
+  }
+
+  close() {
+    this.removeAttribute("open");
+  }
+
+  setOpen() {
+    $("sidebar-database-item", this).open();
+  }
+
+  setClose() {
+    $("sidebar-database-item", this).close();
+  }
+
+  isOpen() {
+    return this.getAttribute("open") == "true" ? true : false;
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
-      const arrow = this.querySelector("[data-arrow] svg");
-
-      if (arrow) {
-        if (attr == "active" && newValue == "true") {
-          arrow.classList.remove("rotate-180");
-        } else {
-          arrow.classList.add("rotate-180");
-        }
+      switch (attr) {
+        case "open":
+          if (newValue == "true") {
+            this.setOpen();
+          } else {
+            this.setClose();
+          }
+          break;
       }
     }
   }
 
-  onClickDatabase() {
-    this.querySelector("[data-database]").addEventListener("click", (e) => {
-      if (this.isActive()) {
-        this.deactivate();
-      } else {
-        this.activate();
-      }
-    });
-  }
-
-  onClickTable(el) {
+  /*onClickTable(el) {
     el.addEventListener("click", () => {
       if (el.isActive()) {
         el.deactivate();
@@ -1671,59 +1736,6 @@ class SidebarDatabase extends HTMLElement {
     });
   }
 
-  activate() {
-    const tables = this.querySelector("[data-tables]");
-    this.setAttribute("active", "true");
-    this.querySelector("[data-tables]").removeAttribute("hidden");
-
-    if (tables.innerHTML == "") {
-      this.populate();
-      /*
-
-      tables.querySelectorAll("sidebar-table").forEach((item) => {
-        item.addEventListener("click", (e) => {
-          const el = e.currentTarget;
-          this.deactivateAllTables();
-          el.activate();
-
-          const offset = 1;
-          const rows = 300;
-          const total = 1235;
-
-          $("bar-footer-items").setAttribute("database", this.getValue());
-          $("bar-footer-items").setAttribute("table", el.getValue());
-          $("bar-footer-items").setRecords(offset, rows, total);
-        });
-      });*/
-    }
-  }
-
-  populate() {
-    const tables = this.querySelector("[data-tables]");
-    tables.innerHTML = `<sidebar-database-loading></sidebar-database-loading>`;
-
-    axios
-      .get(
-        "http://localhost/tools/squares/server/php/queries/tables.php?database=" +
-          this.getValue()
-      )
-      .then((response) => {
-        if (response.status !== 200) return;
-
-        let html = `
-        <sidebar-database-refresh></sidebar-database-refresh>
-        `;
-
-        response.data.forEach((title) => {
-          html += this.template(title);
-        });
-
-        tables.innerHTML = html;
-        $("sidebar-filter").filter(tables);
-        this.populateEvents(tables);
-      });
-  }
-
   populateEvents(tables) {
     tables.querySelectorAll("sidebar-table").forEach((item) => {
       item.addEventListener("click", (e) => {
@@ -1731,9 +1743,9 @@ class SidebarDatabase extends HTMLElement {
         this.deactivateAllTables();
         el.activate();
 
-        /*const offset = 1;
+        const offset = 1;
         const rows = 300;
-        const total = 1235;*/
+        const total = 1235;
 
         //$("bar-footer-items").setAttribute("database", this.getValue());
         //$("bar-footer-items").setAttribute("table", el.getValue());
@@ -1742,22 +1754,10 @@ class SidebarDatabase extends HTMLElement {
     });
   }
 
-  template(title) {
-    return `<sidebar-table title="${title}"></sidebar-table>`;
-  }
-
   deactivate() {
     this.removeAttribute("active");
-    this.querySelector("[data-tables]").setAttribute("hidden", "");
-  }
-
-  isActive() {
-    return this.getAttribute("active") == "true";
-  }
-
-  getValue() {
-    return this.querySelector("[data-local-database]").innerHTML;
-  }
+    this.querySelector("sidebar-tables").setAttribute("hidden", "");
+  }*/
 }
 
 customElements.define("sidebar-database", SidebarDatabase);
@@ -1769,27 +1769,17 @@ class SidebarDatabases extends HTMLElement {
 
   connectedCallback() {
     this.classList.add(...["flex", "flex-col"]);
-    this.populate();
-  }
-
-  template(title) {
-    return `<sidebar-database title="${title}"></sidebar-database>`;
+    actions.databasesLoad();
   }
 
   populate() {
-    axios
-      .get("http://localhost/tools/squares/server/php/queries/databases.php")
-      .then((response) => {
-        if (response.status !== 200) return;
+    let html = "";
 
-        let html = "";
+    state.databases_order.forEach((name) => {
+      html += `<sidebar-database database="${name}"></sidebar-database>`;
+    });
 
-        response.data.forEach((title) => {
-          html += this.template(title);
-        });
-
-        this.innerHTML += html;
-      });
+    this.innerHTML += html;
   }
 }
 
@@ -1862,12 +1852,14 @@ class SidebarTable extends HTMLElement {
     current.table = this.getValue();
     current.database = this.closest("sidebar-database").getValue();
 
-    const el = tab.getItem(current.database, current.table);
+    store.table.activate(
+      this.closest("sidebar-database").getValue(),
+      this.getValue()
+    );
 
-    if (el) {
-      tabs.deactivate();
-      el.activate();
+    dump(state);
 
+    if ($("tab-items").tab()) {
       $$("pane-main").forEach((item) => {
         item.deactivate();
       });
@@ -1878,9 +1870,6 @@ class SidebarTable extends HTMLElement {
 
       current_el.activate();
     } else {
-      tab.add(current.database, current.table);
-
-      syncSidebarLogo();
       // Fetch
       this.test(current.database, current.table).then((test) => {
         data[current.database + " " + current.table] = test;
@@ -1946,34 +1935,64 @@ class SidebarTable extends HTMLElement {
 
 customElements.define("sidebar-table", SidebarTable);
 
-class SidebarWrap extends HTMLElement {
+class SidebarTables extends HTMLElement {
   constructor() {
     super();
   }
 
-  /*
-  bg-navy-50
-  bg-navy-100
-  bg-navy-200
-  bg-navy-300
-  bg-navy-400
-  bg-navy-500
-  bg-navy-600
-  bg-navy-700
-  bg-navy-800
-  bg-navy-900
+  connectedCallback() {
+    this.hide();
+    this.innerHTML = ``;
+  }
 
-  bg-gray-50
-  bg-gray-100
-  bg-gray-200
-  bg-gray-300
-  bg-gray-400
-  bg-gray-500
-  bg-gray-600
-  bg-gray-700
-  bg-gray-800
-  bg-gray-900
-  */
+  show() {
+    this.removeAttribute("hidden");
+  }
+
+  hide() {
+    this.setAttribute("hidden", "");
+  }
+
+  isEmpty() {
+    return this.innerHTML == "";
+  }
+
+  populate(database) {
+    let html = this.templateRefresh();
+
+    console.log(state.databases[database]);
+
+    state.databases[database].table_order.forEach((table) => {
+      html += this.templateTable(database, table);
+    });
+
+    this.innerHTML = html;
+
+    this.show();
+
+    //$("sidebar-filter").filter(tables);
+    //this.populateEvents(tables);
+  }
+
+  templateLoading() {
+    return `<sidebar-database-loading></sidebar-database-loading>`;
+  }
+
+  templateRefresh() {
+    return `<sidebar-database-refresh></sidebar-database-refresh>`;
+  }
+
+  templateTable(database, table) {
+    return `<sidebar-table database="database" table="${table}" title="${table}"></sidebar-table>`;
+  }
+}
+
+customElements.define("sidebar-tables", SidebarTables);
+
+class SidebarX extends HTMLElement {
+  constructor() {
+    super();
+  }
 
   connectedCallback() {
     this.classList.add(
@@ -1997,7 +2016,7 @@ class SidebarWrap extends HTMLElement {
   }
 }
 
-customElements.define("sidebar-wrap", SidebarWrap);
+customElements.define("sidebar-x", SidebarX);
 
 class IconDatabase2 extends HTMLElement {
   constructor() {
@@ -3067,39 +3086,39 @@ class TabItem extends HTMLElement {
   }
 
   static get observedAttributes() {
-    return ["title", "label", "active"];
+    return ["active"];
+  }
+
+  set database(value) {
+    this.databaseValue = value;
+  }
+
+  get database() {
+    return this.databaseValue;
+  }
+
+  set table(value) {
+    this.tableValue = value;
+  }
+
+  get table() {
+    return this.tableValue;
   }
 
   connectedCallback() {
-    this.classList.add(
-      ...[
-        "rounded-t",
-        "px-4",
-        "pr-2",
-        "py-2",
-        "cursor-default",
-        "select-none",
-        "focus:outline-none",
-        "flex",
-        "gap-3",
-        "items-center",
-        "text-sm",
-      ],
-      ...tab.classesInactive()
-    );
+    this.database = this.getAttribute("database");
+    this.table = this.getAttribute("table");
 
-    this.setAttribute(
-      "title",
-      this.getAttribute("database") + "/" + this.getAttribute("table")
-    );
+    this.setAttribute("title", this.database + "/" + this.table);
 
     this.innerHTML = `
-      ${this.getAttribute("table")}
+      ${this.table}
       <img-svg src="remixicon/close.svg" classes="rounded w-5 h-5">
     `;
 
-    tab.onClose(this);
-    tab.onClick(this);
+    this.onClick();
+    this.onCloseClick();
+    this.onMiddleClick();
   }
 
   deactivate() {
@@ -3110,17 +3129,37 @@ class TabItem extends HTMLElement {
     this.setAttribute("active", "true");
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue === newValue) return;
+  isActive() {
+    return this.getAttribute("active") == "true";
+  }
 
-    switch (attr) {
-      case "active":
-        if (newValue == "true") {
-          tab.activate(this);
-        } else {
-          tab.deactivate(this);
-        }
-        break;
+  onClick() {
+    this.addEventListener("mousedown", (e) => {
+      if (e.currentTarget !== e.target || e.which !== 1) return;
+
+      store.table.activate(this.database, this.table);
+    });
+  }
+
+  onCloseClick() {
+    $("img-svg", this).on("click", () => {
+      this.handleClose();
+    });
+  }
+
+  onMiddleClick() {
+    this.on("mouseup", (e) => {
+      if (e.button !== 1) return;
+
+      this.handleClose();
+    });
+  }
+
+  handleClose() {
+    if (this.getAttribute("active") == "true") {
+      store.table.close(this.database, this.table);
+    } else {
+      this.remove();
     }
   }
 }
@@ -3132,17 +3171,71 @@ class TabItems extends HTMLElement {
     super();
   }
 
+  static get observedAttributes() {
+    return ["database", "table"];
+  }
+
   connectedCallback() {
     this.classList.add(
       "flex",
-      "flex-1",
       "items-center",
       "gap-2",
-      "text-white",
+      "bg-blueGray-700",
       "overflow-auto",
       "w-full",
+      "px-2",
       "self-end"
     );
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      switch (attr) {
+        case "database":
+          this.activate();
+          break;
+      }
+    }
+  }
+
+  activate(database, table) {
+    this.deactivate();
+
+    if (this.tab(database, table)) {
+      this.tab(database, table).activate();
+    } else {
+      this.create(database, table);
+      this.last().activate();
+    }
+  }
+
+  deactivate() {
+    const tabs = $$("tab-item");
+    if (!tabs) return;
+
+    tabs.forEach((el) => {
+      el.deactivate();
+    });
+  }
+
+  create(database, table) {
+    $("tab-items").insertAdjacentHTML(
+      "beforeend",
+      this.html(database, table, "true")
+    );
+  }
+
+  html(database, table, active) {
+    return `
+    <tab-item database="${database}" table="${table}" active="${active}"></tab-item>`;
+  }
+
+  last() {
+    return $("tab-item:last-child");
+  }
+
+  tab(database, table) {
+    return $(`tab-item[database="${database}"][table="${table}"]`);
   }
 }
 
@@ -3254,7 +3347,6 @@ class TopbarWrap extends HTMLElement {
           <img-svg src="logo.svg" classes="h-5"></img-svg>
         </div>
       </resize-logo>
-      <tab-items></tab-items>
       <topbar-items></topbar-items>
     </div>
     `;
