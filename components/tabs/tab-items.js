@@ -20,7 +20,7 @@ class TabItems extends HTMLElement {
     );
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {
+  /*attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
       switch (attr) {
         case "database":
@@ -28,17 +28,21 @@ class TabItems extends HTMLElement {
           break;
       }
     }
-  }
+  }*/
 
-  activate(database, table) {
+  activate() {
     this.deactivate();
 
-    if (this.tab(database, table)) {
-      this.tab(database, table).activate();
+    if (this.tab(state.database, state.table)) {
+      this.tab(state.database, state.table).activate();
     } else {
-      this.create(database, table);
+      this.create(state.database, state.table);
       this.last().activate();
     }
+  }
+
+  close(database, table) {
+    $(`tab-item[database="${database}"][table="${table}"]`).remove();
   }
 
   deactivate() {
@@ -53,11 +57,11 @@ class TabItems extends HTMLElement {
   create(database, table) {
     $("tab-items").insertAdjacentHTML(
       "beforeend",
-      this.html(database, table, "true")
+      this.templateTab(database, table, "true")
     );
   }
 
-  html(database, table, active) {
+  templateTab(database, table, active) {
     return `
     <tab-item database="${database}" table="${table}" active="${active}"></tab-item>`;
   }

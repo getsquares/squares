@@ -1,3 +1,28 @@
+const $ = (selector, base = document) => {
+  return base.querySelector(selector);
+};
+const $$ = (selector, base = document) => {
+  return base.querySelectorAll(selector);
+};
+
+Node.prototype.on = function (type, listener) {
+  return this.addEventListener(type, listener);
+};
+
+var actions = {};
+var set = {};
+var unset = {};
+var triggers = {};
+var state = {
+  database: null,
+  table: null,
+  databases_order: [],
+  databases: {},
+  tables: [],
+};
+
+var nav = {};
+
 function tabClassActive() {
   return ["bg-navy-100", "text-navy-900", "border-navy-300"];
 }
@@ -173,6 +198,10 @@ function setCellActiveToEl(el, state = "active") {
   el.setAttribute("state", state);
 }
 
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}
+
 function error(message) {}
 
 function success(message) {}
@@ -205,6 +234,34 @@ function storeDomCell(el_table_cell) {
   dom.up = spreadDomCell(getDomCellUp());
 }
 
+nav.db = {};
+nav.tb = {};
+
+nav.tb.section = (db) => {
+  return $(`nav-tb-section`, nav.db.group(db));
+};
+
+nav.db.item = (db) => {
+  return $(`nav-db[db="${db}"]`);
+};
+
+nav.db.group = (db) => {
+  return $(`nav-db[db="${db}"]`).closest("nav-db-group");
+};
+
+nav.tb.item = () => {
+  const db_el = $(`nav-db[db="${state.database}"]`);
+  return $(`nav-tb[tb="${state.table}"]`, db_el.closest("nav-db-group"));
+};
+
+nav.tb.group = (db) => {
+  return $("nav-tb-group", nav.db.group(db));
+};
+
+nav.arrow = (db) => {
+  return $(`nav-db[db="${db}"] [arrow]`);
+};
+
 class row {
   static isNew(obj) {
     return obj.closest(".row-new") ? true : false;
@@ -218,101 +275,6 @@ class row {
     return obj.closest("table-row").dataset.index;
   }
 }
-
-var actions = {
-  // Database
-  databasesLoad: () => {
-    axios.get("server/php/queries/databases.php").then((response) => {
-      if (response.status !== 200) return;
-
-      set.databaseOrder(response.data);
-      set.databaseItems(response.data);
-
-      triggers.databaseLoad();
-    });
-  },
-  databaseToggle(is_open, database) {
-    set.databaseState(is_open, database);
-    triggers.databaseToggle(database);
-  },
-  // Tables
-  tablesLoad(database) {
-    axios
-      .get(`server/php/queries/tables.php?database=${database}`)
-      .then((response) => {
-        if (response.status !== 200) return;
-
-        set.tableOrder(response.data, database);
-        set.tableItems(response.data, database);
-
-        console.log(state);
-      });
-  },
-};
-
-var set = {
-  // Database
-  databaseItems: (content) => {
-    state.databases = {};
-
-    content.forEach((item) => {
-      state.databases[item] = {
-        open: false,
-        table_order: [],
-        table_items: {},
-      };
-    });
-  },
-  databaseOrder: (content) => {
-    state.databases_order = content;
-  },
-  database: (database) => {
-    state.database = database;
-  },
-  databaseState: (is_open, database) => {
-    state.databases[database].open = is_open;
-  },
-  // Tables
-
-  tableItems: (content, database) => {
-    content.forEach((item) => {
-      state.databases[database].table_items[item] = {
-        name: item,
-      };
-    });
-
-    triggers.tableItems(database);
-  },
-};
-
-set.tableOrder = (content, database) => {
-  state.databases[database].table_order = content;
-};
-
-var triggers = {
-  databaseLoad: () => {
-    $("sidebar-databases").populate();
-  },
-  databaseToggle: (database) => {
-    const current_database = $(`sidebar-database[database="${database}"]`);
-
-    if (state.databases[database].open) {
-      current_database.open();
-      if ($("sidebar-tables", current_database).isEmpty()) {
-        console.log("em");
-        actions.tablesLoad(database);
-      }
-    } else {
-      current_database.close();
-    }
-  },
-};
-
-triggers.tableItems = (database) => {
-  $(`sidebar-database[database="${database}"] sidebar-tables`).populate(
-    database
-  );
-};
 
 class tab {
   // tab.onMiddleClick()
@@ -335,6 +297,699 @@ class table {
     return `${main.getAttribute("database")} ${main.getAttribute("table")}`;
   }
 }
+
+actions.database = {};
+actions.databases = {};
+
+// Databases
+actions.databases.load = () => {
+  axios.get("server/php/queries/databases.php").then((response) => {
+    if (response.status !== 200) return;
+
+    set.database.order(response.data);
+    set.database.items(response.data);
+  });
+};
+
+// Database
+actions.database.toggle = (db) => {
+  set.database.toggleState(db);
+};
+
+actions.table = {};
+actions.tables = {};
+
+// Table
+actions.table.load = (db, tb) => {
+  if (isEmpty(state.databases[db].table_items[tb])) {
+    axios
+      .get(`server/php/queries/data.php?database=${db}&table=${tb}`)
+      .then((response) => {
+        if (response.status !== 200) return;
+
+        set.table.item(response.data, db, tb);
+        actions.table.activate(db, tb);
+      });
+  } else {
+    actions.table.activate(db, tb);
+  }
+};
+
+// Tables
+actions.tables.load = (db) => {
+  axios.get(`server/php/queries/tables.php?database=${db}`).then((response) => {
+    if (response.status !== 200) return;
+
+    set.table.order(response.data, db);
+    set.table.items(response.data, db);
+  });
+};
+
+actions.table.activate = (db, tb) => {
+  set.table.name(db, tb);
+};
+
+actions.table.close = (db, tb) => {
+  set.table.item({}, db, tb);
+  set.table.name(null, null);
+};
+
+set.database = {};
+
+// Order
+set.database.order = (content) => {
+  state.databases_order = content;
+};
+
+// Items
+set.database.items = (content) => {
+  state.databases = {};
+
+  content.forEach((item) => {
+    state.databases[item] = {
+      open: false,
+      table_order: [],
+      table_items: {},
+    };
+  });
+
+  triggers.database.load();
+};
+
+// Toggle state
+set.database.toggleState = (db) => {
+  state.databases[db].open = !state.databases[db].open;
+  triggers.db.toggle(db);
+};
+
+set.table = {};
+
+// Order
+set.table.order = (content, db) => {
+  state.databases[db].table_order = content;
+};
+
+//triggers.table.close(state.database, state.table);
+
+//triggers.table.close(state.database, state.table);
+set.table.name = (db, tb) => {
+  state.database = db;
+  state.table = tb;
+
+  if (table) {
+    triggers.table.activate();
+  }
+};
+
+// Item
+set.table.item = (content, db, tb) => {
+  state.databases[db].table_items[tb] = content;
+};
+
+// Items
+set.table.items = (content, db) => {
+  content.forEach((item) => {
+    state.databases[db].table_items[item] = {};
+  });
+
+  triggers.table.items(db);
+};
+
+triggers.database = {};
+triggers.db = {};
+
+// Load
+triggers.database.load = () => {
+  $("nav-db-groups").databasesPopulate();
+};
+
+// Toggle
+triggers.db.toggle = (db) => {
+  triggers.db.open(db);
+  triggers.db.close(db);
+};
+
+// Open
+triggers.db.open = (db) => {
+  if (!state.databases[db].open) return;
+
+  nav.arrow(db).classList.add("rotate-180");
+  nav.tb.section(db).removeAttribute("hidden");
+
+  if (nav.tb.group(db).innerHTML == "") {
+    actions.tables.load(db);
+  }
+};
+
+// Close
+triggers.db.close = (db) => {
+  if (state.databases[db].open) return;
+
+  nav.arrow(db).classList.remove("rotate-180");
+  nav.tb.section(db).setAttribute("hidden", "");
+};
+
+triggers.table = {};
+
+triggers.table.activate = () => {
+  $$(`nav-tb`).forEach((el) => {
+    el.removeAttribute("active");
+  });
+  nav.tb.item().activate();
+  $(`tab-items`).activate();
+};
+
+triggers.table.close = (db, tb) => {
+  $(`nav-db-groups`).tablesDeactivate();
+  $(`tab-items`).close(db, tb);
+};
+
+triggers.table.items = (db) => {
+  const db_group = $(`nav-db[db="${db}"]`).parentElement;
+  $(`nav-db-groups`).tablesPopulate(db);
+  $(`nav-tb-section`, db_group).removeAttribute("hidden");
+  $(`nav-loading`, db_group).setAttribute("hidden", "");
+};
+
+unset.table = {};
+
+/*unset.table.name = (table) => {
+  state.table = null;
+  
+};*/
+
+class ActionbarRefresh extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    //return ["active"];
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div data-action>
+        <img-svg src="material-icons/refresh.svg" classes="animate-spin w-5 h-5"></img-svg>
+        <div>Refresh</div>
+      </div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (attr != "active") return;
+    if (oldValue !== newValue) {
+      if (newValue == "true") {
+        this.classList.remove("hidden");
+      } else {
+        this.classList.add("hidden");
+      }
+    }
+  }
+}
+
+customElements.define("actionbar-refresh", ActionbarRefresh);
+
+class ButtonItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const href = this.getAttribute("href");
+    const title = this.getAttribute("title");
+    this.removeAttribute("title");
+    let html = "";
+
+    if (href) {
+      html = this.linkHtml(title, href);
+    } else {
+      html = this.buttonHtml(title, href);
+    }
+
+    this.innerHTML = html;
+  }
+
+  getClasses() {
+    const style = this.getAttribute("style");
+    let classes = "";
+
+    switch (style) {
+      case "default":
+        classes = this.classesStyleDefault();
+        break;
+      case "action":
+        classes = this.classesStyleAction();
+        break;
+      case "ghost":
+        classes = this.classesStyleGhost();
+        break;
+    }
+
+    return this.classesBase().concat(classes);
+  }
+
+  linkHtml(title, href) {
+    return `<a href="${href}" class="${this.getClasses().join(
+      " "
+    )}">${title}</a>`;
+  }
+
+  buttonHtml(title) {
+    return `<button class="focus:outline-none cursor-default ${this.getClasses().join(
+      " "
+    )}">${title}</button>`;
+  }
+
+  classesBase() {
+    return [
+      "inline-flex",
+      "items-center",
+      "gap-2",
+      "px-4",
+      "py-1.5",
+      "font-bold",
+      "rounded",
+      "fill-current",
+    ];
+  }
+
+  classesStyleDefault() {
+    return [
+      "text-white",
+      "border-2",
+      "bg-blueGray-700",
+      "border-black",
+      "hover:bg-blueGray-800",
+    ];
+  }
+
+  classesStyleAction() {
+    return [
+      "text-white",
+      "bg-gradient-to-br",
+      "from-navy-500",
+      "via-navy-600",
+      "to-navy-600",
+      "hover:from-navy-600",
+      "border",
+      "border-navy-600",
+    ];
+  }
+
+  classesStyleGhost() {
+    return ["border-2", "border-gray-200", "hover:border-gray-400"];
+  }
+}
+
+customElements.define("button-item", ButtonItem);
+
+class CheckboxItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const label = this.getAttribute("label");
+    const checked = this.getAttribute("checked") == "true" ? " checked" : "";
+
+    this.innerHTML = `
+      <label class="flex select-none items-center gap-2">
+        <input type="checkbox" class="form-checkbox w-4 h-4 rounded focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
+        ${label ? label : ""}
+      </label>
+    `;
+  }
+}
+
+customElements.define("checkbox-item", CheckboxItem);
+
+class ImgSvg extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["classes", "src"];
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "src" && newValue != "") {
+        fetch(`assets/icons/${newValue}`)
+          .then((response) => response.text())
+          .then((text) => {
+            this.innerHTML = text;
+            const svg = this.querySelector("svg");
+            svg.setAttribute("class", this.getAttribute("classes"));
+            svg.classList.add("fill-current");
+          })
+          .catch(console.error.bind(console));
+      }
+    }
+  }
+}
+
+customElements.define("img-svg", ImgSvg);
+
+class MessageItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const state = this.getAttribute("state");
+    const message = this.innerHTML;
+    let state_class = "";
+
+    switch (state) {
+      case "success":
+        state_class = "bg-green-600";
+        break;
+      case "error":
+        state_class = "bg-red-700";
+        break;
+    }
+
+    this.classList.add("flex", state_class, "text-white", "text-opacity-90");
+    this.innerHTML = `
+      <div class="flex-1 p-6">${message}</div>
+      <div class="p-2">
+        <button class="hover:bg-black hover:bg-opacity-10 p-2 focus:outline-none cursor-default">
+          <img-svg src="remixicon/close.svg"></img-svg>
+        </button>
+      </div>
+    `;
+  }
+}
+
+customElements.define("message-item", MessageItem);
+
+class ModalBox extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.deactivate();
+    this.innerHTML = `
+      <div
+        data-backdrop
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div class="flex items-start w-full max-w-lg bg-white shadow-md">
+          <div class="p-8 flex-1" data-modal-content>
+            <modal-info></modal-info>
+          </div>
+          <button class="p-2 m-2 focus:outline-none hover:bg-gray-100 rounded">
+            <img-svg src="remixicon/close.svg"></img-svg>
+          </button>
+        </div>
+      </div>
+    `;
+    this.onClose();
+  }
+
+  onClose() {
+    this.querySelector("button").addEventListener("click", (e) => {
+      this.deactivate();
+    });
+
+    this.querySelector("[data-backdrop]").addEventListener("click", (e) => {
+      if (e.target != e.currentTarget) return;
+      this.deactivate();
+    });
+  }
+
+  activate() {
+    this.removeAttribute("hidden");
+  }
+
+  deactivate() {
+    this.setAttribute("hidden", "");
+  }
+}
+
+customElements.define("modal-box", ModalBox);
+
+class PaneMain extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("flex", "flex-col", "overflow-auto", "flex-1");
+
+    const grid_cols = this.gridCols();
+    const grid_cols_class = `auto ${grid_cols.widths.join("px ")}px`;
+    console.log(JSON.stringify(grid_cols_class));
+
+    this.innerHTML = `
+      <actions-x></actions-x>
+      <div class="flex-1 flex overflow-auto">
+        <div class="overflow-x-auto flex-1 my-4 border border-gray-200 rounded bg-white">
+          <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
+            <div data-table class="grid gap-y-px bg-white" style="grid-template-columns: ${grid_cols_class};">
+              <table-headings></table-headings>
+              <table-cells></table-cells>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pagination-x></pagination-x>
+    `;
+  }
+
+  gridCols() {
+    const this_data = data[table.get(this)];
+
+    let sum = 0;
+    let widths = [];
+
+    this_data.cols_order.forEach((item) => {
+      let width = null;
+      const item_obj = this_data.cols[item];
+
+      if (item_obj.config && item_obj.config.hasOwnProperty("width")) {
+        width = item_obj.config.width;
+      } else {
+        width = 300;
+      }
+
+      widths.push(width);
+
+      sum += width;
+
+      console.log(width);
+      //console.log(item);
+      //console.log(this_data.cols[item].config);
+    });
+
+    return {
+      sum: sum,
+      widths: widths,
+    };
+  }
+
+  part() {
+    return `
+      <div class="contents">
+        <row-select></row-select>
+        <table-cell></table-cell>
+        <table-cell></table-cell>
+        <table-cell></table-cell>
+      </div>`;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.removeAttribute("hidden");
+  }
+
+  thisDeactivate() {
+    this.setAttribute("hidden", "");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("pane-main", PaneMain);
+
+class RadioItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const label = this.getAttribute("label");
+    const checked = this.getAttribute("checked") == "true" ? " checked" : "";
+
+    this.innerHTML = `
+      <label class="flex select-none items-center gap-2">
+        <input type="radio" class="w-4 h-4 focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
+        ${label}
+      </label>
+    `;
+  }
+}
+
+customElements.define("radio-item", RadioItem);
+
+class ColumnsItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const checked = this.getAttribute("checked");
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, checked);
+    this.onClick();
+  }
+
+  template(name, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${name}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange();
+      }
+    }
+  }
+
+  onClick() {
+    $("input", this).addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange() {
+    console.log("Something has changed");
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("columns-item", ColumnsItem);
+
+class ColumnsX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
+    this.setAttribute("hidden", "");
+    this.innerHTML = this.template("Columns");
+  }
+
+  checkboxes() {
+    const database = this.closest("pane-main").getAttribute("database");
+    const table = this.closest("pane-main").getAttribute("table");
+    const data_cols_all = data[`${database} ${table}`].cols_all;
+    const data_cols_active = data[`${database} ${table}`].cols_order;
+    let html = "";
+
+    data_cols_all.forEach((item) => {
+      const checked = data_cols_active.includes(item);
+      const checked_html = checked ? `checked="true"` : "";
+      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
+    });
+
+    return html;
+  }
+
+  template(title) {
+    return `
+      <div class="font-bold">${title}</div>
+      <div class="flex gap-x-4 gap-y-1 flex-wrap">
+        ${this.checkboxes()}
+      </div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("columns-x", ColumnsX);
 
 class ActionsAdd extends HTMLElement {
   constructor() {
@@ -672,139 +1327,6 @@ class PaneClose extends HTMLElement {
 }
 
 customElements.define("pane-close", PaneClose);
-
-class ColumnsItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["checked"];
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const checked = this.getAttribute("checked");
-    this.classList.add("flex");
-
-    this.innerHTML = this.template(name, checked);
-    this.onClick();
-  }
-
-  template(name, checked) {
-    return `
-      <label class="btn btn-borderless">
-        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
-      checked ? "checked" : ""
-    }>
-        ${name}
-      </label>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "checked") {
-        this.onChange();
-      }
-    }
-  }
-
-  onClick() {
-    $("input", this).addEventListener("change", (e) => {
-      if (e.currentTarget.checked) {
-        this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-  }
-
-  onChange() {
-    console.log("Something has changed");
-  }
-
-  activate() {
-    this.setAttribute("checked", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("checked");
-  }
-}
-
-customElements.define("columns-item", ColumnsItem);
-
-class ColumnsX extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
-    this.setAttribute("hidden", "");
-    this.innerHTML = this.template("Columns");
-  }
-
-  checkboxes() {
-    const database = this.closest("pane-main").getAttribute("database");
-    const table = this.closest("pane-main").getAttribute("table");
-    const data_cols_all = data[`${database} ${table}`].cols_all;
-    const data_cols_active = data[`${database} ${table}`].cols_order;
-    let html = "";
-
-    data_cols_all.forEach((item) => {
-      const checked = data_cols_active.includes(item);
-      const checked_html = checked ? `checked="true"` : "";
-      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
-    });
-
-    return html;
-  }
-
-  template(title) {
-    return `
-      <div class="font-bold">${title}</div>
-      <div class="flex gap-x-4 gap-y-1 flex-wrap">
-        ${this.checkboxes()}
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.classList.remove("hidden");
-  }
-
-  thisDeactivate() {
-    this.classList.add("hidden");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("columns-x", ColumnsX);
 
 class FilterItem extends HTMLElement {
   constructor() {
@@ -1545,245 +2067,138 @@ class RowActions extends HTMLElement {
 }
 customElements.define("row-actions", RowActions);
 
-class SidebarDatabaseItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.classList.add(
-      ...[
-        "flex",
-        "gap-2",
-        "px-2",
-        "py-1",
-        "cursor-default",
-        "select-none",
-        "fill-current",
-        "items-center",
-      ]
-    );
-
-    this.innerHTML = `
-      <img-svg src="remixicon/database-2-fill.svg" classes="w-4 h-4 text-yellow-500"></img-svg>
-      <div class="flex-1 truncate font-bold text-sm">
-        ${this.closest("sidebar-database").getAttribute("database")}
-      </div>
-      <img-svg arrow src="remixicon/arrow-down-s.svg" classes="transform rotate-180 w-4 h-4"></img-svg>
-    `;
-  }
-
-  open() {
-    $("[arrow] svg", this).classList.remove("rotate-180");
-  }
-
-  close() {
-    $("[arrow] svg", this).classList.add("rotate-180");
-  }
-
-  /*load() {
-    const tables = this.nextElementSibling;
-    if (tables.innerHTML == "") {
-      tables.load();
-    } else {
-      tables.hide();
-    }
-  }*/
-}
-
-customElements.define("sidebar-database-item", SidebarDatabaseItem);
-
-class SidebarDatabaseLoading extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.classList.add(
-      "flex",
-      "gap-2",
-      "py-1",
-      "px-2",
-      "cursor-default",
-      "select-none",
-      "fill-current",
-      "items-center"
-    );
-    this.innerHTML = `
-      <img-svg src="material-icons/refresh.svg" classes="animate-spin w-4 h-4 text-gray-400"></img-svg>
-      <div data-local-table class="flex-1 truncate text-13">Loading...</div>
-    `;
-  }
-}
-
-customElements.define("sidebar-database-loading", SidebarDatabaseLoading);
-
-class SidebarDatabaseRefresh extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.classList.add(
-      ...hollowClassInactive(),
-      "flex",
-      "gap-2",
-      "py-1",
-      "px-2",
-      "cursor-default",
-      "select-none",
-      "fill-current",
-      "items-center"
-    );
-    this.innerHTML = `
-      <img-svg src="material-icons/refresh.svg" classes="w-4 h-4 text-gray-400"></img-svg>
-      <div data-local-table class="flex-1 truncate text-13">Refresh</div>
-    `;
-
-    this.onClick();
-  }
-
-  onClick() {
-    this.addEventListener("click", () => {
-      this.closest("sidebar-database").populate();
-    });
-  }
-}
-
-customElements.define("sidebar-database-refresh", SidebarDatabaseRefresh);
-
-class SidebarDatabase extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["open"];
-  }
-
-  set database(value) {
-    this.databaseValue = value;
-  }
-
-  get database() {
-    return this.databaseValue;
-  }
-
-  connectedCallback() {
-    this.database = this.getAttribute("database");
-
-    this.innerHTML = `
-      <sidebar-database-item database="${this.database}"></sidebar-database-item>
-      <sidebar-tables></sidebar-tables>
-      `;
-
-    this.onClickDatabase();
-  }
-
-  onClickDatabase() {
-    $("sidebar-database-item", this).on("click", () => {
-      actions.databaseToggle(!this.isOpen(), this.database);
-    });
-  }
-
-  open() {
-    this.setAttribute("open", "true");
-  }
-
-  close() {
-    this.removeAttribute("open");
-  }
-
-  setOpen() {
-    $("sidebar-database-item", this).open();
-  }
-
-  setClose() {
-    $("sidebar-database-item", this).close();
-  }
-
-  isOpen() {
-    return this.getAttribute("open") == "true" ? true : false;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      switch (attr) {
-        case "open":
-          if (newValue == "true") {
-            this.setOpen();
-          } else {
-            this.setClose();
-          }
-          break;
-      }
-    }
-  }
-
-  /*onClickTable(el) {
-    el.addEventListener("click", () => {
-      if (el.isActive()) {
-        el.deactivate();
-      } else {
-        el.activate();
-      }
-    });
-  }
-
-  deactivateAllTables() {
-    $$("sidebar-table").forEach((item) => {
-      item.deactivate();
-    });
-  }
-
-  populateEvents(tables) {
-    tables.querySelectorAll("sidebar-table").forEach((item) => {
-      item.addEventListener("click", (e) => {
-        const el = e.currentTarget;
-        this.deactivateAllTables();
-        el.activate();
-
-        const offset = 1;
-        const rows = 300;
-        const total = 1235;
-
-        //$("bar-footer-items").setAttribute("database", this.getValue());
-        //$("bar-footer-items").setAttribute("table", el.getValue());
-        //$("bar-footer-items").setRecords(offset, rows, total);
-      });
-    });
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-    this.querySelector("sidebar-tables").setAttribute("hidden", "");
-  }*/
-}
-
-customElements.define("sidebar-database", SidebarDatabase);
-
-class SidebarDatabases extends HTMLElement {
+class NavDbGroups extends HTMLElement {
   constructor() {
     super();
   }
 
   connectedCallback() {
     this.classList.add(...["flex", "flex-col"]);
-    actions.databasesLoad();
+    actions.databases.load();
   }
 
-  populate() {
+  // Databases populate
+  databasesPopulate() {
     let html = "";
 
     state.databases_order.forEach((name) => {
-      html += `<sidebar-database database="${name}"></sidebar-database>`;
+      html += `
+      <nav-db-group>
+        <nav-db db="${name}" class="nav-row">
+          <img-svg
+            src="remixicon/database-2-fill.svg"
+            classes="w-4 h-4 text-yellow-500">
+          </img-svg>
+          <div class="flex-1 truncate font-bold text-sm">
+            ${name}
+          </div>
+          <img-svg
+            arrow
+            src="remixicon/arrow-down-s.svg"
+            classes="w-4 h-4 text-gray-800">
+          </img-svg>
+        </nav-db>
+        <nav-tb-section hidden>
+          <nav-refresh class="nav-row">
+            <img-svg
+              src="material-icons/refresh.svg"
+              classes="w-4 h-4 text-gray-400">
+            </img-svg>
+            <div class="flex-1 truncate text-13">Refresh</div>
+          </nav-refresh>
+          <nav-loading class="nav-row">
+            <img-svg
+              src="material-icons/refresh.svg"
+              classes="w-4 h-4 text-gray-400 animate-spin">
+            </img-svg>
+            <div class="flex-1 truncate text-13">Loading...</div>
+          </nav-loading>
+          <nav-tb-group></nav-tb-group>
+        </nav-tb-section>
+      </nav-db-group>`;
     });
 
     this.innerHTML += html;
+    this.onClickRefresh();
+    this.onClickDatabase();
+  }
+
+  // Tables populate
+  tablesPopulate(db) {
+    let html = "";
+
+    state.databases[db].table_order.forEach((tb) => {
+      html += `
+        <nav-tb tb="${tb}" title="${tb}" class="nav-row">
+          <img-svg src="boxicons/bx-table.svg" classes="w-4 h-4 text-navy-400"></img-svg>
+          <div class="flex-1 truncate text-13">${tb}</div>
+        </nav-tb>
+      `;
+    });
+
+    nav.tb.group(db).innerHTML = html;
+    this.onClickTable(db);
+  }
+
+  // On click refresh
+  onClickRefresh() {
+    $$("nav-refresh").forEach((el) => {
+      el.on("click", (e) => {
+        const db_group = e.currentTarget.closest("nav-db-group");
+        const db = $("nav-db", db_group).getAttribute("db");
+        actions.tables.load(db);
+      });
+    });
+  }
+
+  // On click database
+  onClickDatabase() {
+    $$("nav-db").forEach((el) => {
+      el.on("click", (e) => {
+        actions.database.toggle(e.currentTarget.getAttribute("db"));
+      });
+    });
+  }
+
+  // On click table
+  onClickTable(db) {
+    $("nav-tb", nav.tb.group(db)).forEach((el) => {
+      el.on("click", (e) => {
+        const tb = e.currentTarget.getAttribute("tb");
+        const db = $("nav-db", this.closest("nav-db-group")).getAttribute("db");
+        actions.table.load(db, tb);
+      });
+    });
   }
 }
 
-customElements.define("sidebar-databases", SidebarDatabases);
+customElements.define("nav-db-groups", NavDbGroups);
+
+/*
+FIXME: Inaktivera alla panemain 
+FIXME: Lägg till pane-main
+FIXME: Uppdatera rows offset och total
+
+const html = `
+  <pane-main database="${current.database}" table="${current.table}" active="true"></pane-main>
+`;
+
+$$("pane-main").forEach((item) => {
+  item.deactivate();
+});
+
+$("main-x").insertAdjacentHTML("beforeend", html);
+
+const current_el = $(
+  `pane-main[database="${current.database}"][table="${current.table}"]`
+);
+
+$("select-table").setAttribute("hidden", "");
+
+$("records-x", current_el).setAttribute("rows", test.meta.limit);
+$("records-x", current_el).setAttribute("offset", test.meta.offset);
+$("records-x", current_el).setAttribute("total", test.meta.total);
+*/
 
 class SidebarFilter extends HTMLElement {
   constructor() {
@@ -1821,174 +2236,6 @@ class SidebarFilter extends HTMLElement {
 
 customElements.define("sidebar-filter", SidebarFilter);
 
-class SidebarTable extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    const title = this.getAttribute("title");
-    this.removeAttribute("title");
-
-    this.innerHTML = `
-      <img-svg src="boxicons/bx-table.svg" classes="w-4 h-4 text-navy-400"></img-svg>
-      <div data-local-table class="flex-1 truncate text-13" title="${title}">${title}</div>
-      
-      `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-    }
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-
-    current.table = this.getValue();
-    current.database = this.closest("sidebar-database").getValue();
-
-    store.table.activate(
-      this.closest("sidebar-database").getValue(),
-      this.getValue()
-    );
-
-    dump(state);
-
-    if ($("tab-items").tab()) {
-      $$("pane-main").forEach((item) => {
-        item.deactivate();
-      });
-
-      const current_el = $(
-        `pane-main[database="${current.database}"][table="${current.table}"]`
-      );
-
-      current_el.activate();
-    } else {
-      // Fetch
-      this.test(current.database, current.table).then((test) => {
-        data[current.database + " " + current.table] = test;
-
-        const html = `
-          <pane-main database="${current.database}" table="${current.table}" active="true"></pane-main>
-        `;
-
-        $$("pane-main").forEach((item) => {
-          item.deactivate();
-        });
-
-        $("main-x").insertAdjacentHTML("beforeend", html);
-
-        const current_el = $(
-          `pane-main[database="${current.database}"][table="${current.table}"]`
-        );
-
-        $("select-table").setAttribute("hidden", "");
-
-        $("records-x", current_el).setAttribute("rows", test.meta.limit);
-        $("records-x", current_el).setAttribute("offset", test.meta.offset);
-        $("records-x", current_el).setAttribute("total", test.meta.total);
-      });
-    }
-  }
-
-  async test(database, table) {
-    try {
-      const resp = await axios.get(
-        `http://localhost/tools/squares/server/php/queries/data.php?database=${database}&table=${table}`
-      );
-
-      tables[`${database}|${table}`] = resp.data;
-
-      return resp.data;
-    } catch (err) {
-      // Handle Error Here
-      console.error(err);
-    }
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-
-  hide() {
-    this.setAttribute("hidden", "");
-  }
-
-  show() {
-    this.removeAttribute("hidden");
-  }
-
-  isActive() {
-    return this.getAttribute("active") == "true";
-  }
-
-  getValue() {
-    return this.querySelector("[data-local-table]").innerHTML;
-  }
-}
-
-customElements.define("sidebar-table", SidebarTable);
-
-class SidebarTables extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.hide();
-    this.innerHTML = ``;
-  }
-
-  show() {
-    this.removeAttribute("hidden");
-  }
-
-  hide() {
-    this.setAttribute("hidden", "");
-  }
-
-  isEmpty() {
-    return this.innerHTML == "";
-  }
-
-  populate(database) {
-    let html = this.templateRefresh();
-
-    console.log(state.databases[database]);
-
-    state.databases[database].table_order.forEach((table) => {
-      html += this.templateTable(database, table);
-    });
-
-    this.innerHTML = html;
-
-    this.show();
-
-    //$("sidebar-filter").filter(tables);
-    //this.populateEvents(tables);
-  }
-
-  templateLoading() {
-    return `<sidebar-database-loading></sidebar-database-loading>`;
-  }
-
-  templateRefresh() {
-    return `<sidebar-database-refresh></sidebar-database-refresh>`;
-  }
-
-  templateTable(database, table) {
-    return `<sidebar-table database="database" table="${table}" title="${table}"></sidebar-table>`;
-  }
-}
-
-customElements.define("sidebar-tables", SidebarTables);
-
 class SidebarX extends HTMLElement {
   constructor() {
     super();
@@ -2011,7 +2258,7 @@ class SidebarX extends HTMLElement {
     this.innerHTML = `
       <h2 class="pt-4 text-sm text-gray-400 uppercase">Databases and tables</h2>
       <sidebar-filter></sidebar-filter>
-      <sidebar-databases></sidebar-databases>
+      <nav-db-groups></nav-db-groups>
     `;
   }
 }
@@ -3129,15 +3376,15 @@ class TabItem extends HTMLElement {
     this.setAttribute("active", "true");
   }
 
-  isActive() {
+  /*isActive() {
     return this.getAttribute("active") == "true";
-  }
+  }*/
 
   onClick() {
-    this.addEventListener("mousedown", (e) => {
-      if (e.currentTarget !== e.target || e.which !== 1) return;
+    this.on("mousedown", (e) => {
+      if (e.currentTarget !== e.target || e.button === 1) return;
 
-      store.table.activate(this.database, this.table);
+      actions.table.activate(this.database, this.table);
     });
   }
 
@@ -3157,7 +3404,7 @@ class TabItem extends HTMLElement {
 
   handleClose() {
     if (this.getAttribute("active") == "true") {
-      store.table.close(this.database, this.table);
+      actions.table.close(this.database, this.table);
     } else {
       this.remove();
     }
@@ -3188,7 +3435,7 @@ class TabItems extends HTMLElement {
     );
   }
 
-  attributeChangedCallback(attr, oldValue, newValue) {
+  /*attributeChangedCallback(attr, oldValue, newValue) {
     if (oldValue !== newValue) {
       switch (attr) {
         case "database":
@@ -3196,17 +3443,21 @@ class TabItems extends HTMLElement {
           break;
       }
     }
-  }
+  }*/
 
-  activate(database, table) {
+  activate() {
     this.deactivate();
 
-    if (this.tab(database, table)) {
-      this.tab(database, table).activate();
+    if (this.tab(state.database, state.table)) {
+      this.tab(state.database, state.table).activate();
     } else {
-      this.create(database, table);
+      this.create(state.database, state.table);
       this.last().activate();
     }
+  }
+
+  close(database, table) {
+    $(`tab-item[database="${database}"][table="${table}"]`).remove();
   }
 
   deactivate() {
@@ -3221,11 +3472,11 @@ class TabItems extends HTMLElement {
   create(database, table) {
     $("tab-items").insertAdjacentHTML(
       "beforeend",
-      this.html(database, table, "true")
+      this.templateTab(database, table, "true")
     );
   }
 
-  html(database, table, active) {
+  templateTab(database, table, active) {
     return `
     <tab-item database="${database}" table="${table}" active="${active}"></tab-item>`;
   }
@@ -3354,386 +3605,6 @@ class TopbarWrap extends HTMLElement {
 }
 
 customElements.define("topbar-wrap", TopbarWrap);
-
-class ActionbarRefresh extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div data-action>
-        <img-svg src="material-icons/refresh.svg" classes="animate-spin w-5 h-5"></img-svg>
-        <div>Refresh</div>
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }
-  }
-}
-
-customElements.define("actionbar-refresh", ActionbarRefresh);
-
-class ButtonItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const href = this.getAttribute("href");
-    const title = this.getAttribute("title");
-    this.removeAttribute("title");
-    let html = "";
-
-    if (href) {
-      html = this.linkHtml(title, href);
-    } else {
-      html = this.buttonHtml(title, href);
-    }
-
-    this.innerHTML = html;
-  }
-
-  getClasses() {
-    const style = this.getAttribute("style");
-    let classes = "";
-
-    switch (style) {
-      case "default":
-        classes = this.classesStyleDefault();
-        break;
-      case "action":
-        classes = this.classesStyleAction();
-        break;
-      case "ghost":
-        classes = this.classesStyleGhost();
-        break;
-    }
-
-    return this.classesBase().concat(classes);
-  }
-
-  linkHtml(title, href) {
-    return `<a href="${href}" class="${this.getClasses().join(
-      " "
-    )}">${title}</a>`;
-  }
-
-  buttonHtml(title) {
-    return `<button class="focus:outline-none cursor-default ${this.getClasses().join(
-      " "
-    )}">${title}</button>`;
-  }
-
-  classesBase() {
-    return [
-      "inline-flex",
-      "items-center",
-      "gap-2",
-      "px-4",
-      "py-1.5",
-      "font-bold",
-      "rounded",
-      "fill-current",
-    ];
-  }
-
-  classesStyleDefault() {
-    return [
-      "text-white",
-      "border-2",
-      "bg-blueGray-700",
-      "border-black",
-      "hover:bg-blueGray-800",
-    ];
-  }
-
-  classesStyleAction() {
-    return [
-      "text-white",
-      "bg-gradient-to-br",
-      "from-navy-500",
-      "via-navy-600",
-      "to-navy-600",
-      "hover:from-navy-600",
-      "border",
-      "border-navy-600",
-    ];
-  }
-
-  classesStyleGhost() {
-    return ["border-2", "border-gray-200", "hover:border-gray-400"];
-  }
-}
-
-customElements.define("button-item", ButtonItem);
-
-class CheckboxItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const label = this.getAttribute("label");
-    const checked = this.getAttribute("checked") == "true" ? " checked" : "";
-
-    this.innerHTML = `
-      <label class="flex select-none items-center gap-2">
-        <input type="checkbox" class="form-checkbox w-4 h-4 rounded focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
-        ${label ? label : ""}
-      </label>
-    `;
-  }
-}
-
-customElements.define("checkbox-item", CheckboxItem);
-
-class ImgSvg extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["classes", "src"];
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "src" && newValue != "") {
-        fetch(`assets/icons/${newValue}`)
-          .then((response) => response.text())
-          .then((text) => {
-            this.innerHTML = text;
-            const svg = this.querySelector("svg");
-            svg.setAttribute("class", this.getAttribute("classes"));
-            svg.classList.add("fill-current");
-          })
-          .catch(console.error.bind(console));
-      }
-    }
-  }
-}
-
-customElements.define("img-svg", ImgSvg);
-
-class MessageItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const state = this.getAttribute("state");
-    const message = this.innerHTML;
-    let state_class = "";
-
-    switch (state) {
-      case "success":
-        state_class = "bg-green-600";
-        break;
-      case "error":
-        state_class = "bg-red-700";
-        break;
-    }
-
-    this.classList.add("flex", state_class, "text-white", "text-opacity-90");
-    this.innerHTML = `
-      <div class="flex-1 p-6">${message}</div>
-      <div class="p-2">
-        <button class="hover:bg-black hover:bg-opacity-10 p-2 focus:outline-none cursor-default">
-          <img-svg src="remixicon/close.svg"></img-svg>
-        </button>
-      </div>
-    `;
-  }
-}
-
-customElements.define("message-item", MessageItem);
-
-class ModalBox extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.deactivate();
-    this.innerHTML = `
-      <div
-        data-backdrop
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
-      >
-        <div class="flex items-start w-full max-w-lg bg-white shadow-md">
-          <div class="p-8 flex-1" data-modal-content>
-            <modal-info></modal-info>
-          </div>
-          <button class="p-2 m-2 focus:outline-none hover:bg-gray-100 rounded">
-            <img-svg src="remixicon/close.svg"></img-svg>
-          </button>
-        </div>
-      </div>
-    `;
-    this.onClose();
-  }
-
-  onClose() {
-    this.querySelector("button").addEventListener("click", (e) => {
-      this.deactivate();
-    });
-
-    this.querySelector("[data-backdrop]").addEventListener("click", (e) => {
-      if (e.target != e.currentTarget) return;
-      this.deactivate();
-    });
-  }
-
-  activate() {
-    this.removeAttribute("hidden");
-  }
-
-  deactivate() {
-    this.setAttribute("hidden", "");
-  }
-}
-
-customElements.define("modal-box", ModalBox);
-
-class PaneMain extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("flex", "flex-col", "overflow-auto", "flex-1");
-
-    const grid_cols = this.gridCols();
-    const grid_cols_class = `auto ${grid_cols.widths.join("px ")}px`;
-    console.log(JSON.stringify(grid_cols_class));
-
-    this.innerHTML = `
-      <actions-x></actions-x>
-      <div class="flex-1 flex overflow-auto">
-        <div class="overflow-x-auto flex-1 my-4 border border-gray-200 rounded bg-white">
-          <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
-            <div data-table class="grid gap-y-px bg-white" style="grid-template-columns: ${grid_cols_class};">
-              <table-headings></table-headings>
-              <table-cells></table-cells>
-            </div>
-          </div>
-        </div>
-      </div>
-      <pagination-x></pagination-x>
-    `;
-  }
-
-  gridCols() {
-    const this_data = data[table.get(this)];
-
-    let sum = 0;
-    let widths = [];
-
-    this_data.cols_order.forEach((item) => {
-      let width = null;
-      const item_obj = this_data.cols[item];
-
-      if (item_obj.config && item_obj.config.hasOwnProperty("width")) {
-        width = item_obj.config.width;
-      } else {
-        width = 300;
-      }
-
-      widths.push(width);
-
-      sum += width;
-
-      console.log(width);
-      //console.log(item);
-      //console.log(this_data.cols[item].config);
-    });
-
-    return {
-      sum: sum,
-      widths: widths,
-    };
-  }
-
-  part() {
-    return `
-      <div class="contents">
-        <row-select></row-select>
-        <table-cell></table-cell>
-        <table-cell></table-cell>
-        <table-cell></table-cell>
-      </div>`;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.removeAttribute("hidden");
-  }
-
-  thisDeactivate() {
-    this.setAttribute("hidden", "");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("pane-main", PaneMain);
-
-class RadioItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const label = this.getAttribute("label");
-    const checked = this.getAttribute("checked") == "true" ? " checked" : "";
-
-    this.innerHTML = `
-      <label class="flex select-none items-center gap-2">
-        <input type="radio" class="w-4 h-4 focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
-        ${label}
-      </label>
-    `;
-  }
-}
-
-customElements.define("radio-item", RadioItem);
 
 
 class FieldText extends HTMLElement {

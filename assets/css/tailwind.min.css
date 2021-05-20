@@ -1013,11 +1013,37 @@ sidebar-table {
 	padding-top: 0.25rem;
 	padding-bottom: 0.25rem;
 }
-sidebar-table:hover {
+sidebar-table[active="true"], sidebar-table[active="true"]:hover {
+	--tw-border-opacity: 1;
+	border-color: rgba(175, 205, 239, var(--tw-border-opacity));
+	--tw-bg-opacity: 1;
+	background-color: rgba(230, 240, 251, var(--tw-bg-opacity));
+	--tw-text-opacity: 1;
+	color: rgba(22, 40, 90, var(--tw-text-opacity));
+}
+.nav-row {
+	display: flex;
+	cursor: default;
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	    -ms-user-select: none;
+	        user-select: none;
+	align-items: center;
+	gap: 0.5rem;
+	border-radius: 0.25rem;
+	border-width: 1px;
+	border-color: transparent;
+	fill: currentColor;
+	padding-top: 0.25rem;
+	padding-bottom: 0.25rem;
+	padding-left: 0.5rem;
+	padding-right: 0.5rem;
+}
+.nav-row:hover {
 	--tw-bg-opacity: 1;
 	background-color: rgba(229, 229, 229, var(--tw-bg-opacity));
 }
-sidebar-table[active="true"], sidebar-table[active="true"]:hover {
+nav-tb[active], nav-tb[active]:hover {
 	--tw-border-opacity: 1;
 	border-color: rgba(175, 205, 239, var(--tw-border-opacity));
 	--tw-bg-opacity: 1;
@@ -1659,13 +1685,13 @@ tab-item[active="true"] img-svg:hover {
 	--tw-text-opacity: 1;
 	color: rgba(234, 179, 8, var(--tw-text-opacity));
 }
-.text-gray-400 {
-	--tw-text-opacity: 1;
-	color: rgba(163, 163, 163, var(--tw-text-opacity));
-}
 .text-navy-400 {
 	--tw-text-opacity: 1;
 	color: rgba(122, 164, 217, var(--tw-text-opacity));
+}
+.text-gray-400 {
+	--tw-text-opacity: 1;
+	color: rgba(163, 163, 163, var(--tw-text-opacity));
 }
 .text-blue-600 {
 	--tw-text-opacity: 1;

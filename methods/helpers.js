@@ -42,3 +42,7 @@ function isCellState(state = "active") {
 function setCellActiveToEl(el, state = "active") {
   el.setAttribute("state", state);
 }
+
+function isEmpty(obj) {
+  return Object.keys(obj).length === 0;
+}

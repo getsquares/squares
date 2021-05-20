@@ -4,7 +4,12 @@ let uglify = require("gulp-uglify-es").default;
 let rename = require("gulp-rename");
 
 var js = {
-  src: ["methods/**/*.js", "components/**/*.js", "fields/**/*.js"],
+  src: [
+    "methods/init.js",
+    "methods/**/*.js",
+    "components/**/*.js",
+    "fields/**/*.js",
+  ],
   dest: "assets/js",
   filename: "script.js",
 };

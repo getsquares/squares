@@ -2,11 +2,16 @@ sidebar-table {
   @apply flex items-center gap-2 px-2 py-1 border border-transparent rounded cursor-default select-none fill-current;
 }
 
-sidebar-table:hover {
-  @apply bg-gray-200;
-}
-
 sidebar-table[active="true"],
 sidebar-table[active="true"]:hover {
+  @apply bg-navy-100 text-navy-900 border-navy-300;
+}
+
+.nav-row {
+  @apply hover:bg-gray-200 rounded flex gap-2 py-1 px-2 cursor-default select-none fill-current items-center border border-transparent;
+}
+
+nav-tb[active],
+nav-tb[active]:hover {
   @apply bg-navy-100 text-navy-900 border-navy-300;
 }

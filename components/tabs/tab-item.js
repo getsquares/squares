@@ -47,15 +47,15 @@ class TabItem extends HTMLElement {
     this.setAttribute("active", "true");
   }
 
-  isActive() {
+  /*isActive() {
     return this.getAttribute("active") == "true";
-  }
+  }*/
 
   onClick() {
-    this.addEventListener("mousedown", (e) => {
-      if (e.currentTarget !== e.target || e.which !== 1) return;
+    this.on("mousedown", (e) => {
+      if (e.currentTarget !== e.target || e.button === 1) return;
 
-      store.table.activate(this.database, this.table);
+      actions.table.activate(this.database, this.table);
     });
   }
 
@@ -75,7 +75,7 @@ class TabItem extends HTMLElement {
 
   handleClose() {
     if (this.getAttribute("active") == "true") {
-      store.table.close(this.database, this.table);
+      actions.table.close(this.database, this.table);
     } else {
       this.remove();
     }
