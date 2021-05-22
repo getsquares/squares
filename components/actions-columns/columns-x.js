@@ -14,10 +14,11 @@ class ColumnsX extends HTMLElement {
   }
 
   checkboxes() {
-    const database = this.closest("pane-main").getAttribute("database");
-    const table = this.closest("pane-main").getAttribute("table");
-    const data_cols_all = data[`${database} ${table}`].cols_all;
-    const data_cols_active = data[`${database} ${table}`].cols_order;
+    const db = this.closest("pane-main").getAttribute("database");
+    const tb = this.closest("pane-main").getAttribute("table");
+    const data = get.tb.items(db, tb);
+    const data_cols_all = data.cols_all;
+    const data_cols_active = data.cols_order;
     let html = "";
 
     data_cols_all.forEach((item) => {

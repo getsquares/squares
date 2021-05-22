@@ -14,3 +14,10 @@
 .row-new .checkbox {
   @apply text-green-600;
 }
+
+.row-selected {
+  & row-select,
+  & table-cell {
+    @apply bg-gray-50;
+  }
+}

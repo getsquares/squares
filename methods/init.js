@@ -9,9 +9,9 @@ Node.prototype.on = function (type, listener) {
   return this.addEventListener(type, listener);
 };
 
-var actions = {};
+var get = {};
 var set = {};
-var unset = {};
+var actions = {};
 var triggers = {};
 var state = {
   database: null,
@@ -20,5 +20,3 @@ var state = {
   databases: {},
   tables: [],
 };
-
-var nav = {};

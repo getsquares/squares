@@ -75,7 +75,7 @@ class TabItem extends HTMLElement {
 
   handleClose() {
     if (this.getAttribute("active") == "true") {
-      actions.table.close(this.database, this.table);
+      actions.table.closeTab(this.database, this.table);
     } else {
       this.remove();
     }

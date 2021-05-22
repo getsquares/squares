@@ -19,7 +19,11 @@ class TableRowGhost extends HTMLElement {
 
   templateTableCells() {
     const table_name = table.get(this);
-    const this_data = data[table_name];
+    //const this_data = data[table_name];
+    const db = this.closest("pane-main").getAttribute("database");
+    const tb = this.closest("pane-main").getAttribute("table");
+
+    const this_data = get.tb.items(db, tb);
     let html = "";
 
     temp["insert"][table_name] = {

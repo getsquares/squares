@@ -9,9 +9,9 @@ Node.prototype.on = function (type, listener) {
   return this.addEventListener(type, listener);
 };
 
-var actions = {};
+var get = {};
 var set = {};
-var unset = {};
+var actions = {};
 var triggers = {};
 var state = {
   database: null,
@@ -20,8 +20,6 @@ var state = {
   databases: {},
   tables: [],
 };
-
-var nav = {};
 
 function tabClassActive() {
   return ["bg-navy-100", "text-navy-900", "border-navy-300"];
@@ -234,34 +232,6 @@ function storeDomCell(el_table_cell) {
   dom.up = spreadDomCell(getDomCellUp());
 }
 
-nav.db = {};
-nav.tb = {};
-
-nav.tb.section = (db) => {
-  return $(`nav-tb-section`, nav.db.group(db));
-};
-
-nav.db.item = (db) => {
-  return $(`nav-db[db="${db}"]`);
-};
-
-nav.db.group = (db) => {
-  return $(`nav-db[db="${db}"]`).closest("nav-db-group");
-};
-
-nav.tb.item = () => {
-  const db_el = $(`nav-db[db="${state.database}"]`);
-  return $(`nav-tb[tb="${state.table}"]`, db_el.closest("nav-db-group"));
-};
-
-nav.tb.group = (db) => {
-  return $("nav-tb-group", nav.db.group(db));
-};
-
-nav.arrow = (db) => {
-  return $(`nav-db[db="${db}"] [arrow]`);
-};
-
 class row {
   static isNew(obj) {
     return obj.closest(".row-new") ? true : false;
@@ -321,14 +291,15 @@ actions.tables = {};
 
 // Table
 actions.table.load = (db, tb) => {
-  if (isEmpty(state.databases[db].table_items[tb])) {
+  if (isEmpty(get.tb.items(db, tb))) {
     axios
       .get(`server/php/queries/data.php?database=${db}&table=${tb}`)
       .then((response) => {
         if (response.status !== 200) return;
 
-        set.table.item(response.data, db, tb);
         actions.table.activate(db, tb);
+
+        set.table.item(response.data, db, tb);
       });
   } else {
     actions.table.activate(db, tb);
@@ -349,9 +320,26 @@ actions.table.activate = (db, tb) => {
   set.table.name(db, tb);
 };
 
-actions.table.close = (db, tb) => {
+actions.table.closeTab = (db, tb) => {
   set.table.item({}, db, tb);
   set.table.name(null, null);
+};
+
+get.db = {};
+get.tb = {};
+
+// Database
+/*get.db.items = (db = state.database) => {
+  return state.databases[db];
+};*/
+
+// Table
+get.tb.order = () => {
+  return state.databases[state.database].tables_order;
+};
+
+get.tb.items = (db = state.database, tb = state.table) => {
+  return state.databases[db].table_items[tb];
 };
 
 set.database = {};
@@ -373,7 +361,7 @@ set.database.items = (content) => {
     };
   });
 
-  triggers.database.load();
+  triggers.db.load();
 };
 
 // Toggle state
@@ -389,21 +377,25 @@ set.table.order = (content, db) => {
   state.databases[db].table_order = content;
 };
 
-//triggers.table.close(state.database, state.table);
-
-//triggers.table.close(state.database, state.table);
 set.table.name = (db, tb) => {
+  const old_db = state.database;
+  const old_tb = state.table;
+
   state.database = db;
   state.table = tb;
 
-  if (table) {
-    triggers.table.activate();
+  if (state.table) {
+    triggers.tb.activate();
+  } else {
+    triggers.tb.closeTab(old_db, old_tb);
   }
 };
 
 // Item
 set.table.item = (content, db, tb) => {
   state.databases[db].table_items[tb] = content;
+
+  triggers.tb.data();
 };
 
 // Items
@@ -412,15 +404,14 @@ set.table.items = (content, db) => {
     state.databases[db].table_items[item] = {};
   });
 
-  triggers.table.items(db);
+  triggers.tb.items(db);
 };
 
-triggers.database = {};
 triggers.db = {};
 
 // Load
-triggers.database.load = () => {
-  $("nav-db-groups").databasesPopulate();
+triggers.db.load = () => {
+  $("db-list").databasesPopulate();
 };
 
 // Toggle
@@ -433,10 +424,10 @@ triggers.db.toggle = (db) => {
 triggers.db.open = (db) => {
   if (!state.databases[db].open) return;
 
-  nav.arrow(db).classList.add("rotate-180");
-  nav.tb.section(db).removeAttribute("hidden");
+  $("db-list").arrowUp(db);
+  $("db-list").showElement("tb-section", db);
 
-  if (nav.tb.group(db).innerHTML == "") {
+  if ($("db-list").groupEmpty(db)) {
     actions.tables.load(db);
   }
 };
@@ -445,38 +436,34 @@ triggers.db.open = (db) => {
 triggers.db.close = (db) => {
   if (state.databases[db].open) return;
 
-  nav.arrow(db).classList.remove("rotate-180");
-  nav.tb.section(db).setAttribute("hidden", "");
+  $("db-list").arrowDown(db);
+  $("db-list").hideElement("tb-section", db);
 };
 
-triggers.table = {};
+triggers.tb = {};
 
-triggers.table.activate = () => {
-  $$(`nav-tb`).forEach((el) => {
-    el.removeAttribute("active");
-  });
-  nav.tb.item().activate();
+triggers.tb.activate = () => {
+  $(`db-list`).deactivateTb();
+  $(`db-list`).activateTb();
   $(`tab-items`).activate();
 };
 
-triggers.table.close = (db, tb) => {
-  $(`nav-db-groups`).tablesDeactivate();
+triggers.tb.closeTab = (db, tb) => {
+  $(`db-list`).deactivateTb();
   $(`tab-items`).close(db, tb);
 };
 
-triggers.table.items = (db) => {
-  const db_group = $(`nav-db[db="${db}"]`).parentElement;
-  $(`nav-db-groups`).tablesPopulate(db);
-  $(`nav-tb-section`, db_group).removeAttribute("hidden");
-  $(`nav-loading`, db_group).setAttribute("hidden", "");
+triggers.tb.items = (db) => {
+  $(`db-list`).tablesPopulate(db);
+  $(`db-list`).hideElement("tb-loading", db);
 };
 
-unset.table = {};
+triggers.tb.data = () => {
+  console.log(state);
 
-/*unset.table.name = (table) => {
-  state.table = null;
-  
-};*/
+  $("main-x").deactivatePanes();
+  $("main-x").addPane();
+};
 
 class ActionbarRefresh extends HTMLElement {
   constructor() {
@@ -653,6 +640,36 @@ class ImgSvg extends HTMLElement {
 
 customElements.define("img-svg", ImgSvg);
 
+class MainX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  /*static get observedAttributes() {
+    return ["active"];
+  }*/
+
+  connectedCallback() {}
+
+  deactivatePanes() {
+    $$("pane-main").forEach((item) => {
+      item.deactivate();
+    });
+  }
+
+  addPane() {
+    $("main-x").insertAdjacentHTML("beforeend", this.templatePane());
+  }
+
+  templatePane() {
+    return `
+      <pane-main database="${state.database}" db="${state.database}" table="${state.table}" tb="${state.table}"></pane-main>
+    `;
+  }
+}
+
+customElements.define("main-x", MainX);
+
 class MessageItem extends HTMLElement {
   constructor() {
     super();
@@ -742,7 +759,27 @@ class PaneMain extends HTMLElement {
     return ["active"];
   }
 
+  set db(value) {
+    this.dbValue = value;
+  }
+
+  get db() {
+    return this.dbValue;
+  }
+
+  set tb(value) {
+    this.tbValue = value;
+  }
+
+  get tb() {
+    return this.tbValue;
+  }
+
   connectedCallback() {
+    this.db = this.getAttribute("db");
+    this.tb = this.getAttribute("tb");
+    this.data = get.tb.items(this.db, this.tb);
+
     this.classList.add("flex", "flex-col", "overflow-auto", "flex-1");
 
     const grid_cols = this.gridCols();
@@ -755,7 +792,39 @@ class PaneMain extends HTMLElement {
         <div class="overflow-x-auto flex-1 my-4 border border-gray-200 rounded bg-white">
           <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
             <div data-table class="grid gap-y-px bg-white" style="grid-template-columns: ${grid_cols_class};">
-              <table-headings></table-headings>
+              <table-headings class="z-40 contents">
+                <table-heading-check
+                  class="sticky top-0 z-[600] flex bg-gray-100 heading-bkg left-0">
+                  <label class="tp relative heading-bkg flex items-center bg-gray-100">
+                    <input type="checkbox" class="form-checkbox checkstyle-white" name="test" />
+                  </label>
+                </table-heading-check>
+                ${this.data.cols_order
+                  .map((item) => {
+                    const col = this.data.cols[item];
+                    const key = col.config && col.config.id ? true : false;
+                    return `
+                      <table-heading
+                        class="tp heading-bkg font-bold flex gap-2 items-center text-sm sticky top-0 z-[500] bg-gray-100"
+                      >
+                        ${
+                          key
+                            ? `<img-svg src="remixicon/key-2-line.svg" classes="w-5 h-5"></img-svg>`
+                            : ""
+                        }
+                        <div class="flex flex-col gap-1">
+                          <div>
+                            <div class="text-opacity-60 text-black inline-block py-0.5 text-xs font-normal rounded">${
+                              col.meta.Type
+                            }</div>
+                          </div>
+                          ${item}
+                        </div>
+                      </table-heading>
+                    `;
+                  })
+                  .join("")}
+              </table-headings>
               <table-cells></table-cells>
             </div>
           </div>
@@ -763,10 +832,34 @@ class PaneMain extends HTMLElement {
       </div>
       <pagination-x></pagination-x>
     `;
+
+    this.onChangeCheckAll();
+  }
+
+  // EVENTS
+
+  onChangeCheckAll() {
+    $("table-heading-check input", this).on("change", (e) => {
+      const checked = e.currentTarget.checked;
+
+      $$("row-select input", this).forEach(() => {
+        this.checkToggle(checked);
+      });
+    });
+  }
+
+  checkToggle(checked) {
+    $$("table-row", this).forEach((el) => {
+      el.classList.toggle("row-selected", checked);
+    });
+
+    $$("row-select input", this).forEach((el) => {
+      el.checked = checked;
+    });
   }
 
   gridCols() {
-    const this_data = data[table.get(this)];
+    const this_data = get.tb.items(this.db, this.tb);
 
     let sum = 0;
     let widths = [];
@@ -857,139 +950,6 @@ class RadioItem extends HTMLElement {
 }
 
 customElements.define("radio-item", RadioItem);
-
-class ColumnsItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["checked"];
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const checked = this.getAttribute("checked");
-    this.classList.add("flex");
-
-    this.innerHTML = this.template(name, checked);
-    this.onClick();
-  }
-
-  template(name, checked) {
-    return `
-      <label class="btn btn-borderless">
-        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
-      checked ? "checked" : ""
-    }>
-        ${name}
-      </label>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "checked") {
-        this.onChange();
-      }
-    }
-  }
-
-  onClick() {
-    $("input", this).addEventListener("change", (e) => {
-      if (e.currentTarget.checked) {
-        this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-  }
-
-  onChange() {
-    console.log("Something has changed");
-  }
-
-  activate() {
-    this.setAttribute("checked", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("checked");
-  }
-}
-
-customElements.define("columns-item", ColumnsItem);
-
-class ColumnsX extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
-    this.setAttribute("hidden", "");
-    this.innerHTML = this.template("Columns");
-  }
-
-  checkboxes() {
-    const database = this.closest("pane-main").getAttribute("database");
-    const table = this.closest("pane-main").getAttribute("table");
-    const data_cols_all = data[`${database} ${table}`].cols_all;
-    const data_cols_active = data[`${database} ${table}`].cols_order;
-    let html = "";
-
-    data_cols_all.forEach((item) => {
-      const checked = data_cols_active.includes(item);
-      const checked_html = checked ? `checked="true"` : "";
-      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
-    });
-
-    return html;
-  }
-
-  template(title) {
-    return `
-      <div class="font-bold">${title}</div>
-      <div class="flex gap-x-4 gap-y-1 flex-wrap">
-        ${this.checkboxes()}
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.classList.remove("hidden");
-  }
-
-  thisDeactivate() {
-    this.classList.add("hidden");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("columns-x", ColumnsX);
 
 class ActionsAdd extends HTMLElement {
   constructor() {
@@ -1327,6 +1287,140 @@ class PaneClose extends HTMLElement {
 }
 
 customElements.define("pane-close", PaneClose);
+
+class ColumnsItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const checked = this.getAttribute("checked");
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, checked);
+    this.onClick();
+  }
+
+  template(name, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${name}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange();
+      }
+    }
+  }
+
+  onClick() {
+    $("input", this).addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange() {
+    console.log("Something has changed");
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("columns-item", ColumnsItem);
+
+class ColumnsX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
+    this.setAttribute("hidden", "");
+    this.innerHTML = this.template("Columns");
+  }
+
+  checkboxes() {
+    const db = this.closest("pane-main").getAttribute("database");
+    const tb = this.closest("pane-main").getAttribute("table");
+    const data = get.tb.items(db, tb);
+    const data_cols_all = data.cols_all;
+    const data_cols_active = data.cols_order;
+    let html = "";
+
+    data_cols_all.forEach((item) => {
+      const checked = data_cols_active.includes(item);
+      const checked_html = checked ? `checked="true"` : "";
+      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
+    });
+
+    return html;
+  }
+
+  template(title) {
+    return `
+      <div class="font-bold">${title}</div>
+      <div class="flex gap-x-4 gap-y-1 flex-wrap">
+        ${this.checkboxes()}
+      </div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("columns-x", ColumnsX);
 
 class FilterItem extends HTMLElement {
   constructor() {
@@ -2067,7 +2161,7 @@ class RowActions extends HTMLElement {
 }
 customElements.define("row-actions", RowActions);
 
-class NavDbGroups extends HTMLElement {
+class DbList extends HTMLElement {
   constructor() {
     super();
   }
@@ -2083,8 +2177,8 @@ class NavDbGroups extends HTMLElement {
 
     state.databases_order.forEach((name) => {
       html += `
-      <nav-db-group>
-        <nav-db db="${name}" class="nav-row">
+      <db-group db="${name}">
+        <db-item class="nav-row">
           <img-svg
             src="remixicon/database-2-fill.svg"
             classes="w-4 h-4 text-yellow-500">
@@ -2095,27 +2189,28 @@ class NavDbGroups extends HTMLElement {
           <img-svg
             arrow
             src="remixicon/arrow-down-s.svg"
+            class="transform"
             classes="w-4 h-4 text-gray-800">
           </img-svg>
-        </nav-db>
-        <nav-tb-section hidden>
-          <nav-refresh class="nav-row">
+        </db-item>
+        <tb-section hidden>
+          <tb-refresh class="nav-row">
             <img-svg
               src="material-icons/refresh.svg"
               classes="w-4 h-4 text-gray-400">
             </img-svg>
             <div class="flex-1 truncate text-13">Refresh</div>
-          </nav-refresh>
-          <nav-loading class="nav-row">
+          </tb-refresh>
+          <tb-loading class="nav-row">
             <img-svg
               src="material-icons/refresh.svg"
               classes="w-4 h-4 text-gray-400 animate-spin">
             </img-svg>
             <div class="flex-1 truncate text-13">Loading...</div>
-          </nav-loading>
-          <nav-tb-group></nav-tb-group>
-        </nav-tb-section>
-      </nav-db-group>`;
+          </tb-loading>
+          <tb-group></tb-group>
+        </tb-section>
+      </db-group>`;
     });
 
     this.innerHTML += html;
@@ -2129,23 +2224,25 @@ class NavDbGroups extends HTMLElement {
 
     state.databases[db].table_order.forEach((tb) => {
       html += `
-        <nav-tb tb="${tb}" title="${tb}" class="nav-row">
+        <tb-item tb="${tb}" title="${tb}" class="nav-row">
           <img-svg src="boxicons/bx-table.svg" classes="w-4 h-4 text-navy-400"></img-svg>
           <div class="flex-1 truncate text-13">${tb}</div>
-        </nav-tb>
+        </tb-item>
       `;
     });
 
-    nav.tb.group(db).innerHTML = html;
+    this.dom("tb-group", db).innerHTML = html;
     this.onClickTable(db);
   }
 
+  // EVENTS
+
   // On click refresh
   onClickRefresh() {
-    $$("nav-refresh").forEach((el) => {
+    $$("tb-refresh").forEach((el) => {
       el.on("click", (e) => {
-        const db_group = e.currentTarget.closest("nav-db-group");
-        const db = $("nav-db", db_group).getAttribute("db");
+        const db = e.currentTarget.closest("db-group").getAttribute("db");
+
         actions.tables.load(db);
       });
     });
@@ -2153,41 +2250,90 @@ class NavDbGroups extends HTMLElement {
 
   // On click database
   onClickDatabase() {
-    $$("nav-db").forEach((el) => {
+    $$("db-item").forEach((el) => {
       el.on("click", (e) => {
-        actions.database.toggle(e.currentTarget.getAttribute("db"));
+        const db = e.currentTarget.closest("db-group").getAttribute("db");
+
+        actions.database.toggle(db);
       });
     });
   }
 
   // On click table
   onClickTable(db) {
-    $("nav-tb", nav.tb.group(db)).forEach((el) => {
+    $$("tb-item", this.dom("tb-group", db)).forEach((el) => {
       el.on("click", (e) => {
-        const tb = e.currentTarget.getAttribute("tb");
-        const db = $("nav-db", this.closest("nav-db-group")).getAttribute("db");
+        const current = e.currentTarget;
+        const tb = current.getAttribute("tb");
+        const db = current.closest("db-group").getAttribute("db");
+
         actions.table.load(db, tb);
       });
     });
   }
+
+  // HELPERS
+
+  // Arrow up
+  arrowUp(db) {
+    this.dom("[arrow]", db).classList.add("rotate-180");
+  }
+
+  // Arrow down
+  arrowDown(db) {
+    this.dom("[arrow]", db).classList.remove("rotate-180");
+  }
+
+  // Show element
+  showElement(selector, db) {
+    this.dom(selector, db).removeAttribute("hidden");
+  }
+
+  // Hide element
+  hideElement(selector, db) {
+    this.dom(selector, db).setAttribute("hidden", "");
+  }
+
+  groupEmpty(db) {
+    return this.dom("tb-group", db).innerHTML == "";
+  }
+
+  activateTb() {
+    this.tbItem().setAttribute("active", "true");
+  }
+
+  deactivateTb() {
+    $$(`tb-item`).forEach((el) => {
+      el.removeAttribute("active");
+    });
+  }
+
+  // DOM HELPERS
+
+  // Dom
+  dom = (selector, db) => {
+    return $(selector, this.dbGroup(db));
+  };
+
+  // DB Group
+  dbGroup = (db) => {
+    return $(`db-group[db="${db}"]`);
+  };
+
+  // Current tb item
+  tbItem = () => {
+    return $(`tb-item[tb="${state.table}"]`, this.dbGroup(state.database));
+  };
 }
 
-customElements.define("nav-db-groups", NavDbGroups);
+customElements.define("db-list", DbList);
 
 /*
 FIXME: Inaktivera alla panemain 
 FIXME: Lägg till pane-main
 FIXME: Uppdatera rows offset och total
 
-const html = `
-  <pane-main database="${current.database}" table="${current.table}" active="true"></pane-main>
-`;
 
-$$("pane-main").forEach((item) => {
-  item.deactivate();
-});
-
-$("main-x").insertAdjacentHTML("beforeend", html);
 
 const current_el = $(
   `pane-main[database="${current.database}"][table="${current.table}"]`
@@ -2258,7 +2404,7 @@ class SidebarX extends HTMLElement {
     this.innerHTML = `
       <h2 class="pt-4 text-sm text-gray-400 uppercase">Databases and tables</h2>
       <sidebar-filter></sidebar-filter>
-      <nav-db-groups></nav-db-groups>
+      <db-list></db-list>
     `;
   }
 }
@@ -2951,7 +3097,10 @@ class TableCells extends HTMLElement {
   }
 
   template() {
-    const this_data = data[table.get(this)];
+    //const this_data = data[table.get(this)];
+    const db = this.closest("pane-main").getAttribute("database");
+    const tb = this.closest("pane-main").getAttribute("table");
+    const this_data = get.tb.items(db, tb);
     const cols = this_data.cols_order;
 
     let html = "<table-row-ghost></table-row-ghost>";
@@ -3003,180 +3152,6 @@ class TableCells extends HTMLElement {
 
 customElements.define("table-cells", TableCells);
 
-class TableHeadingCheck extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.classList.add(
-      "sticky",
-      "top-0",
-      "z-[600]",
-      "flex",
-      "sticky",
-      "bg-gray-100",
-      "heading-bkg",
-      "left-0"
-    );
-
-    this.innerHTML = `
-      <label class="tp relative heading-bkg flex items-center bg-gray-100">
-        <input type="checkbox" class="form-checkbox checkstyle-white" name="test" />
-      </label>
-    `;
-    this.onChange();
-  }
-
-  keyHtml() {
-    return `<img-svg src="remixicon/key-2-line.svg"></img-svg>`;
-  }
-
-  onChange() {
-    this.querySelector("input").addEventListener("change", (e) => {
-      const checked = e.currentTarget.checked;
-
-      $$("row-select").forEach((item) => {
-        item.querySelector("input").checked = checked;
-
-        if (checked) {
-          this.selectAll();
-        } else {
-          this.deselectAll();
-        }
-      });
-    });
-  }
-
-  selectAll() {
-    $$("[data-cells] row-select").forEach((item) => {
-      $$("row-select, table-cell", item.closest("table-row")).forEach((el) => {
-        item.selectOne(el);
-      });
-    });
-  }
-
-  deselectAll() {
-    $$("[data-cells] row-select").forEach((item) => {
-      const el_cells = item
-        .closest(".contents")
-        .querySelectorAll("row-select, table-cell");
-
-      el_cells.forEach((el) => {
-        item.deselectOne(el);
-      });
-    });
-  }
-
-  /*attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "title") return;
-    if (oldValue !== newValue) {
-      this.title = newValue;
-    }
-  }*/
-}
-
-customElements.define("table-heading-check", TableHeadingCheck);
-
-class TableHeading extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    //return ["title"];
-  }
-
-  connectedCallback() {
-    const id = this.getAttribute("key");
-    const title = this.getAttribute("title");
-    const type = this.getAttribute("fieldtype");
-    const key_html = id ? this.keyHtml() : "";
-
-    this.classList.add(
-      "tp",
-      "heading-bkg",
-      "font-bold",
-      "flex",
-      "gap-2",
-      "items-center",
-      "text-sm",
-      "sticky",
-      "top-0",
-      "z-[500]",
-      "bg-gray-100"
-    );
-    this.innerHTML = `
-      ${key_html}
-      <div class="flex flex-col gap-1">
-        <div>
-          <div class="text-opacity-60 text-black inline-block py-0.5 text-xs font-normal rounded">${type}</div>
-        </div>
-        ${title}
-      </div>
-    `;
-  }
-
-  keyHtml() {
-    return `<img-svg src="remixicon/key-2-line.svg" classes="w-5 h-5"></img-svg>`;
-  }
-
-  /*attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "title") return;
-    if (oldValue !== newValue) {
-      this.title = newValue;
-    }
-  }*/
-}
-
-customElements.define("table-heading", TableHeading);
-
-class TableHeadings extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("z-40", "contents");
-
-    this.innerHTML = this.template();
-  }
-
-  template() {
-    const this_data = data[table.get(this)];
-    const cols = this_data.cols_order;
-    let html = `<table-heading-check></table-heading-check>`;
-
-    cols.forEach((item) => {
-      const col = this_data.cols[item];
-      const key = col.config && col.config.id ? `key="true"` : "";
-      html += `
-        <table-heading title="${item}" fieldtype="${col.meta.Type}" ${key}></table-heading>
-      `;
-    });
-
-    return html;
-  }
-
-  /*attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }*/
-}
-
-customElements.define("table-headings", TableHeadings);
-
 class TableRowGhost extends HTMLElement {
   constructor() {
     super();
@@ -3198,7 +3173,11 @@ class TableRowGhost extends HTMLElement {
 
   templateTableCells() {
     const table_name = table.get(this);
-    const this_data = data[table_name];
+    //const this_data = data[table_name];
+    const db = this.closest("pane-main").getAttribute("database");
+    const tb = this.closest("pane-main").getAttribute("table");
+
+    const this_data = get.tb.items(db, tb);
     let html = "";
 
     temp["insert"][table_name] = {
@@ -3404,7 +3383,7 @@ class TabItem extends HTMLElement {
 
   handleClose() {
     if (this.getAttribute("active") == "true") {
-      actions.table.close(this.database, this.table);
+      actions.table.closeTab(this.database, this.table);
     } else {
       this.remove();
     }
@@ -3434,16 +3413,6 @@ class TabItems extends HTMLElement {
       "self-end"
     );
   }
-
-  /*attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      switch (attr) {
-        case "database":
-          this.activate();
-          break;
-      }
-    }
-  }*/
 
   activate() {
     this.deactivate();

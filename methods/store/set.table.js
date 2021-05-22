@@ -5,21 +5,25 @@ set.table.order = (content, db) => {
   state.databases[db].table_order = content;
 };
 
-//triggers.table.close(state.database, state.table);
-
-//triggers.table.close(state.database, state.table);
 set.table.name = (db, tb) => {
+  const old_db = state.database;
+  const old_tb = state.table;
+
   state.database = db;
   state.table = tb;
 
-  if (table) {
-    triggers.table.activate();
+  if (state.table) {
+    triggers.tb.activate();
+  } else {
+    triggers.tb.closeTab(old_db, old_tb);
   }
 };
 
 // Item
 set.table.item = (content, db, tb) => {
   state.databases[db].table_items[tb] = content;
+
+  triggers.tb.data();
 };
 
 // Items
@@ -28,5 +32,5 @@ set.table.items = (content, db) => {
     state.databases[db].table_items[item] = {};
   });
 
-  triggers.table.items(db);
+  triggers.tb.items(db);
 };

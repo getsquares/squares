@@ -7,7 +7,27 @@ class PaneMain extends HTMLElement {
     return ["active"];
   }
 
+  set db(value) {
+    this.dbValue = value;
+  }
+
+  get db() {
+    return this.dbValue;
+  }
+
+  set tb(value) {
+    this.tbValue = value;
+  }
+
+  get tb() {
+    return this.tbValue;
+  }
+
   connectedCallback() {
+    this.db = this.getAttribute("db");
+    this.tb = this.getAttribute("tb");
+    this.data = get.tb.items(this.db, this.tb);
+
     this.classList.add("flex", "flex-col", "overflow-auto", "flex-1");
 
     const grid_cols = this.gridCols();
@@ -20,7 +40,39 @@ class PaneMain extends HTMLElement {
         <div class="overflow-x-auto flex-1 my-4 border border-gray-200 rounded bg-white">
           <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
             <div data-table class="grid gap-y-px bg-white" style="grid-template-columns: ${grid_cols_class};">
-              <table-headings></table-headings>
+              <table-headings class="z-40 contents">
+                <table-heading-check
+                  class="sticky top-0 z-[600] flex bg-gray-100 heading-bkg left-0">
+                  <label class="tp relative heading-bkg flex items-center bg-gray-100">
+                    <input type="checkbox" class="form-checkbox checkstyle-white" name="test" />
+                  </label>
+                </table-heading-check>
+                ${this.data.cols_order
+                  .map((item) => {
+                    const col = this.data.cols[item];
+                    const key = col.config && col.config.id ? true : false;
+                    return `
+                      <table-heading
+                        class="tp heading-bkg font-bold flex gap-2 items-center text-sm sticky top-0 z-[500] bg-gray-100"
+                      >
+                        ${
+                          key
+                            ? `<img-svg src="remixicon/key-2-line.svg" classes="w-5 h-5"></img-svg>`
+                            : ""
+                        }
+                        <div class="flex flex-col gap-1">
+                          <div>
+                            <div class="text-opacity-60 text-black inline-block py-0.5 text-xs font-normal rounded">${
+                              col.meta.Type
+                            }</div>
+                          </div>
+                          ${item}
+                        </div>
+                      </table-heading>
+                    `;
+                  })
+                  .join("")}
+              </table-headings>
               <table-cells></table-cells>
             </div>
           </div>
@@ -28,10 +80,34 @@ class PaneMain extends HTMLElement {
       </div>
       <pagination-x></pagination-x>
     `;
+
+    this.onChangeCheckAll();
+  }
+
+  // EVENTS
+
+  onChangeCheckAll() {
+    $("table-heading-check input", this).on("change", (e) => {
+      const checked = e.currentTarget.checked;
+
+      $$("row-select input", this).forEach(() => {
+        this.checkToggle(checked);
+      });
+    });
+  }
+
+  checkToggle(checked) {
+    $$("table-row", this).forEach((el) => {
+      el.classList.toggle("row-selected", checked);
+    });
+
+    $$("row-select input", this).forEach((el) => {
+      el.checked = checked;
+    });
   }
 
   gridCols() {
-    const this_data = data[table.get(this)];
+    const this_data = get.tb.items(this.db, this.tb);
 
     let sum = 0;
     let widths = [];

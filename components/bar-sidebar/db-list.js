@@ -1,4 +1,4 @@
-class NavDbGroups extends HTMLElement {
+class DbList extends HTMLElement {
   constructor() {
     super();
   }
@@ -14,8 +14,8 @@ class NavDbGroups extends HTMLElement {
 
     state.databases_order.forEach((name) => {
       html += `
-      <nav-db-group>
-        <nav-db db="${name}" class="nav-row">
+      <db-group db="${name}">
+        <db-item class="nav-row">
           <img-svg
             src="remixicon/database-2-fill.svg"
             classes="w-4 h-4 text-yellow-500">
@@ -26,27 +26,28 @@ class NavDbGroups extends HTMLElement {
           <img-svg
             arrow
             src="remixicon/arrow-down-s.svg"
+            class="transform"
             classes="w-4 h-4 text-gray-800">
           </img-svg>
-        </nav-db>
-        <nav-tb-section hidden>
-          <nav-refresh class="nav-row">
+        </db-item>
+        <tb-section hidden>
+          <tb-refresh class="nav-row">
             <img-svg
               src="material-icons/refresh.svg"
               classes="w-4 h-4 text-gray-400">
             </img-svg>
             <div class="flex-1 truncate text-13">Refresh</div>
-          </nav-refresh>
-          <nav-loading class="nav-row">
+          </tb-refresh>
+          <tb-loading class="nav-row">
             <img-svg
               src="material-icons/refresh.svg"
               classes="w-4 h-4 text-gray-400 animate-spin">
             </img-svg>
             <div class="flex-1 truncate text-13">Loading...</div>
-          </nav-loading>
-          <nav-tb-group></nav-tb-group>
-        </nav-tb-section>
-      </nav-db-group>`;
+          </tb-loading>
+          <tb-group></tb-group>
+        </tb-section>
+      </db-group>`;
     });
 
     this.innerHTML += html;
@@ -60,23 +61,25 @@ class NavDbGroups extends HTMLElement {
 
     state.databases[db].table_order.forEach((tb) => {
       html += `
-        <nav-tb tb="${tb}" title="${tb}" class="nav-row">
+        <tb-item tb="${tb}" title="${tb}" class="nav-row">
           <img-svg src="boxicons/bx-table.svg" classes="w-4 h-4 text-navy-400"></img-svg>
           <div class="flex-1 truncate text-13">${tb}</div>
-        </nav-tb>
+        </tb-item>
       `;
     });
 
-    nav.tb.group(db).innerHTML = html;
+    this.dom("tb-group", db).innerHTML = html;
     this.onClickTable(db);
   }
 
+  // EVENTS
+
   // On click refresh
   onClickRefresh() {
-    $$("nav-refresh").forEach((el) => {
+    $$("tb-refresh").forEach((el) => {
       el.on("click", (e) => {
-        const db_group = e.currentTarget.closest("nav-db-group");
-        const db = $("nav-db", db_group).getAttribute("db");
+        const db = e.currentTarget.closest("db-group").getAttribute("db");
+
         actions.tables.load(db);
       });
     });
@@ -84,41 +87,90 @@ class NavDbGroups extends HTMLElement {
 
   // On click database
   onClickDatabase() {
-    $$("nav-db").forEach((el) => {
+    $$("db-item").forEach((el) => {
       el.on("click", (e) => {
-        actions.database.toggle(e.currentTarget.getAttribute("db"));
+        const db = e.currentTarget.closest("db-group").getAttribute("db");
+
+        actions.database.toggle(db);
       });
     });
   }
 
   // On click table
   onClickTable(db) {
-    $("nav-tb", nav.tb.group(db)).forEach((el) => {
+    $$("tb-item", this.dom("tb-group", db)).forEach((el) => {
       el.on("click", (e) => {
-        const tb = e.currentTarget.getAttribute("tb");
-        const db = $("nav-db", this.closest("nav-db-group")).getAttribute("db");
+        const current = e.currentTarget;
+        const tb = current.getAttribute("tb");
+        const db = current.closest("db-group").getAttribute("db");
+
         actions.table.load(db, tb);
       });
     });
   }
+
+  // HELPERS
+
+  // Arrow up
+  arrowUp(db) {
+    this.dom("[arrow]", db).classList.add("rotate-180");
+  }
+
+  // Arrow down
+  arrowDown(db) {
+    this.dom("[arrow]", db).classList.remove("rotate-180");
+  }
+
+  // Show element
+  showElement(selector, db) {
+    this.dom(selector, db).removeAttribute("hidden");
+  }
+
+  // Hide element
+  hideElement(selector, db) {
+    this.dom(selector, db).setAttribute("hidden", "");
+  }
+
+  groupEmpty(db) {
+    return this.dom("tb-group", db).innerHTML == "";
+  }
+
+  activateTb() {
+    this.tbItem().setAttribute("active", "true");
+  }
+
+  deactivateTb() {
+    $$(`tb-item`).forEach((el) => {
+      el.removeAttribute("active");
+    });
+  }
+
+  // DOM HELPERS
+
+  // Dom
+  dom = (selector, db) => {
+    return $(selector, this.dbGroup(db));
+  };
+
+  // DB Group
+  dbGroup = (db) => {
+    return $(`db-group[db="${db}"]`);
+  };
+
+  // Current tb item
+  tbItem = () => {
+    return $(`tb-item[tb="${state.table}"]`, this.dbGroup(state.database));
+  };
 }
 
-customElements.define("nav-db-groups", NavDbGroups);
+customElements.define("db-list", DbList);
 
 /*
 FIXME: Inaktivera alla panemain 
 FIXME: Lägg till pane-main
 FIXME: Uppdatera rows offset och total
 
-const html = `
-  <pane-main database="${current.database}" table="${current.table}" active="true"></pane-main>
-`;
 
-$$("pane-main").forEach((item) => {
-  item.deactivate();
-});
-
-$("main-x").insertAdjacentHTML("beforeend", html);
 
 const current_el = $(
   `pane-main[database="${current.database}"][table="${current.table}"]`

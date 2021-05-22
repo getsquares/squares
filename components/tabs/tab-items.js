@@ -20,16 +20,6 @@ class TabItems extends HTMLElement {
     );
   }
 
-  /*attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      switch (attr) {
-        case "database":
-          this.activate();
-          break;
-      }
-    }
-  }*/
-
   activate() {
     this.deactivate();
 

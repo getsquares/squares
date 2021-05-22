@@ -18,7 +18,10 @@ class TableCells extends HTMLElement {
   }
 
   template() {
-    const this_data = data[table.get(this)];
+    //const this_data = data[table.get(this)];
+    const db = this.closest("pane-main").getAttribute("database");
+    const tb = this.closest("pane-main").getAttribute("table");
+    const this_data = get.tb.items(db, tb);
     const cols = this_data.cols_order;
 
     let html = "<table-row-ghost></table-row-ghost>";

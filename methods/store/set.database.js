@@ -17,7 +17,7 @@ set.database.items = (content) => {
     };
   });
 
-  triggers.database.load();
+  triggers.db.load();
 };
 
 // Toggle state

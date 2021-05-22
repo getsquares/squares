@@ -1,9 +1,8 @@
-triggers.database = {};
 triggers.db = {};
 
 // Load
-triggers.database.load = () => {
-  $("nav-db-groups").databasesPopulate();
+triggers.db.load = () => {
+  $("db-list").databasesPopulate();
 };
 
 // Toggle
@@ -16,10 +15,10 @@ triggers.db.toggle = (db) => {
 triggers.db.open = (db) => {
   if (!state.databases[db].open) return;
 
-  nav.arrow(db).classList.add("rotate-180");
-  nav.tb.section(db).removeAttribute("hidden");
+  $("db-list").arrowUp(db);
+  $("db-list").showElement("tb-section", db);
 
-  if (nav.tb.group(db).innerHTML == "") {
+  if ($("db-list").groupEmpty(db)) {
     actions.tables.load(db);
   }
 };
@@ -28,6 +27,6 @@ triggers.db.open = (db) => {
 triggers.db.close = (db) => {
   if (state.databases[db].open) return;
 
-  nav.arrow(db).classList.remove("rotate-180");
-  nav.tb.section(db).setAttribute("hidden", "");
+  $("db-list").arrowDown(db);
+  $("db-list").hideElement("tb-section", db);
 };

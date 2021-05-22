@@ -1,21 +1,24 @@
-triggers.table = {};
+triggers.tb = {};
 
-triggers.table.activate = () => {
-  $$(`nav-tb`).forEach((el) => {
-    el.removeAttribute("active");
-  });
-  nav.tb.item().activate();
+triggers.tb.activate = () => {
+  $(`db-list`).deactivateTb();
+  $(`db-list`).activateTb();
   $(`tab-items`).activate();
 };
 
-triggers.table.close = (db, tb) => {
-  $(`nav-db-groups`).tablesDeactivate();
+triggers.tb.closeTab = (db, tb) => {
+  $(`db-list`).deactivateTb();
   $(`tab-items`).close(db, tb);
 };
 
-triggers.table.items = (db) => {
-  const db_group = $(`nav-db[db="${db}"]`).parentElement;
-  $(`nav-db-groups`).tablesPopulate(db);
-  $(`nav-tb-section`, db_group).removeAttribute("hidden");
-  $(`nav-loading`, db_group).setAttribute("hidden", "");
+triggers.tb.items = (db) => {
+  $(`db-list`).tablesPopulate(db);
+  $(`db-list`).hideElement("tb-loading", db);
+};
+
+triggers.tb.data = () => {
+  console.log(state);
+
+  $("main-x").deactivatePanes();
+  $("main-x").addPane();
 };
