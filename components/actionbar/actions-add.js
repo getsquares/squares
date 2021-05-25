@@ -27,19 +27,14 @@ class ActionsAdd extends HTMLElement {
 
   onClick() {
     this.addEventListener("click", () => {
-      //data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
-      console.log(current.database);
       const el_cell_active = $(
         `cell-ring[state="active"]`,
         this.closest("pane-main")
       );
 
-      console.log("dooo2");
       if (!el_cell_active) return;
 
-      console.log("dooo");
-
-      el_cell_active.closest("table-row").addRow();
+      el_cell_active.closest("pane-main").addRow();
     });
   }
 }

@@ -8,7 +8,8 @@ class FieldText extends HTMLElement {
   }
 
   connectedCallback() {
-    const value = cell.getTempValue(this);
+    //const value = cell.getTempValue(this);
+    const value = "omomo";
     this.innerHTML = `
       <input value="${value}" type="text" class="form-input focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
     `;

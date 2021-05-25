@@ -1,21 +1,23 @@
 // Event cell step
 function eventCellKeydown() {
   window.addEventListener("keydown", (e) => {
-    let cell_active = $('cell-ring[state="active"]');
-    if (!cell_active) return;
+    const root_el = $(`pane-main[db="${state.database}"][tb="${state.table}"]`);
+    const active_ring = $('cell-ring[state="active"]', root_el);
+    let table_cell = active_ring.closest("table-cell");
+    if (!table_cell) return;
 
     switch (e.key) {
       case "ArrowLeft":
       case "ArrowRight":
       case "ArrowDown":
       case "ArrowUp":
-        cell_active.handleStep(e.key);
+        table_cell.handleStep(e.key);
         break;
       case "Tab":
-        cell_active.handleCellTab(e);
+        table_cell.handleCellTab(e);
         break;
       case "Enter":
-        cell_active.handleCellEdit();
+        table_cell.handleCellEdit();
         break;
     }
   });

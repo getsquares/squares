@@ -53,21 +53,23 @@ function hollowClassInactive() {
 // Event cell step
 function eventCellKeydown() {
   window.addEventListener("keydown", (e) => {
-    let cell_active = $('cell-ring[state="active"]');
-    if (!cell_active) return;
+    const root_el = $(`pane-main[db="${state.database}"][tb="${state.table}"]`);
+    const active_ring = $('cell-ring[state="active"]', root_el);
+    let table_cell = active_ring.closest("table-cell");
+    if (!table_cell) return;
 
     switch (e.key) {
       case "ArrowLeft":
       case "ArrowRight":
       case "ArrowDown":
       case "ArrowUp":
-        cell_active.handleStep(e.key);
+        table_cell.handleStep(e.key);
         break;
       case "Tab":
-        cell_active.handleCellTab(e);
+        table_cell.handleCellTab(e);
         break;
       case "Enter":
-        cell_active.handleCellEdit();
+        table_cell.handleCellEdit();
         break;
     }
   });
@@ -327,6 +329,7 @@ actions.table.closeTab = (db, tb) => {
 
 get.db = {};
 get.tb = {};
+get.col = {};
 
 // Database
 /*get.db.items = (db = state.database) => {
@@ -340,6 +343,18 @@ get.tb.order = () => {
 
 get.tb.items = (db = state.database, tb = state.table) => {
   return state.databases[db].table_items[tb];
+};
+
+get.tb.value = (db, tb, col, index) => {
+  const data = get.tb.items(db, tb);
+
+  return data.rows[index][col];
+};
+
+get.col.data = (db, tb, col) => {
+  const data = get.tb.items(db, tb);
+
+  return data.cols[col];
 };
 
 set.database = {};
@@ -800,32 +815,62 @@ class PaneMain extends HTMLElement {
                   </label>
                 </table-heading-check>
                 ${this.data.cols_order
-                  .map((item) => {
-                    const col = this.data.cols[item];
-                    const key = col.config && col.config.id ? true : false;
+                  .map((column_name) => {
+                    const column_data = this.data.cols[column_name];
+
                     return `
                       <table-heading
                         class="tp heading-bkg font-bold flex gap-2 items-center text-sm sticky top-0 z-[500] bg-gray-100"
                       >
-                        ${
-                          key
-                            ? `<img-svg src="remixicon/key-2-line.svg" classes="w-5 h-5"></img-svg>`
-                            : ""
-                        }
+                        ${this.keyIcon(column_name)}
                         <div class="flex flex-col gap-1">
                           <div>
                             <div class="text-opacity-60 text-black inline-block py-0.5 text-xs font-normal rounded">${
-                              col.meta.Type
+                              column_data.meta.Type
                             }</div>
                           </div>
-                          ${item}
+                          ${column_name}
                         </div>
                       </table-heading>
                     `;
                   })
                   .join("")}
               </table-headings>
-              <table-cells></table-cells>
+              <table-cells class="contents">
+                <table-row-ghost hidden>
+                  <template data-first>
+                    <table-row class="contents row-new">
+                      <row-select></row-select>
+                      ${this.templateTableCells()}
+                    </table-row>
+                  </template>
+                </table-row-ghost>
+                ${this.data.rows
+                  .map((row, index) => {
+                    return `
+                    <table-row class="contents">
+                      <row-select class="flex sticky z-50 left-0 heading-bkg">
+                        <label class="tp relative">
+                          <input type="checkbox" class="checkstyle form-checkbox" name="test" />
+                          <div class="absolute block inset-0 shadow-y"></div>
+                        </label>
+                      </row-select>
+                      ${this.data.cols_order
+                        .map((col) => {
+                          return `
+                            <table-cell
+                              class="relative"
+                              col="${col}"
+                              row="${row[this.data.meta.id]}"
+                              index="${index}"
+                            ></table-cell>
+                          `;
+                        })
+                        .join("")}
+                    </table-row>`;
+                  })
+                  .join("")}
+              </table-cells>
             </div>
           </div>
         </div>
@@ -833,7 +878,15 @@ class PaneMain extends HTMLElement {
       <pagination-x></pagination-x>
     `;
 
+    this.setFirstCellActive();
+
     this.onChangeCheckAll();
+    this.onChangeCheckOne();
+  }
+
+  keyIcon(col) {
+    if (!col.config || !col.config.id) return "";
+    return `<img-svg src="remixicon/key-2-line.svg" classes="w-5 h-5"></img-svg>`;
   }
 
   // EVENTS
@@ -843,12 +896,29 @@ class PaneMain extends HTMLElement {
       const checked = e.currentTarget.checked;
 
       $$("row-select input", this).forEach(() => {
-        this.checkToggle(checked);
+        this.checkToggleAll(checked);
       });
     });
   }
 
-  checkToggle(checked) {
+  onChangeCheckOne() {
+    $$("row-select input", this).forEach((el) => {
+      el.on("change", (e) => {
+        const el = e.currentTarget;
+        const checked = el.checked;
+
+        el.closest("table-row").classList.toggle("row-selected", checked);
+      });
+    });
+  }
+
+  // ACTIONS
+
+  setFirstCellActive() {
+    $("cell-ring", this).setAttribute("state", "active");
+  }
+
+  checkToggleAll(checked) {
     $$("table-row", this).forEach((el) => {
       el.classList.toggle("row-selected", checked);
     });
@@ -856,6 +926,49 @@ class PaneMain extends HTMLElement {
     $$("row-select input", this).forEach((el) => {
       el.checked = checked;
     });
+  }
+
+  addRow() {
+    const db_name = `${this.db} ${this.tb}`;
+    const row = $("[data-first]", this).innerHTML;
+    const current_row = $('cell-ring[state="active"]', this).closest(
+      "table-row"
+    );
+
+    $('cell-ring[state="active"]', this)
+      .closest("table-row")
+      .insertAdjacentHTML("afterend", row);
+
+    const currentDate = new Date();
+    const timestamp = currentDate.getTime();
+    current_row.nextElementSibling.dataset.index = timestamp;
+
+    temp["insert"][db_name].data[timestamp] = temp["insert"][db_name].defaults;
+  }
+
+  deactivateCells() {
+    this.deactivateCellEdit();
+    this.deactivateCellRing();
+  }
+
+  deactivateCellRing() {
+    const el_cell = $(
+      'cell-ring[state="active"], cell-ring[state="edit"]',
+      this
+    );
+
+    if (!el_cell) return;
+
+    el_cell.setAttribute("state", "default");
+  }
+
+  deactivateCellEdit() {
+    const el_edit = $("cell-edit[active]", this);
+
+    if (!el_edit) return;
+
+    el_edit.innerHTML = "";
+    el_edit.removeAttribute("active");
   }
 
   gridCols() {
@@ -889,14 +1002,61 @@ class PaneMain extends HTMLElement {
     };
   }
 
-  part() {
-    return `
-      <div class="contents">
-        <row-select></row-select>
-        <table-cell></table-cell>
-        <table-cell></table-cell>
-        <table-cell></table-cell>
-      </div>`;
+  templateTableCells() {
+    let html = "";
+
+    temp["insert"][this.tb] = {
+      defaults: {},
+      data: [],
+    };
+
+    this.data.cols_order.forEach((column) => {
+      const nullable = this.isNullable(column);
+      const value = this.parseDefault(column);
+
+      if (this.data.meta.id !== column) {
+        temp["insert"][this.tb]["defaults"][column] =
+          nullable == "true" ? "" : value;
+      }
+
+      html += `
+        <table-cell class="relative" col="${column}">
+          <cell-ring></cell-ring>
+          <cell-edit></cell-edit>
+          <cell-preview>
+            <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
+            <preview-value>${row[column]}</preview-value>
+          </cell-preview>
+        </table-cell>
+      `;
+    });
+
+    return html;
+  }
+
+  parseDefault(column) {
+    let value = this.data.cols[column].meta.Default;
+
+    value = this.trimNull(value);
+    value = this.trimQuotes(value);
+
+    return value;
+  }
+
+  trimNull(value) {
+    if (value !== null) return value;
+    return "";
+  }
+
+  trimQuotes(value) {
+    if (!value.startsWith("'")) return value;
+    if (!value.endsWith("'")) return value;
+
+    return value.slice(1, -1);
+  }
+
+  isNullable(column) {
+    return this.data.cols[column].meta.Null == "YES" ? "true" : "false";
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
@@ -980,19 +1140,14 @@ class ActionsAdd extends HTMLElement {
 
   onClick() {
     this.addEventListener("click", () => {
-      //data[`${main.getAttribute("database")} ${main.getAttribute("table")}`];
-      console.log(current.database);
       const el_cell_active = $(
         `cell-ring[state="active"]`,
         this.closest("pane-main")
       );
 
-      console.log("dooo2");
       if (!el_cell_active) return;
 
-      console.log("dooo");
-
-      el_cell_active.closest("table-row").addRow();
+      el_cell_active.closest("pane-main").addRow();
     });
   }
 }
@@ -2738,112 +2893,6 @@ class CellEdit extends HTMLElement {
 
 customElements.define("cell-edit", CellEdit);
 
-class CellPreview extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active", "is_null", "nullable"];
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <preview-null class="text-opacity-50 text-gray-800 italic" hidden>NULL</preview-null>
-      <preview-value></preview-value>
-    `;
-
-    this.toggleActive();
-    this.toggleNull();
-  }
-
-  set nullable(value) {
-    this.nullableValue = value;
-  }
-  get nullable() {
-    return this.nullableValue;
-  }
-
-  set active(value) {
-    this.activeValue = value;
-  }
-  get active() {
-    return this.activeValue;
-  }
-
-  set is_null(value) {
-    this.nullValue = value;
-  }
-  get is_null() {
-    return this.nullValue;
-  }
-
-  toggleNull() {
-    if (!this.nullable) return;
-    if (!$("preview-null", this)) return;
-
-    if (this.is_null) {
-      this.showNull();
-    } else {
-      this.showValue();
-    }
-  }
-
-  toggleActive() {
-    if (this.active) {
-      this.thisActivate();
-    } else {
-      this.thisDeactivate();
-    }
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      switch (attr) {
-        case "active":
-          this.active = newValue == "true" ? true : false;
-          this.toggleActive();
-          break;
-        case "is_null":
-          this.is_null = newValue == "true" ? true : false;
-          this.toggleNull();
-          break;
-        case "nullable":
-          this.nullable = newValue == "true" ? true : false;
-          break;
-      }
-    }
-  }
-
-  showNull() {
-    $("preview-null", this).removeAttribute("hidden");
-    $("preview-value", this).setAttribute("hidden", "");
-  }
-
-  showValue() {
-    $("preview-null", this).setAttribute("hidden", "");
-    $("preview-value", this).removeAttribute("hidden");
-  }
-
-  thisActivate() {
-    this.removeAttribute("hidden");
-  }
-
-  thisDeactivate() {
-    this.setAttribute("hidden", "");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("cell-preview", CellPreview);
-
 class CellRing extends HTMLElement {
   constructor() {
     super();
@@ -2854,8 +2903,7 @@ class CellRing extends HTMLElement {
   }
 
   connectedCallback() {
-    this.onClick();
-    this.onDblClick();
+    //this.onDblClick();
   }
 
   attributeChangedCallback(attr, oldValue, newValue) {
@@ -2867,16 +2915,67 @@ class CellRing extends HTMLElement {
     }
   }
 
-  // Events
+  // Handlers
+}
 
-  onClick() {
-    this.addEventListener("click", (e) => {
-      this.handleCellActive(e);
+//customElements.define("cell-ring", CellRing);
+
+/* NEW table cell */
+class TableCell extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.db = this.closest("pane-main").getAttribute("db");
+    this.tb = this.closest("pane-main").getAttribute("tb");
+    this.col = this.getAttribute("col");
+    this.row = this.getAttribute("row");
+    this.index = this.getAttribute("index");
+    this.data = get.tb.items(this.db, this.tb);
+    this.value = get.tb.value(this.db, this.tb, this.col, this.index);
+    this.col_data = get.col.data(this.db, this.tb, this.col);
+
+    console.log(this.col_data);
+    this.innerHTML = `
+      <cell-ring></cell-ring>
+      <cell-edit></cell-edit>
+      <cell-preview>
+        <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
+        <preview-value></preview-value>
+      </cell-preview>
+    `;
+
+    this.xEdges();
+
+    this.setPreviewValue();
+    this.setPreviewNull();
+
+    this.onClickRing();
+    this.onDblclickRing();
+  }
+
+  // Set preview value
+  setPreviewValue() {
+    $("preview-value", this).innerText = this.value;
+  }
+
+  // Set preview null
+  setPreviewNull() {
+    $("preview-null", this).hidden = this.value !== null;
+    $("preview-value", this).hidden = this.value === null;
+  }
+
+  // EVENTS
+
+  onClickRing() {
+    $("cell-ring", this).on("click", () => {
+      this.handleCellActive(this);
     });
   }
 
-  onDblClick() {
-    this.addEventListener("dblclick", () => {
+  onDblclickRing() {
+    $("cell-ring", this).on("dblclick", () => {
       this.handleCellEdit();
     });
   }
@@ -2899,41 +2998,39 @@ class CellRing extends HTMLElement {
   }
 
   stepLeft() {
-    const prev = this.closest("table-cell").previousElementSibling;
+    const prev = this.previousElementSibling;
 
     if (!prev) return;
     if (prev.tagName !== "TABLE-CELL") return;
 
-    $("cell-ring", prev).handleCellActive();
+    this.handleCellActive(prev);
   }
 
   stepRight() {
-    const next = this.closest("table-cell").nextElementSibling;
+    const next = this.nextElementSibling;
 
     if (!next) return;
     if (next.tagName !== "TABLE-CELL") return;
 
-    $("cell-ring", next).handleCellActive();
+    this.handleCellActive(next);
   }
 
   stepDown() {
-    const el_table = this.closest("table-cell");
-    const index = cellActiveIndex(el_table);
-    const down = el_table.parentElement.nextElementSibling;
+    const index = cellActiveIndex(this);
+    const down = this.parentElement.nextElementSibling;
 
     if (!down) return;
     if (down.tagName !== "TABLE-ROW") return;
-    $(`table-cell:nth-child(${index}) cell-ring`, down).handleCellActive();
+    $(`table-cell:nth-child(${index})`, down).handleCellActive(down);
   }
 
   stepUp() {
-    const el_table = this.closest("table-cell");
-    const index = cellActiveIndex(el_table);
-    const up = el_table.parentElement.previousElementSibling;
+    const index = cellActiveIndex(this);
+    const up = this.parentElement.previousElementSibling;
 
     if (!up) return;
     if (up.tagName !== "TABLE-ROW") return;
-    $(`table-cell:nth-child(${index}) cell-ring`, up).handleCellActive();
+    $(`table-cell:nth-child(${index})`, up).handleCellActive(up);
   }
 
   handleCellTab(e) {
@@ -2941,370 +3038,41 @@ class CellRing extends HTMLElement {
     this.handleStep(e.shiftKey ? "ArrowLeft" : "ArrowRight");
   }
 
-  /*handleCellEscape() {
-    e.preventDefault();
-  
-    dom.current.cell_ring.setAttribute("state", "default");
-    resetStore();
-  }*/
-
-  // Handlers
-
-  handleCellActive() {
-    const is_active = this.getAttribute("state") == "active";
-    if (is_active) return;
-    this.closest("table-cells").deactivateCells();
-    this.setAttribute("state", "active");
-  }
-
   handleCellEdit() {
+    console.log("edit");
     if (in_field) {
       in_field = false;
       return;
     }
     this.setAttribute("state", "edit");
 
-    $("cell-edit", this.closest("table-cell")).activate();
+    $("cell-edit", this).activate();
+  }
+
+  handleCellActive(el) {
+    if ($("cell-ring", el).getAttribute("state") == "active") return;
+
+    this.closest("pane-main").deactivateCells();
+    $("cell-ring", el).setAttribute("state", "active");
+  }
+
+  isNullable() {
+    return this.col_data.meta.Null == "YES" ? "true" : "false";
   }
 
   xEdges() {
-    const prev_el = this.closest("table-cell").previousElementSibling;
-    const next_el = this.closest("table-cell").nextElementSibling;
+    const prev_el = this.previousElementSibling;
+    const next_el = this.nextElementSibling;
 
-    if (prev_el.tagName == "ROW-SELECT") this.classList.add("ml-2px");
-    if (!next_el) this.classList.add("mr-2px");
-  }
-}
-
-customElements.define("cell-ring", CellRing);
-
-class RowSelect extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["value"];
-  }
-
-  connectedCallback() {
-    this.classList.add(
-      "relative",
-      "flex",
-      "sticky",
-      "z-50",
-      "left-0",
-      "heading-bkg"
-    );
-    this.innerHTML = `
-      <label class="tp relative">
-        <input type="checkbox" class="checkstyle form-checkbox" name="test" />
-        <div class="absolute block inset-0 shadow-y"></div>
-      </label>
-    `;
-    this.onClick();
-  }
-
-  onClick() {
-    this.querySelector("input").addEventListener("input", (e) => {
-      const checked = e.currentTarget.checked;
-      const el_cells = this.closest(".contents").querySelectorAll(
-        "row-select, table-cell"
-      );
-
-      if (checked) {
-        this.closest("table-row").setAttribute("active", "true");
-      } else {
-        this.closest("table-row").removeAttribute("active");
-      }
-
-      el_cells.forEach((el) => {
-        if (checked) {
-          this.selectOne(el);
-        } else {
-          this.deselectOne(el);
-        }
-      });
-      $("row-actions").toggle();
-    });
-  }
-
-  selectOne(el) {
-    el.classList.add("bg-navy-100");
-    el.classList.remove("bg-white");
-  }
-
-  deselectOne(el) {
-    el.classList.remove("bg-navy-100");
-    el.classList.add("bg-white");
-  }
-}
-
-/*
-Enter - Triggar annan component i annan typ
-Bostav eller siffra - om allowKeypress från fält options
-*/
-
-customElements.define("row-select", RowSelect);
-
-class TableCell extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["value", "null"];
-  }
-
-  connectedCallback() {
-    const is_null = this.getAttribute("null");
-    const nullable = this.getAttribute("nullable");
-    this.classList.add("relative", "bg-white");
-    const value = this.getAttribute("value");
-    this.innerHTML = `
-      <cell-ring state="default"></cell-ring>
-      <cell-edit is_null="${is_null}" nullable="${nullable}"></cell-edit>
-      <cell-preview is_null="${is_null}" nullable="${nullable}" active="true"></cell-preview>
-    `;
-    $("preview-value", this).innerHTML = value;
-  }
-}
-
-/*
-Enter - Triggar annan component i annan typ
-Bostav eller siffra - om allowKeypress från fält options
-*/
-
-customElements.define("table-cell", TableCell);
-
-class TableCells extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["value"];
-  }
-
-  connectedCallback() {
-    this.classList.add("contents");
-    this.innerHTML = this.template();
-
-    const el_first_ring = $("cell-ring", this.closest("table-cells"));
-    if (!el_first_ring) return;
-
-    el_first_ring.setAttribute("state", "active");
-  }
-
-  template() {
-    //const this_data = data[table.get(this)];
-    const db = this.closest("pane-main").getAttribute("database");
-    const tb = this.closest("pane-main").getAttribute("table");
-    const this_data = get.tb.items(db, tb);
-    const cols = this_data.cols_order;
-
-    let html = "<table-row-ghost></table-row-ghost>";
-    let table_cols = "";
-
-    this_data.rows.forEach((row) => {
-      table_cols = "";
-      cols.forEach((item) => {
-        const value = row[item];
-        table_cols += `<table-cell value="${value}" column="${item}"></table-cell>`;
-      });
-
-      html += `
-        <table-row>
-          <row-select></row-select>
-          ${table_cols}
-        </table-row>
-      `;
-    });
-
-    return html;
-  }
-
-  deactivateCells() {
-    this.deactivateCellEdit();
-    this.deactivateCellRing();
-  }
-
-  deactivateCellRing() {
-    const el_cell = $(
-      'cell-ring[state="active"], cell-ring[state="edit"]',
-      this
-    );
-
-    if (!el_cell) return;
-
-    el_cell.setAttribute("state", "default");
-  }
-
-  deactivateCellEdit() {
-    const el_edit = $("cell-edit[active]", this);
-
-    if (!el_edit) return;
-
-    el_edit.innerHTML = "";
-    el_edit.removeAttribute("active");
-  }
-}
-
-customElements.define("table-cells", TableCells);
-
-class TableRowGhost extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    //return ["value"];
-  }
-
-  connectedCallback() {
-    this.setAttribute("hidden", "");
-    this.innerHTML = this.template();
-  }
-
-  template() {
-    const table_cells = this.templateTableCells();
-    return this.templateFirstTableRow(table_cells);
-  }
-
-  templateTableCells() {
-    const table_name = table.get(this);
-    //const this_data = data[table_name];
-    const db = this.closest("pane-main").getAttribute("database");
-    const tb = this.closest("pane-main").getAttribute("table");
-
-    const this_data = get.tb.items(db, tb);
-    let html = "";
-
-    temp["insert"][table_name] = {
-      defaults: {},
-      data: [],
-    };
-
-    this_data.cols_order.forEach((name) => {
-      const nullable = this.isNullable(this_data, name);
-      const value = this.parseDefault(this_data, name);
-
-      if (this_data.meta.id !== name) {
-        temp["insert"][table_name]["defaults"][name] =
-          nullable == "true" ? "" : value;
-      }
-
-      html += this.templateTableCell(nullable, value, name);
-    });
-
-    return html;
-  }
-
-  templateFirstTableRow(html_first) {
-    return `
-      <template data-first>
-        <table-row class="contents row-new">
-          <row-select></row-select>
-          ${html_first}
-        </table-row>
-      </template>
-    `;
-  }
-
-  templateTableCell(nullable, value, column) {
-    return `
-      <table-cell
-        nullable="${nullable}"
-        value="${value}"
-        null="${nullable}"
-        column="${column}">
-      </table-cell>
-    `;
-  }
-
-  parseDefault(this_data, name) {
-    let value = this_data.cols[name].meta.Default;
-
-    value = this.trimNull(value);
-    value = this.trimQuotes(value);
-
-    return value;
-  }
-
-  trimNull(value) {
-    if (value !== null) return value;
-    return "";
-  }
-
-  trimQuotes(value) {
-    if (!value.startsWith("'")) return value;
-    if (!value.endsWith("'")) return value;
-
-    return value.slice(1, -1);
-  }
-
-  isNullable(this_data, name) {
-    return this_data.cols[name].meta.Null == "YES" ? "true" : "false";
-  }
-}
-
-customElements.define("table-row-ghost", TableRowGhost);
-
-class TableRow extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.classList.add("contents");
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
+    if (prev_el.tagName == "ROW-SELECT") {
+      $("cell-ring", this).classList.add("ml-2px");
+    } else if (!next_el) {
+      $("cell-ring", this).classList.add("mr-2px");
     }
   }
-
-  addRow() {
-    const main = this.closest("pane-main");
-    const db_name = `${main.getAttribute("database")} ${main.getAttribute(
-      "table"
-    )}`;
-    const row = $("[data-first]", this.closest("pane-main")).innerHTML;
-
-    this.insertAdjacentHTML("afterend", row);
-
-    const currentDate = new Date();
-    const timestamp = currentDate.getTime();
-    this.nextElementSibling.dataset.index = timestamp;
-
-    temp["insert"][db_name].data[timestamp] = temp["insert"][db_name].defaults;
-  }
-
-  thisActivate() {
-    this.classList.add("row-primary");
-  }
-
-  thisDeactivate() {
-    this.classList.remove("row-primary");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
 }
 
-customElements.define("table-row", TableRow);
+customElements.define("table-cell", TableCell);
 
 class TabItem extends HTMLElement {
   constructor() {
@@ -3586,7 +3354,8 @@ class FieldText extends HTMLElement {
   }
 
   connectedCallback() {
-    const value = cell.getTempValue(this);
+    //const value = cell.getTempValue(this);
+    const value = "omomo";
     this.innerHTML = `
       <input value="${value}" type="text" class="form-input focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
     `;
