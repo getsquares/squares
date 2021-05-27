@@ -55,6 +55,7 @@ function eventCellKeydown() {
   window.addEventListener("keydown", (e) => {
     const root_el = $(`pane-main[db="${state.database}"][tb="${state.table}"]`);
     const active_ring = $('cell-ring[state="active"]', root_el);
+    if (!active_ring) return;
     let table_cell = active_ring.closest("table-cell");
     if (!table_cell) return;
 
@@ -106,6 +107,7 @@ class cell {
 
   static setTempValue(value, obj) {
     const db_table = table.get(obj);
+    console.log(db_table);
     const temp_data = temp[row.getType(obj)][db_table].data;
     temp_data[row.getIndex(obj)][cell.getColumn(obj)] = value;
   }
@@ -114,6 +116,18 @@ class cell {
     const db_table = table.get(obj);
     const temp_data = temp[row.getType(obj)][db_table].data;
     return temp_data[row.getIndex(obj)][cell.getColumn(obj)];
+  }
+
+  static getValue(obj) {
+    const table_cell = obj.closest("table-cell");
+    const pane_main = obj.closest("pane-main");
+
+    const db = pane_main.db;
+    const tb = pane_main.tb;
+    const col = table_cell.col;
+    const index = table_cell.index;
+
+    return get.tb.value(db, tb, col, index);
   }
 
   static getColumn(obj) {
@@ -134,23 +148,20 @@ class cell {
 }
 
 // Leave edit
-function leaveEdit() {
+function leaveEdit(el) {
   in_field = true;
 
-  fieldClose();
+  fieldClose(el);
 }
 
 // Field close helper
-function fieldClose() {
-  const el_cell_ring = $('cell-ring[state="edit"]');
+function fieldClose(el) {
+  const table_cell = el.closest("table-cell");
 
-  if (!el_cell_ring) return;
+  if (!$('cell-ring[state="edit"]', table_cell)) return;
 
-  const el_table_cell = el_cell_ring.closest("table-cell");
-  const el_cell_edit = $("cell-edit", el_table_cell);
-
-  el_cell_ring.setAttribute("state", "active");
-  el_cell_edit.removeAttribute("active");
+  $("cell-ring", table_cell).setAttribute("state", "active");
+  $("cell-edit", table_cell).hidden = true;
 }
 
 // Update preview
@@ -161,11 +172,11 @@ function updatePreview(html, obj) {
 function updateNull(obj) {
   const preview = $("preview", obj.closest("table-cell"));
   const preview_value = $("preview-value", obj.closest("table-cell"));
-  preview_value.setAttribute("hidden", "");
+  preview_value.hidden = true;
   preview.setAttribute("active", "true");
 
   const el_null = $("preview-null", obj.closest("table-cell"));
-  el_null.removeAttribute("hidden");
+  el_null.hidden = false;
 }
 
 // Set cell field state
@@ -373,6 +384,7 @@ set.database.items = (content) => {
       open: false,
       table_order: [],
       table_items: {},
+      table_pending_update: {},
     };
   });
 
@@ -386,6 +398,7 @@ set.database.toggleState = (db) => {
 };
 
 set.table = {};
+set.pending = {};
 
 // Order
 set.table.order = (content, db) => {
@@ -413,6 +426,50 @@ set.table.item = (content, db, tb) => {
   triggers.tb.data();
 };
 
+set.pending.update = (content, context) => {
+  const root = context.closest("pane-main");
+  const table_cell = context.closest("table-cell");
+  const db = root.db;
+  const tb = root.tb;
+  const col = table_cell.getAttribute("col");
+  const row = table_cell.getAttribute("row");
+  const index = table_cell.getAttribute("index");
+  const data = state?.databases[db]?.table_items[tb];
+  const original = get.tb.value(db, tb, col, index);
+
+  if (!data?.pending_updates) {
+    data.pending_updates = {};
+  }
+
+  if (!data?.pending_updates[row]) {
+    data.pending_updates[row] = {};
+  }
+
+  if (original !== content) {
+    data.pending_updates[row][col] = content;
+    context.closest("table-cell").setAttribute("state", "changed");
+  } else {
+    delete data.pending_updates[row][col];
+
+    if (!data?.pending_updates[row]) {
+      delete data.pending_updates[row];
+    }
+
+    if (!data?.pending_updates) {
+      delete data.pending_updates;
+    }
+
+    context.closest("table-cell").removeAttribute("state");
+    // Vid dubbelklick, öppna update om finns.
+  }
+
+  console.log(original);
+  console.log(content);
+
+  console.log(data.pending_updates);
+  // Ta bort tomma
+};
+
 // Items
 set.table.items = (content, db) => {
   content.forEach((item) => {
@@ -421,6 +478,12 @@ set.table.items = (content, db) => {
 
   triggers.tb.items(db);
 };
+
+var test = [];
+
+test[3] = "Hello";
+
+console.log(test);
 
 triggers.db = {};
 
@@ -474,8 +537,6 @@ triggers.tb.items = (db) => {
 };
 
 triggers.tb.data = () => {
-  console.log(state);
-
   $("main-x").deactivatePanes();
   $("main-x").addPane();
 };
@@ -755,11 +816,11 @@ class ModalBox extends HTMLElement {
   }
 
   activate() {
-    this.removeAttribute("hidden");
+    this.hidden = false;
   }
 
   deactivate() {
-    this.setAttribute("hidden", "");
+    this.hidden = true;
   }
 }
 
@@ -799,7 +860,6 @@ class PaneMain extends HTMLElement {
 
     const grid_cols = this.gridCols();
     const grid_cols_class = `auto ${grid_cols.widths.join("px ")}px`;
-    console.log(JSON.stringify(grid_cols_class));
 
     this.innerHTML = `
       <actions-x></actions-x>
@@ -963,12 +1023,10 @@ class PaneMain extends HTMLElement {
   }
 
   deactivateCellEdit() {
-    const el_edit = $("cell-edit[active]", this);
-
-    if (!el_edit) return;
-
-    el_edit.innerHTML = "";
-    el_edit.removeAttribute("active");
+    $$("cell-edit", this).forEach((el) => {
+      el.innerHTML = "";
+      el.hidden = true;
+    });
   }
 
   gridCols() {
@@ -990,10 +1048,6 @@ class PaneMain extends HTMLElement {
       widths.push(width);
 
       sum += width;
-
-      console.log(width);
-      //console.log(item);
-      //console.log(this_data.cols[item].config);
     });
 
     return {
@@ -1072,11 +1126,11 @@ class PaneMain extends HTMLElement {
   }
 
   thisActivate() {
-    this.removeAttribute("hidden");
+    this.hidden = false;
   }
 
   thisDeactivate() {
-    this.setAttribute("hidden", "");
+    this.hidden = true;
   }
 
   activate() {
@@ -1224,7 +1278,7 @@ class ActionsPanes extends HTMLElement {
       "rounded",
       "border-gray-200"
     );
-    this.setAttribute("hidden", "");
+    this.hidden = true;
     this.innerHTML = `
       <panes-x></panes-x>
       <columns-x></columns-x>
@@ -1246,23 +1300,23 @@ class ActionsPanes extends HTMLElement {
   }
 
   thisActivate() {
-    this.removeAttribute("hidden");
+    this.hidden = false;
   }
 
   thisDeactivate() {
-    this.setAttribute("hidden", "");
+    this.hidden = true;
   }
 
   activate(name) {
     this.setAttribute("active", "true");
 
-    this.querySelector(name).removeAttribute("hidden");
+    this.querySelector(name).hidden = false;
   }
 
   deactivate() {
     // Hide all panes
     [...this.children].forEach((el) => {
-      el.setAttribute("hidden", "");
+      el.hidden = true;
     });
 
     // Hide pane container
@@ -1301,8 +1355,6 @@ class ActionsTab extends HTMLElement {
       const active = this.getAttribute("active") == "true";
       const name = this.getAttribute("name");
       const panes_el = this.closest("pane-main").querySelector("actions-panes");
-
-      console.log(panes_el);
 
       this.closest("pane-main").querySelector("actions-tabs").deactivate();
       panes_el.deactivate();
@@ -1434,7 +1486,7 @@ class PaneClose extends HTMLElement {
   onClick() {
     $("button", this).addEventListener("click", () => {
       //this.closest(hide).deactivate();
-      $("actions-panes > *:not([hidden])", this).setAttribute("hidden", "");
+      $("actions-panes > *:not([hidden])", this).hidden = true;
       $("actions-panes", this).removeAttribute("active");
       $(`actions-tab[active="true"]`, this).deactivate();
     });
@@ -1516,7 +1568,7 @@ class ColumnsX extends HTMLElement {
 
   connectedCallback() {
     this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
-    this.setAttribute("hidden", "");
+    this.hidden = true;
     this.innerHTML = this.template("Columns");
   }
 
@@ -1665,7 +1717,7 @@ class FilterX extends HTMLElement {
 
   connectedCallback() {
     this.classList.add("gap-4", "flex", "flex-col", "p-4", "text-sm");
-    this.setAttribute("hidden", "");
+    this.hidden = true;
     this.innerHTML = this.template("Filter");
     this.onAdd();
   }
@@ -1722,11 +1774,11 @@ class FilterX extends HTMLElement {
   }
 
   thisActivate() {
-    this.removeAttribute("hidden");
+    this.hidden = false;
   }
 
   thisDeactivate() {
-    this.setAttribute("hidden", "");
+    this.hidden = true;
   }
 
   activate() {
@@ -1803,7 +1855,7 @@ class OrderX extends HTMLElement {
 
   connectedCallback() {
     this.classList.add("gap-4", "flex", "flex-col", "p-4", "text-sm");
-    this.setAttribute("hidden", "");
+    this.hidden = true;
     this.innerHTML = this.template();
     this.onAdd();
   }
@@ -1859,11 +1911,11 @@ class OrderX extends HTMLElement {
   }
 
   thisActivate() {
-    this.removeAttribute("hidden");
+    this.hidden = false;
   }
 
   thisDeactivate() {
-    this.setAttribute("hidden", "");
+    this.hidden = true;
   }
 
   activate() {
@@ -1930,11 +1982,7 @@ class PanesItem extends HTMLElement {
     const name = this.getAttribute("name");
 
     $$(name).forEach((el) => {
-      if (!checked) {
-        el.setAttribute("hidden", "");
-      } else {
-        el.removeAttribute("hidden", "");
-      }
+      el.hidden = !checked;
 
       // Sync
       $$(`panes-item[name="${name}"]`).forEach((item) => {
@@ -1970,7 +2018,7 @@ class PanesX extends HTMLElement {
 
   connectedCallback() {
     this.classList.add("gap-2", "flex", "flex-col", "p-4", "text-sm");
-    this.setAttribute("hidden", "");
+    this.hidden = true;
     this.innerHTML = this.template();
   }
 
@@ -2441,12 +2489,12 @@ class DbList extends HTMLElement {
 
   // Show element
   showElement(selector, db) {
-    this.dom(selector, db).removeAttribute("hidden");
+    this.dom(selector, db).hidden = false;
   }
 
   // Hide element
   hideElement(selector, db) {
-    this.dom(selector, db).setAttribute("hidden", "");
+    this.dom(selector, db).hidden = true;
   }
 
   groupEmpty(db) {
@@ -2756,170 +2804,6 @@ class ModalLogout extends HTMLElement {
 
 customElements.define("modal-logout", ModalLogout);
 
-class CellEdit extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active", "is_null", "nullable"];
-  }
-
-  connectedCallback() {
-    this.toggleActive();
-  }
-
-  set nullable(value) {
-    this.nullableValue = value;
-  }
-  get nullable() {
-    return this.nullableValue;
-  }
-
-  set active(value) {
-    this.activeValue = value;
-  }
-  get active() {
-    return this.activeValue;
-  }
-
-  set is_null(value) {
-    this.nullValue = value;
-  }
-  get is_null() {
-    return this.nullValue;
-  }
-
-  toggleActive() {
-    if (this.active) {
-      this.thisActivate();
-    } else {
-      this.thisDeactivate();
-    }
-  }
-
-  toggleNull() {
-    if (!this.nullable) return;
-    if (this.is_null) {
-      this.setChecked(true);
-    } else {
-      this.setChecked(false);
-    }
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      switch (attr) {
-        case "active":
-          this.active = newValue == "true" ? true : false;
-          this.toggleActive();
-          break;
-        case "is_null":
-          this.is_null = newValue == "true" ? true : false;
-          this.toggleNull();
-          break;
-        case "nullable":
-          this.nullable = newValue == "true" ? true : false;
-          break;
-      }
-    }
-  }
-
-  setChecked(value) {
-    const checkbox = $('input[type="checkbox"][name="null"]');
-    if (!checkbox) return;
-
-    $('input[type="checkbox"][name="null"]').checked = value;
-  }
-
-  populate() {
-    const has_null =
-      this.closest("table-cell").getAttribute("nullable") == "true"
-        ? true
-        : false;
-    let html_null = "";
-    if (has_null) {
-      html_null = `
-        <label class="flex gap-2 items-center">
-          <input type="checkbox" class="checkstyle-white form-checkbox" name="null">
-          <div class="italic">NULL</div>
-        </label>
-      `;
-    }
-    let html = `
-      ${html_null}
-      <field-text></field-text>
-    `;
-
-    this.innerHTML = html;
-
-    if (!has_null) return;
-
-    this.onClickNull();
-  }
-
-  onClickNull() {
-    $('input[type="checkbox"][name="null"]', this).addEventListener(
-      "click",
-      (e) => {
-        const checked = e.currentTarget.checked ? true : false;
-        $("cell-preview", this.closest("table-cell")).setAttribute(
-          "is_null",
-          checked
-        );
-        this.setAttribute("is_null", checked);
-      }
-    );
-  }
-
-  thisActivate() {
-    this.removeAttribute("hidden");
-    this.populate();
-    this.toggleNull();
-  }
-
-  thisDeactivate() {
-    this.setAttribute("hidden", "");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("cell-edit", CellEdit);
-
-class CellRing extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["state"];
-  }
-
-  connectedCallback() {
-    //this.onDblClick();
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "state") return;
-    if (oldValue !== newValue) {
-      if (newValue != "default") {
-        this.xEdges();
-      }
-    }
-  }
-
-  // Handlers
-}
-
-//customElements.define("cell-ring", CellRing);
-
 /* NEW table cell */
 class TableCell extends HTMLElement {
   constructor() {
@@ -2936,10 +2820,9 @@ class TableCell extends HTMLElement {
     this.value = get.tb.value(this.db, this.tb, this.col, this.index);
     this.col_data = get.col.data(this.db, this.tb, this.col);
 
-    console.log(this.col_data);
     this.innerHTML = `
       <cell-ring></cell-ring>
-      <cell-edit></cell-edit>
+      <cell-edit hidden></cell-edit>
       <cell-preview>
         <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
         <preview-value></preview-value>
@@ -2975,8 +2858,16 @@ class TableCell extends HTMLElement {
   }
 
   onDblclickRing() {
-    $("cell-ring", this).on("dblclick", () => {
+    $("cell-ring", this).on("dblclick", (e) => {
       this.handleCellEdit();
+    });
+  }
+
+  onClickNull() {
+    $("cell-edit label:first-child input", this).on("change", (e) => {
+      const checked = e.currentTarget.checked;
+      $("preview-null", this).hidden = !checked;
+      $("preview-value", this).hidden = checked;
     });
   }
 
@@ -3021,7 +2912,8 @@ class TableCell extends HTMLElement {
 
     if (!down) return;
     if (down.tagName !== "TABLE-ROW") return;
-    $(`table-cell:nth-child(${index})`, down).handleCellActive(down);
+
+    this.handleCellActive($(`table-cell:nth-child(${index})`, down));
   }
 
   stepUp() {
@@ -3030,7 +2922,8 @@ class TableCell extends HTMLElement {
 
     if (!up) return;
     if (up.tagName !== "TABLE-ROW") return;
-    $(`table-cell:nth-child(${index})`, up).handleCellActive(up);
+
+    this.handleCellActive($(`table-cell:nth-child(${index})`, up));
   }
 
   handleCellTab(e) {
@@ -3039,14 +2932,13 @@ class TableCell extends HTMLElement {
   }
 
   handleCellEdit() {
-    console.log("edit");
     if (in_field) {
       in_field = false;
       return;
     }
-    this.setAttribute("state", "edit");
+    $("cell-ring", this).setAttribute("state", "edit");
 
-    $("cell-edit", this).activate();
+    this.populateEdit();
   }
 
   handleCellActive(el) {
@@ -3057,7 +2949,34 @@ class TableCell extends HTMLElement {
   }
 
   isNullable() {
-    return this.col_data.meta.Null == "YES" ? "true" : "false";
+    return this.col_data.meta.Null == "YES";
+  }
+
+  populateEdit() {
+    let html_null = "";
+    if (this.isNullable()) {
+      html_null = `
+        <label class="flex gap-2 items-center">
+          <input
+            type="checkbox"
+            class="checkstyle-white form-checkbox"
+            ${this.value === null ? "checked" : ""}
+          >
+          <div class="italic">NULL</div>
+        </label>
+      `;
+    }
+    let html = `
+      ${html_null}
+      <field-text></field-text>
+    `;
+
+    $("cell-edit", this).hidden = false;
+    $("cell-edit", this).innerHTML = html;
+
+    if (!this.isNullable()) return;
+
+    this.onClickNull();
   }
 
   xEdges() {
@@ -3354,8 +3273,10 @@ class FieldText extends HTMLElement {
   }
 
   connectedCallback() {
-    //const value = cell.getTempValue(this);
-    const value = "omomo";
+    const value = cell.getValue(this);
+
+    console.log(state);
+
     this.innerHTML = `
       <input value="${value}" type="text" class="form-input focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
     `;
@@ -3366,6 +3287,7 @@ class FieldText extends HTMLElement {
 
     updatePreview($("input", this).value, this);
 
+    $("input", this).focus();
     $("input", this).select();
   }
 
@@ -3373,10 +3295,8 @@ class FieldText extends HTMLElement {
   onKeyup() {
     $("input", this).addEventListener("keyup", (e) => {
       const value = e.currentTarget.value;
-      cell.setTempValue(value, this);
+      set.pending.update(value, this);
       updatePreview(value, this);
-
-      console.log(temp);
     });
   }
 
@@ -3384,7 +3304,7 @@ class FieldText extends HTMLElement {
     $("input", this).addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       e.preventDefault();
-      leaveEdit(e);
+      leaveEdit(e.currentTarget);
     });
   }
 
@@ -3392,11 +3312,13 @@ class FieldText extends HTMLElement {
     window.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
 
-      const el_cell_ring = $('cell-ring[state="edit"]');
-      if (!el_cell_ring) return;
+      const root = $(`pane-main[db=${state.database}][tb=${state.table}]`);
+      const el = $(`cell-ring[state="edit"]`, root);
+
+      if (!el) return;
 
       e.preventDefault();
-      fieldClose();
+      fieldClose(el);
     });
   }
 

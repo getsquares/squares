@@ -14,10 +14,9 @@ class TableCell extends HTMLElement {
     this.value = get.tb.value(this.db, this.tb, this.col, this.index);
     this.col_data = get.col.data(this.db, this.tb, this.col);
 
-    console.log(this.col_data);
     this.innerHTML = `
       <cell-ring></cell-ring>
-      <cell-edit></cell-edit>
+      <cell-edit hidden></cell-edit>
       <cell-preview>
         <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
         <preview-value></preview-value>
@@ -53,8 +52,16 @@ class TableCell extends HTMLElement {
   }
 
   onDblclickRing() {
-    $("cell-ring", this).on("dblclick", () => {
+    $("cell-ring", this).on("dblclick", (e) => {
       this.handleCellEdit();
+    });
+  }
+
+  onClickNull() {
+    $("cell-edit label:first-child input", this).on("change", (e) => {
+      const checked = e.currentTarget.checked;
+      $("preview-null", this).hidden = !checked;
+      $("preview-value", this).hidden = checked;
     });
   }
 
@@ -99,7 +106,8 @@ class TableCell extends HTMLElement {
 
     if (!down) return;
     if (down.tagName !== "TABLE-ROW") return;
-    $(`table-cell:nth-child(${index})`, down).handleCellActive(down);
+
+    this.handleCellActive($(`table-cell:nth-child(${index})`, down));
   }
 
   stepUp() {
@@ -108,7 +116,8 @@ class TableCell extends HTMLElement {
 
     if (!up) return;
     if (up.tagName !== "TABLE-ROW") return;
-    $(`table-cell:nth-child(${index})`, up).handleCellActive(up);
+
+    this.handleCellActive($(`table-cell:nth-child(${index})`, up));
   }
 
   handleCellTab(e) {
@@ -117,14 +126,13 @@ class TableCell extends HTMLElement {
   }
 
   handleCellEdit() {
-    console.log("edit");
     if (in_field) {
       in_field = false;
       return;
     }
-    this.setAttribute("state", "edit");
+    $("cell-ring", this).setAttribute("state", "edit");
 
-    $("cell-edit", this).activate();
+    this.populateEdit();
   }
 
   handleCellActive(el) {
@@ -135,7 +143,34 @@ class TableCell extends HTMLElement {
   }
 
   isNullable() {
-    return this.col_data.meta.Null == "YES" ? "true" : "false";
+    return this.col_data.meta.Null == "YES";
+  }
+
+  populateEdit() {
+    let html_null = "";
+    if (this.isNullable()) {
+      html_null = `
+        <label class="flex gap-2 items-center">
+          <input
+            type="checkbox"
+            class="checkstyle-white form-checkbox"
+            ${this.value === null ? "checked" : ""}
+          >
+          <div class="italic">NULL</div>
+        </label>
+      `;
+    }
+    let html = `
+      ${html_null}
+      <field-text></field-text>
+    `;
+
+    $("cell-edit", this).hidden = false;
+    $("cell-edit", this).innerHTML = html;
+
+    if (!this.isNullable()) return;
+
+    this.onClickNull();
   }
 
   xEdges() {

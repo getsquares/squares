@@ -15,7 +15,7 @@ class ActionsPanes extends HTMLElement {
       "rounded",
       "border-gray-200"
     );
-    this.setAttribute("hidden", "");
+    this.hidden = true;
     this.innerHTML = `
       <panes-x></panes-x>
       <columns-x></columns-x>
@@ -37,23 +37,23 @@ class ActionsPanes extends HTMLElement {
   }
 
   thisActivate() {
-    this.removeAttribute("hidden");
+    this.hidden = false;
   }
 
   thisDeactivate() {
-    this.setAttribute("hidden", "");
+    this.hidden = true;
   }
 
   activate(name) {
     this.setAttribute("active", "true");
 
-    this.querySelector(name).removeAttribute("hidden");
+    this.querySelector(name).hidden = false;
   }
 
   deactivate() {
     // Hide all panes
     [...this.children].forEach((el) => {
-      el.setAttribute("hidden", "");
+      el.hidden = true;
     });
 
     // Hide pane container

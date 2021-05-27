@@ -35,11 +35,11 @@ class ModalBox extends HTMLElement {
   }
 
   activate() {
-    this.removeAttribute("hidden");
+    this.hidden = false;
   }
 
   deactivate() {
-    this.setAttribute("hidden", "");
+    this.hidden = true;
   }
 }
 

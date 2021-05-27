@@ -9,6 +9,7 @@
 @import "./row.css";
 @import "./cell.css";
 @import "./tab.css";
+@import "./table-cell.css";
 
 @import "tailwindcss/utilities";
 

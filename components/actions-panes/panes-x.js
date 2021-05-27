@@ -9,7 +9,7 @@ class PanesX extends HTMLElement {
 
   connectedCallback() {
     this.classList.add("gap-2", "flex", "flex-col", "p-4", "text-sm");
-    this.setAttribute("hidden", "");
+    this.hidden = true;
     this.innerHTML = this.template();
   }
 

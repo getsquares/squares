@@ -17,8 +17,6 @@ triggers.tb.items = (db) => {
 };
 
 triggers.tb.data = () => {
-  console.log(state);
-
   $("main-x").deactivatePanes();
   $("main-x").addPane();
 };

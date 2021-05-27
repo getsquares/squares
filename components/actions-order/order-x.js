@@ -9,7 +9,7 @@ class OrderX extends HTMLElement {
 
   connectedCallback() {
     this.classList.add("gap-4", "flex", "flex-col", "p-4", "text-sm");
-    this.setAttribute("hidden", "");
+    this.hidden = true;
     this.innerHTML = this.template();
     this.onAdd();
   }
@@ -65,11 +65,11 @@ class OrderX extends HTMLElement {
   }
 
   thisActivate() {
-    this.removeAttribute("hidden");
+    this.hidden = false;
   }
 
   thisDeactivate() {
-    this.setAttribute("hidden", "");
+    this.hidden = true;
   }
 
   activate() {

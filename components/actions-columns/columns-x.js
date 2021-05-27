@@ -9,7 +9,7 @@ class ColumnsX extends HTMLElement {
 
   connectedCallback() {
     this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
-    this.setAttribute("hidden", "");
+    this.hidden = true;
     this.innerHTML = this.template("Columns");
   }
 

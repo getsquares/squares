@@ -1173,6 +1173,10 @@ tab-item[active="true"] img-svg:hover {
 	--tw-bg-opacity: 1;
 	background-color: rgba(226, 232, 240, var(--tw-bg-opacity));
 }
+table-cell[state="changed"] {
+	--tw-bg-opacity: 1;
+	background-color: rgba(254, 249, 195, var(--tw-bg-opacity));
+}
 .invisible {
 	visibility: hidden;
 }

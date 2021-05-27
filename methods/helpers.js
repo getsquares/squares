@@ -6,11 +6,11 @@ function updatePreview(html, obj) {
 function updateNull(obj) {
   const preview = $("preview", obj.closest("table-cell"));
   const preview_value = $("preview-value", obj.closest("table-cell"));
-  preview_value.setAttribute("hidden", "");
+  preview_value.hidden = true;
   preview.setAttribute("active", "true");
 
   const el_null = $("preview-null", obj.closest("table-cell"));
-  el_null.removeAttribute("hidden");
+  el_null.hidden = false;
 }
 
 // Set cell field state

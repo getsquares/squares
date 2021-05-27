@@ -51,11 +51,7 @@ class PanesItem extends HTMLElement {
     const name = this.getAttribute("name");
 
     $$(name).forEach((el) => {
-      if (!checked) {
-        el.setAttribute("hidden", "");
-      } else {
-        el.removeAttribute("hidden", "");
-      }
+      el.hidden = !checked;
 
       // Sync
       $$(`panes-item[name="${name}"]`).forEach((item) => {

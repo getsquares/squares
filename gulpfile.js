@@ -1,6 +1,6 @@
 let gulp = require("gulp");
 let concat = require("gulp-concat");
-let uglify = require("gulp-uglify-es").default;
+let uglify = require("gulp-uglify");
 let rename = require("gulp-rename");
 
 var js = {

@@ -3,6 +3,7 @@ function eventCellKeydown() {
   window.addEventListener("keydown", (e) => {
     const root_el = $(`pane-main[db="${state.database}"][tb="${state.table}"]`);
     const active_ring = $('cell-ring[state="active"]', root_el);
+    if (!active_ring) return;
     let table_cell = active_ring.closest("table-cell");
     if (!table_cell) return;
 

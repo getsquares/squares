@@ -123,12 +123,12 @@ class DbList extends HTMLElement {
 
   // Show element
   showElement(selector, db) {
-    this.dom(selector, db).removeAttribute("hidden");
+    this.dom(selector, db).hidden = false;
   }
 
   // Hide element
   hideElement(selector, db) {
-    this.dom(selector, db).setAttribute("hidden", "");
+    this.dom(selector, db).hidden = true;
   }
 
   groupEmpty(db) {

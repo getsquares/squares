@@ -1,19 +1,16 @@
 // Leave edit
-function leaveEdit() {
+function leaveEdit(el) {
   in_field = true;
 
-  fieldClose();
+  fieldClose(el);
 }
 
 // Field close helper
-function fieldClose() {
-  const el_cell_ring = $('cell-ring[state="edit"]');
+function fieldClose(el) {
+  const table_cell = el.closest("table-cell");
 
-  if (!el_cell_ring) return;
+  if (!$('cell-ring[state="edit"]', table_cell)) return;
 
-  const el_table_cell = el_cell_ring.closest("table-cell");
-  const el_cell_edit = $("cell-edit", el_table_cell);
-
-  el_cell_ring.setAttribute("state", "active");
-  el_cell_edit.removeAttribute("active");
+  $("cell-ring", table_cell).setAttribute("state", "active");
+  $("cell-edit", table_cell).hidden = true;
 }

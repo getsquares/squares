@@ -32,7 +32,6 @@ class PaneMain extends HTMLElement {
 
     const grid_cols = this.gridCols();
     const grid_cols_class = `auto ${grid_cols.widths.join("px ")}px`;
-    console.log(JSON.stringify(grid_cols_class));
 
     this.innerHTML = `
       <actions-x></actions-x>
@@ -196,12 +195,10 @@ class PaneMain extends HTMLElement {
   }
 
   deactivateCellEdit() {
-    const el_edit = $("cell-edit[active]", this);
-
-    if (!el_edit) return;
-
-    el_edit.innerHTML = "";
-    el_edit.removeAttribute("active");
+    $$("cell-edit", this).forEach((el) => {
+      el.innerHTML = "";
+      el.hidden = true;
+    });
   }
 
   gridCols() {
@@ -223,10 +220,6 @@ class PaneMain extends HTMLElement {
       widths.push(width);
 
       sum += width;
-
-      console.log(width);
-      //console.log(item);
-      //console.log(this_data.cols[item].config);
     });
 
     return {
@@ -305,11 +298,11 @@ class PaneMain extends HTMLElement {
   }
 
   thisActivate() {
-    this.removeAttribute("hidden");
+    this.hidden = false;
   }
 
   thisDeactivate() {
-    this.setAttribute("hidden", "");
+    this.hidden = true;
   }
 
   activate() {

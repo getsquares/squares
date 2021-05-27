@@ -8,8 +8,10 @@ class FieldText extends HTMLElement {
   }
 
   connectedCallback() {
-    //const value = cell.getTempValue(this);
-    const value = "omomo";
+    const value = cell.getValue(this);
+
+    console.log(state);
+
     this.innerHTML = `
       <input value="${value}" type="text" class="form-input focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
     `;
@@ -20,6 +22,7 @@ class FieldText extends HTMLElement {
 
     updatePreview($("input", this).value, this);
 
+    $("input", this).focus();
     $("input", this).select();
   }
 
@@ -27,10 +30,8 @@ class FieldText extends HTMLElement {
   onKeyup() {
     $("input", this).addEventListener("keyup", (e) => {
       const value = e.currentTarget.value;
-      cell.setTempValue(value, this);
+      set.pending.update(value, this);
       updatePreview(value, this);
-
-      console.log(temp);
     });
   }
 
@@ -38,7 +39,7 @@ class FieldText extends HTMLElement {
     $("input", this).addEventListener("keydown", (e) => {
       if (e.key !== "Enter") return;
       e.preventDefault();
-      leaveEdit(e);
+      leaveEdit(e.currentTarget);
     });
   }
 
@@ -46,11 +47,13 @@ class FieldText extends HTMLElement {
     window.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
 
-      const el_cell_ring = $('cell-ring[state="edit"]');
-      if (!el_cell_ring) return;
+      const root = $(`pane-main[db=${state.database}][tb=${state.table}]`);
+      const el = $(`cell-ring[state="edit"]`, root);
+
+      if (!el) return;
 
       e.preventDefault();
-      fieldClose();
+      fieldClose(el);
     });
   }
 

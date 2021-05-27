@@ -28,8 +28,6 @@ class ActionsTab extends HTMLElement {
       const name = this.getAttribute("name");
       const panes_el = this.closest("pane-main").querySelector("actions-panes");
 
-      console.log(panes_el);
-
       this.closest("pane-main").querySelector("actions-tabs").deactivate();
       panes_el.deactivate();
 

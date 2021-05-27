@@ -1,0 +1,5 @@
+table-cell {
+  &[state="changed"] {
+    @apply bg-yellow-100;
+  }
+}

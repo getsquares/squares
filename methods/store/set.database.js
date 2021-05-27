@@ -14,6 +14,7 @@ set.database.items = (content) => {
       open: false,
       table_order: [],
       table_items: {},
+      table_pending_update: {},
     };
   });
 
