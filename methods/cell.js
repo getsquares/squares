@@ -5,16 +5,15 @@ class cell {
 
   static setTempValue(value, obj) {
     const db_table = table.get(obj);
-    console.log(db_table);
     const temp_data = temp[row.getType(obj)][db_table].data;
     temp_data[row.getIndex(obj)][cell.getColumn(obj)] = value;
   }
 
-  static getTempValue(obj) {
+  /*static getTempValue(obj) {
     const db_table = table.get(obj);
     const temp_data = temp[row.getType(obj)][db_table].data;
     return temp_data[row.getIndex(obj)][cell.getColumn(obj)];
-  }
+  }*/
 
   static getValue(obj) {
     const table_cell = obj.closest("table-cell");

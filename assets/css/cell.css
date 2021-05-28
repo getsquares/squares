@@ -21,7 +21,7 @@ cell-ring {
 }
 
 cell-preview {
-  @apply relative block select-none tp;
+  @apply relative block select-none tp leading-normal;
 }
 
 cell-edit {

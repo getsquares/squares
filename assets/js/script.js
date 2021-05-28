@@ -107,16 +107,15 @@ class cell {
 
   static setTempValue(value, obj) {
     const db_table = table.get(obj);
-    console.log(db_table);
     const temp_data = temp[row.getType(obj)][db_table].data;
     temp_data[row.getIndex(obj)][cell.getColumn(obj)] = value;
   }
 
-  static getTempValue(obj) {
+  /*static getTempValue(obj) {
     const db_table = table.get(obj);
     const temp_data = temp[row.getType(obj)][db_table].data;
     return temp_data[row.getIndex(obj)][cell.getColumn(obj)];
-  }
+  }*/
 
   static getValue(obj) {
     const table_cell = obj.closest("table-cell");
@@ -341,11 +340,25 @@ actions.table.closeTab = (db, tb) => {
 get.db = {};
 get.tb = {};
 get.col = {};
+get.dom = {};
+get.dom.cell = {};
 
 // Database
 /*get.db.items = (db = state.database) => {
   return state.databases[db];
 };*/
+
+get.dom.cell.data = (context) => {
+  const root = context.closest("pane-main");
+  const table_cell = context.closest("table-cell");
+  const db = root.db;
+  const tb = root.tb;
+  const col = table_cell.getAttribute("col");
+  const row = table_cell.getAttribute("row");
+  const index = table_cell.getAttribute("index");
+
+  return { db, tb, col, row, index };
+};
 
 // Table
 get.tb.order = () => {
@@ -358,6 +371,15 @@ get.tb.items = (db = state.database, tb = state.table) => {
 
 get.tb.value = (db, tb, col, index) => {
   const data = get.tb.items(db, tb);
+
+  return data.rows[index][col];
+};
+
+get.tb.updated = (db, tb, row, col, index) => {
+  const data = get.tb.items(db, tb);
+  const updated = data?.pending_updates?.[row]?.[col];
+
+  if (updated) return updated;
 
   return data.rows[index][col];
 };
@@ -427,13 +449,8 @@ set.table.item = (content, db, tb) => {
 };
 
 set.pending.update = (content, context) => {
-  const root = context.closest("pane-main");
-  const table_cell = context.closest("table-cell");
-  const db = root.db;
-  const tb = root.tb;
-  const col = table_cell.getAttribute("col");
-  const row = table_cell.getAttribute("row");
-  const index = table_cell.getAttribute("index");
+  const { db, tb, col, row, index } = get.dom.cell.data(context);
+
   const data = state?.databases[db]?.table_items[tb];
   const original = get.tb.value(db, tb, col, index);
 
@@ -459,14 +476,10 @@ set.pending.update = (content, context) => {
       delete data.pending_updates;
     }
 
-    context.closest("table-cell").removeAttribute("state");
-    // Vid dubbelklick, öppna update om finns.
+    triggers.cell.update(context);
+    // Se till att null accepteras som värde
   }
 
-  console.log(original);
-  console.log(content);
-
-  console.log(data.pending_updates);
   // Ta bort tomma
 };
 
@@ -483,7 +496,11 @@ var test = [];
 
 test[3] = "Hello";
 
-console.log(test);
+triggers.cell = {};
+
+triggers.cell.update = (context) => {
+  context.closest("table-cell").removeAttribute("state");
+};
 
 triggers.db = {};
 
@@ -3273,12 +3290,11 @@ class FieldText extends HTMLElement {
   }
 
   connectedCallback() {
-    const value = cell.getValue(this);
-
-    console.log(state);
+    const { db, tb, col, row, index } = get.dom.cell.data(this);
+    const value = get.tb.updated(db, tb, row, col, index);
 
     this.innerHTML = `
-      <input value="${value}" type="text" class="form-input focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
+      <input value="${value}" type="text" class="form-input leading-normal focus:outline-none focus:ring-0 focus:ring-offset-0 border-2 focus:border-gray-300 border-gray-300 text-13 tp">
     `;
 
     this.onKeyup();

@@ -8,12 +8,11 @@ class FieldText extends HTMLElement {
   }
 
   connectedCallback() {
-    const value = cell.getValue(this);
-
-    console.log(state);
+    const { db, tb, col, row, index } = get.dom.cell.data(this);
+    const value = get.tb.updated(db, tb, row, col, index);
 
     this.innerHTML = `
-      <input value="${value}" type="text" class="form-input focus:outline-none focus:ring-yellow-500 focus:ring-offset-1 border-2 focus:ring-2 focus:border-gray-300 border-gray-300">
+      <input value="${value}" type="text" class="form-input leading-normal focus:outline-none focus:ring-0 focus:ring-offset-0 border-2 focus:border-gray-300 border-gray-300 text-13 tp">
     `;
 
     this.onKeyup();

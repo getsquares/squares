@@ -28,13 +28,8 @@ set.table.item = (content, db, tb) => {
 };
 
 set.pending.update = (content, context) => {
-  const root = context.closest("pane-main");
-  const table_cell = context.closest("table-cell");
-  const db = root.db;
-  const tb = root.tb;
-  const col = table_cell.getAttribute("col");
-  const row = table_cell.getAttribute("row");
-  const index = table_cell.getAttribute("index");
+  const { db, tb, col, row, index } = get.dom.cell.data(context);
+
   const data = state?.databases[db]?.table_items[tb];
   const original = get.tb.value(db, tb, col, index);
 
@@ -60,14 +55,10 @@ set.pending.update = (content, context) => {
       delete data.pending_updates;
     }
 
-    context.closest("table-cell").removeAttribute("state");
-    // Vid dubbelklick, öppna update om finns.
+    triggers.cell.update(context);
+    // Se till att null accepteras som värde
   }
 
-  console.log(original);
-  console.log(content);
-
-  console.log(data.pending_updates);
   // Ta bort tomma
 };
 
@@ -83,5 +74,3 @@ set.table.items = (content, db) => {
 var test = [];
 
 test[3] = "Hello";
-
-console.log(test);

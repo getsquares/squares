@@ -1114,6 +1114,7 @@ cell-preview {
 	   -moz-user-select: none;
 	    -ms-user-select: none;
 	        user-select: none;
+	line-height: 1.5;
 }
 cell-edit {
 	position: absolute;
@@ -1479,13 +1480,13 @@ table-cell[state="changed"] {
 	--tw-border-opacity: 1;
 	border-color: rgba(127, 29, 29, var(--tw-border-opacity));
 }
-.border-navy-300 {
-	--tw-border-opacity: 1;
-	border-color: rgba(175, 205, 239, var(--tw-border-opacity));
-}
 .border-gray-300 {
 	--tw-border-opacity: 1;
 	border-color: rgba(212, 212, 212, var(--tw-border-opacity));
+}
+.border-navy-300 {
+	--tw-border-opacity: 1;
+	border-color: rgba(175, 205, 239, var(--tw-border-opacity));
 }
 .border-transparent {
 	border-color: transparent;
@@ -1672,6 +1673,9 @@ table-cell[state="changed"] {
 .italic {
 	font-style: italic;
 }
+.leading-normal {
+	line-height: 1.5;
+}
 .text-gray-800 {
 	--tw-text-opacity: 1;
 	color: rgba(38, 38, 38, var(--tw-text-opacity));
@@ -1783,6 +1787,10 @@ table-cell[state="changed"] {
 .focus\:border-gray-400:focus {
 	--tw-border-opacity: 1;
 	border-color: rgba(163, 163, 163, var(--tw-border-opacity));
+}
+.focus\:border-gray-300:focus {
+	--tw-border-opacity: 1;
+	border-color: rgba(212, 212, 212, var(--tw-border-opacity));
 }
 .focus\:outline-none:focus {
 	outline: 2px solid transparent;
