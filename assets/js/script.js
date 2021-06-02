@@ -280,6 +280,143 @@ class table {
   }
 }
 
+class UpdateClass {
+  constructor() {}
+
+  initByContext(context) {
+    const args = get.dom.cell.data(context);
+    this.argsToObject(args);
+  }
+
+  argsToObject({ db, tb, row, col, index }) {
+    this.db = db;
+    this.tb = tb;
+    this.row = row;
+    this.col = col;
+    this.index = index;
+    this.data = state?.databases[this.db]?.table_items[this.tb];
+    this.old_value = get.tb.value(this.db, this.tb, this.col, this.index);
+  }
+
+  setNewValue(value) {
+    this.new_value = value;
+  }
+
+  // STORE ADD
+
+  storeAddUpdated() {
+    if (this.hasStoreUpdated()) return;
+    this.data.pending_updates = {};
+  }
+
+  storeAddRow() {
+    if (this.hasStoreRow()) return;
+    this.storeAddUpdated();
+    this.data.pending_updates[this.row] = {};
+  }
+
+  storeAddCol() {
+    if (this.hasStoreCol()) return;
+    this.storeAddRow();
+    this.data.pending_updates[this.row][this.col] = {};
+  }
+
+  storeAddValue(value) {
+    this.storeAddCol();
+    this.data.pending_updates[this.row][this.col].value = value;
+  }
+
+  storeAddIsNull(is_null) {
+    this.storeAddCol();
+    this.data.pending_updates[this.row][this.col].is_null = is_null;
+  }
+
+  // IS
+
+  isUniqueValue() {
+    if (this.hasStoreValue() === undefined) return false;
+
+    return this.getStoreValue() === this.old_value;
+  }
+
+  isUniqueNull() {
+    if (this.hasStoreIsNull() === undefined) return false;
+
+    const is_old_null = this.old_value === null ? true : false;
+
+    return this.getStoreIsNull() === is_old_null;
+  }
+
+  isDiff() {
+    return !this.isUniqueValue() || !this.isNull();
+  }
+
+  // GET
+
+  getStoreValue() {
+    return this.data.pending_updates[this.row][this.col].value;
+  }
+
+  getStoreIsNull() {
+    return this.data.pending_updates[this.row][this.col].is_null;
+  }
+
+  // HAS
+
+  hasStoreUpdated() {
+    return this.data?.pending_updates;
+  }
+  hasStoreRow() {
+    return this.data?.pending_updates?.[this.row];
+  }
+  hasStoreCol() {
+    return this.data?.pending_updates?.[this.row]?.[this.col];
+  }
+  hasStoreValue() {
+    return this.data?.pending_updates?.[this.row]?.[this.col]?.value;
+  }
+  hasStoreIsNull() {
+    return this.data?.pending_updates?.[this.row]?.[this.col]?.is_null;
+  }
+
+  // REMOVE
+
+  removeValue() {
+    if (!this.hasStoreValue()) return;
+    delete this.data.pending_updates[this.row][this.col].value;
+  }
+  removeIsNull() {
+    if (!this.hasStoreIsNull()) return;
+    delete this.data.pending_updates[this.row][this.col].is_null;
+  }
+  removeCol() {
+    if (!this.hasStoreCol()) return;
+    delete this.data.pending_updates[this.row][this.col];
+  }
+  removeRow() {
+    if (!this.hasStoreRow()) return;
+    delete this.data.pending_updates[this.row];
+  }
+  removeUpdated() {
+    if (!this.hasStoreUpdated()) return;
+    delete this.data.pending_updates;
+  }
+}
+/*
+context
+
+setNewPreview(value) returnera om value är null
+setNewValue(value)
+
+isNewValueEqualsOldValue(index)
+isNewValueNull
+
+addNewId(id)
+deleteNewId(id)
+*/
+
+const test2 = new UpdateClass({ db: "test", tb: "asda" });
+
 actions.database = {};
 actions.databases = {};
 
@@ -342,6 +479,7 @@ get.tb = {};
 get.col = {};
 get.dom = {};
 get.dom.cell = {};
+get.new = {};
 
 // Database
 /*get.db.items = (db = state.database) => {
@@ -373,6 +511,17 @@ get.tb.value = (db, tb, col, index) => {
   const data = get.tb.items(db, tb);
 
   return data.rows[index][col];
+};
+
+// Get new value or preview
+get.new.param = (context, type) => {
+  const { db, tb, col, index } = get.dom.cell.data(context);
+  const data = get.tb.items(db, tb);
+
+  const new_value = data?.rows?.[index]?.[`${col}":"${type}`];
+  if (new_value === undefined) return;
+
+  return new_value;
 };
 
 get.tb.updated = (db, tb, row, col, index) => {
@@ -453,6 +602,7 @@ set.pending.update = (content, context) => {
 
   const data = state?.databases[db]?.table_items[tb];
   const original = get.tb.value(db, tb, col, index);
+  const original_is_null = original === null ? true : false;
 
   if (!data?.pending_updates) {
     data.pending_updates = {};
@@ -478,6 +628,8 @@ set.pending.update = (content, context) => {
 
     triggers.cell.update(context);
     // Se till att null accepteras som värde
+    // SetUpdate() class
+    // Cell-edit som component
   }
 
   // Ta bort tomma
@@ -1560,7 +1712,7 @@ class ColumnsItem extends HTMLElement {
   }
 
   onChange() {
-    console.log("Something has changed");
+    //console.log("Something has changed");
   }
 
   activate() {
@@ -2291,7 +2443,7 @@ class RevertX extends HTMLElement {
     this.classList.add("btn", "btn-danger");
     this.innerHTML = `
       <img-svg src="material-icons/undo_black_24dp.svg" classes="w-5 h-5"></img-svg>
-      Revert
+      Cancel
     `;
     //this.onClick();
   }
@@ -2821,7 +2973,85 @@ class ModalLogout extends HTMLElement {
 
 customElements.define("modal-logout", ModalLogout);
 
-/* NEW table cell */
+class CellEdit extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const { db, tb, col, row, index } = get.dom.cell.data(this);
+    this.db = db;
+    this.tb = tb;
+    this.col = col;
+    this.row = row;
+    this.index = index;
+  }
+
+  populateEdit() {
+    let html_null = "";
+    if (this.isNullable()) {
+      html_null = `
+        <label class="flex gap-2 items-center">
+          <input
+            type="checkbox"
+            class="checkstyle-white form-checkbox"
+            ${this.value === null ? "checked" : ""}
+          >
+          <div class="italic">NULL</div>
+        </label>
+      `;
+    }
+    let html = `
+      ${html_null}
+      <field-text></field-text>
+    `;
+
+    this.hidden = false;
+    this.innerHTML = html;
+
+    if (!this.isNullable()) return;
+
+    this.onClickNull();
+  }
+
+  isNullable() {
+    const col = get.col.data(this.db, this.tb, this.col);
+    return col.meta.Null == "YES";
+  }
+
+  onClickNull() {
+    // Jämför mot original null
+    // Om olika, spara null i set som is_null: true eller is_null: false
+    // Om värde saknas, lägg till från original
+
+    $("label:first-child input", this).on("change", (e) => {
+      const new_preview = get.new.param(this, "preview");
+      const new_value = get.new.param(this, "value");
+      console.log(new_preview);
+      console.log(new_value);
+
+      const Update = new UpdateClass();
+      Update.initByContext(this);
+
+      //const origial_value = Update.old_value;
+
+      const checked = e.currentTarget.checked;
+      $("preview-null", this.parentElement).hidden = !checked;
+      $("preview-value", this.parentElement).hidden = checked;
+
+      console.log(Update.data);
+
+      console.log(Update.isUniqueNull());
+
+      if (Update.isUniqueNull()) {
+        Update.storeAddIsNull(checked);
+      }
+    });
+  }
+}
+
+customElements.define("cell-edit", CellEdit);
+
 class TableCell extends HTMLElement {
   constructor() {
     super();
@@ -2877,14 +3107,6 @@ class TableCell extends HTMLElement {
   onDblclickRing() {
     $("cell-ring", this).on("dblclick", (e) => {
       this.handleCellEdit();
-    });
-  }
-
-  onClickNull() {
-    $("cell-edit label:first-child input", this).on("change", (e) => {
-      const checked = e.currentTarget.checked;
-      $("preview-null", this).hidden = !checked;
-      $("preview-value", this).hidden = checked;
     });
   }
 
@@ -2954,8 +3176,7 @@ class TableCell extends HTMLElement {
       return;
     }
     $("cell-ring", this).setAttribute("state", "edit");
-
-    this.populateEdit();
+    $("cell-edit", this).populateEdit();
   }
 
   handleCellActive(el) {
@@ -2963,37 +3184,6 @@ class TableCell extends HTMLElement {
 
     this.closest("pane-main").deactivateCells();
     $("cell-ring", el).setAttribute("state", "active");
-  }
-
-  isNullable() {
-    return this.col_data.meta.Null == "YES";
-  }
-
-  populateEdit() {
-    let html_null = "";
-    if (this.isNullable()) {
-      html_null = `
-        <label class="flex gap-2 items-center">
-          <input
-            type="checkbox"
-            class="checkstyle-white form-checkbox"
-            ${this.value === null ? "checked" : ""}
-          >
-          <div class="italic">NULL</div>
-        </label>
-      `;
-    }
-    let html = `
-      ${html_null}
-      <field-text></field-text>
-    `;
-
-    $("cell-edit", this).hidden = false;
-    $("cell-edit", this).innerHTML = html;
-
-    if (!this.isNullable()) return;
-
-    this.onClickNull();
   }
 
   xEdges() {

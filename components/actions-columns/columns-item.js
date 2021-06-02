@@ -46,7 +46,7 @@ class ColumnsItem extends HTMLElement {
   }
 
   onChange() {
-    console.log("Something has changed");
+    //console.log("Something has changed");
   }
 
   activate() {

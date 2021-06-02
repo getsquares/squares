@@ -11,7 +11,7 @@ class RevertX extends HTMLElement {
     this.classList.add("btn", "btn-danger");
     this.innerHTML = `
       <img-svg src="material-icons/undo_black_24dp.svg" classes="w-5 h-5"></img-svg>
-      Revert
+      Cancel
     `;
     //this.onClick();
   }

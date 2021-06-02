@@ -1,4 +1,3 @@
-/* NEW table cell */
 class TableCell extends HTMLElement {
   constructor() {
     super();
@@ -54,14 +53,6 @@ class TableCell extends HTMLElement {
   onDblclickRing() {
     $("cell-ring", this).on("dblclick", (e) => {
       this.handleCellEdit();
-    });
-  }
-
-  onClickNull() {
-    $("cell-edit label:first-child input", this).on("change", (e) => {
-      const checked = e.currentTarget.checked;
-      $("preview-null", this).hidden = !checked;
-      $("preview-value", this).hidden = checked;
     });
   }
 
@@ -131,8 +122,7 @@ class TableCell extends HTMLElement {
       return;
     }
     $("cell-ring", this).setAttribute("state", "edit");
-
-    this.populateEdit();
+    $("cell-edit", this).populateEdit();
   }
 
   handleCellActive(el) {
@@ -140,37 +130,6 @@ class TableCell extends HTMLElement {
 
     this.closest("pane-main").deactivateCells();
     $("cell-ring", el).setAttribute("state", "active");
-  }
-
-  isNullable() {
-    return this.col_data.meta.Null == "YES";
-  }
-
-  populateEdit() {
-    let html_null = "";
-    if (this.isNullable()) {
-      html_null = `
-        <label class="flex gap-2 items-center">
-          <input
-            type="checkbox"
-            class="checkstyle-white form-checkbox"
-            ${this.value === null ? "checked" : ""}
-          >
-          <div class="italic">NULL</div>
-        </label>
-      `;
-    }
-    let html = `
-      ${html_null}
-      <field-text></field-text>
-    `;
-
-    $("cell-edit", this).hidden = false;
-    $("cell-edit", this).innerHTML = html;
-
-    if (!this.isNullable()) return;
-
-    this.onClickNull();
   }
 
   xEdges() {

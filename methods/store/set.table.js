@@ -32,6 +32,7 @@ set.pending.update = (content, context) => {
 
   const data = state?.databases[db]?.table_items[tb];
   const original = get.tb.value(db, tb, col, index);
+  const original_is_null = original === null ? true : false;
 
   if (!data?.pending_updates) {
     data.pending_updates = {};
@@ -57,6 +58,8 @@ set.pending.update = (content, context) => {
 
     triggers.cell.update(context);
     // Se till att null accepteras som värde
+    // SetUpdate() class
+    // Cell-edit som component
   }
 
   // Ta bort tomma

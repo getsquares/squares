@@ -3,6 +3,7 @@ get.tb = {};
 get.col = {};
 get.dom = {};
 get.dom.cell = {};
+get.new = {};
 
 // Database
 /*get.db.items = (db = state.database) => {
@@ -34,6 +35,17 @@ get.tb.value = (db, tb, col, index) => {
   const data = get.tb.items(db, tb);
 
   return data.rows[index][col];
+};
+
+// Get new value or preview
+get.new.param = (context, type) => {
+  const { db, tb, col, index } = get.dom.cell.data(context);
+  const data = get.tb.items(db, tb);
+
+  const new_value = data?.rows?.[index]?.[`${col}":"${type}`];
+  if (new_value === undefined) return;
+
+  return new_value;
 };
 
 get.tb.updated = (db, tb, row, col, index) => {
