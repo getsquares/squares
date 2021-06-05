@@ -50,7 +50,7 @@ get.new.param = (context, type) => {
 
 get.tb.updated = (db, tb, row, col, index) => {
   const data = get.tb.items(db, tb);
-  const updated = data?.pending_updates?.[row]?.[col];
+  const updated = data?.rows?.[index]?.[`${col}:buffer`];
 
   if (updated) return updated;
 

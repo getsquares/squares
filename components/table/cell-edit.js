@@ -45,32 +45,13 @@ class CellEdit extends HTMLElement {
   }
 
   onClickNull() {
-    // Jämför mot original null
-    // Om olika, spara null i set som is_null: true eller is_null: false
-    // Om värde saknas, lägg till från original
-
     $("label:first-child input", this).on("change", (e) => {
-      const new_preview = get.new.param(this, "preview");
-      const new_value = get.new.param(this, "value");
-      console.log(new_preview);
-      console.log(new_value);
-
-      const Update = new UpdateClass();
-      Update.initByContext(this);
-
-      //const origial_value = Update.old_value;
-
       const checked = e.currentTarget.checked;
+
+      set.new.nulled(checked, e.currentTarget);
+
       $("preview-null", this.parentElement).hidden = !checked;
       $("preview-value", this.parentElement).hidden = checked;
-
-      console.log(Update.data);
-
-      console.log(Update.isUniqueNull());
-
-      if (Update.isUniqueNull()) {
-        Update.storeAddIsNull(checked);
-      }
     });
   }
 }

@@ -19,7 +19,8 @@ class FieldText extends HTMLElement {
     this.onEnter();
     this.onEscape();
 
-    updatePreview($("input", this).value, this);
+    set.new.buffer(value, this);
+    updatePreview(value, this);
 
     $("input", this).focus();
     $("input", this).select();
@@ -29,8 +30,10 @@ class FieldText extends HTMLElement {
   onKeyup() {
     $("input", this).addEventListener("keyup", (e) => {
       const value = e.currentTarget.value;
-      set.pending.update(value, this);
+      set.new.buffer(value, this);
       updatePreview(value, this);
+
+      console.log(state);
     });
   }
 

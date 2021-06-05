@@ -1,5 +1,6 @@
 set.table = {};
 set.pending = {};
+set.new = {};
 
 // Order
 set.table.order = (content, db) => {
@@ -27,42 +28,76 @@ set.table.item = (content, db, tb) => {
   triggers.tb.data();
 };
 
-set.pending.update = (content, context) => {
+set.new.data = (content, is_null, context) => {
+  const { db, tb, col, row, index } = get.dom.cell.data(context);
+  const data = state?.databases[db]?.table_items[tb]?.rows?.[index];
+
+  if (!data) return;
+
+  const value = is_null ? null : content;
+
+  data[`${col}:value`] = value;
+  data[`${col}:buffer`] = content;
+
+  console.log(data);
+};
+
+// Set nulled
+set.new.nulled = (is_null, context) => {
+  const { db, tb, col, row, index } = get.dom.cell.data(context);
+  const data = state?.databases[db]?.table_items[tb]?.rows?.[index];
+
+  if (!data) return;
+
+  let fallback = null;
+
+  if (data?.[`${col}:buffer`] !== undefined) {
+    fallback = data[`${col}:buffer`];
+  } else {
+    fallback = data[col];
+  }
+
+  // state.databases[db][tb].updates[`${row}:${col}`] = "";
+
+  data[`${col}:value`] = is_null ? null : fallback;
+
+  set.new.updates(data, context);
+
+  triggers.cell.state(data, col, context);
+};
+
+// Set buffer
+set.new.buffer = (content, context) => {
+  const { db, tb, col, row, index } = get.dom.cell.data(context);
+  const data = state?.databases[db]?.table_items[tb]?.rows?.[index];
+
+  if (!data) return;
+
+  data[`${col}:buffer`] = content;
+  if (data?.[`${col}:value`] !== null) {
+    data[`${col}:value`] = content;
+  }
+
+  set.new.updates(data, context);
+
+  triggers.cell.state(data, col, context);
+};
+
+set.new.updates = (data, context) => {
   const { db, tb, col, row, index } = get.dom.cell.data(context);
 
-  const data = state?.databases[db]?.table_items[tb];
-  const original = get.tb.value(db, tb, col, index);
-  const original_is_null = original === null ? true : false;
-
-  if (!data?.pending_updates) {
-    data.pending_updates = {};
+  if (!state?.databases?.[db]?.table_items?.[tb]?.updates) {
+    state.databases[db].table_items[tb].updates = {};
   }
 
-  if (!data?.pending_updates[row]) {
-    data.pending_updates[row] = {};
-  }
-
-  if (original !== content) {
-    data.pending_updates[row][col] = content;
-    context.closest("table-cell").setAttribute("state", "changed");
+  if (data[col] !== data[`${col}:value`]) {
+    state.databases[db].table_items[tb].updates[`${index}:${col}`] = "";
   } else {
-    delete data.pending_updates[row][col];
-
-    if (!data?.pending_updates[row]) {
-      delete data.pending_updates[row];
-    }
-
-    if (!data?.pending_updates) {
-      delete data.pending_updates;
-    }
-
-    triggers.cell.update(context);
-    // Se till att null accepteras som värde
-    // SetUpdate() class
-    // Cell-edit som component
+    delete state.databases[db].table_items[tb].updates[`${index}:${col}`];
   }
 
-  // Ta bort tomma
+  console.log("UPDATES");
+  console.log(state.databases[db].table_items[tb]);
 };
 
 // Items

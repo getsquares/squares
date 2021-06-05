@@ -526,7 +526,7 @@ get.new.param = (context, type) => {
 
 get.tb.updated = (db, tb, row, col, index) => {
   const data = get.tb.items(db, tb);
-  const updated = data?.pending_updates?.[row]?.[col];
+  const updated = data?.rows?.[index]?.[`${col}:buffer`];
 
   if (updated) return updated;
 
@@ -555,7 +555,6 @@ set.database.items = (content) => {
       open: false,
       table_order: [],
       table_items: {},
-      table_pending_update: {},
     };
   });
 
@@ -570,6 +569,7 @@ set.database.toggleState = (db) => {
 
 set.table = {};
 set.pending = {};
+set.new = {};
 
 // Order
 set.table.order = (content, db) => {
@@ -597,42 +597,76 @@ set.table.item = (content, db, tb) => {
   triggers.tb.data();
 };
 
-set.pending.update = (content, context) => {
+set.new.data = (content, is_null, context) => {
+  const { db, tb, col, row, index } = get.dom.cell.data(context);
+  const data = state?.databases[db]?.table_items[tb]?.rows?.[index];
+
+  if (!data) return;
+
+  const value = is_null ? null : content;
+
+  data[`${col}:value`] = value;
+  data[`${col}:buffer`] = content;
+
+  console.log(data);
+};
+
+// Set nulled
+set.new.nulled = (is_null, context) => {
+  const { db, tb, col, row, index } = get.dom.cell.data(context);
+  const data = state?.databases[db]?.table_items[tb]?.rows?.[index];
+
+  if (!data) return;
+
+  let fallback = null;
+
+  if (data?.[`${col}:buffer`] !== undefined) {
+    fallback = data[`${col}:buffer`];
+  } else {
+    fallback = data[col];
+  }
+
+  // state.databases[db][tb].updates[`${row}:${col}`] = "";
+
+  data[`${col}:value`] = is_null ? null : fallback;
+
+  set.new.updates(data, context);
+
+  triggers.cell.state(data, col, context);
+};
+
+// Set buffer
+set.new.buffer = (content, context) => {
+  const { db, tb, col, row, index } = get.dom.cell.data(context);
+  const data = state?.databases[db]?.table_items[tb]?.rows?.[index];
+
+  if (!data) return;
+
+  data[`${col}:buffer`] = content;
+  if (data?.[`${col}:value`] !== null) {
+    data[`${col}:value`] = content;
+  }
+
+  set.new.updates(data, context);
+
+  triggers.cell.state(data, col, context);
+};
+
+set.new.updates = (data, context) => {
   const { db, tb, col, row, index } = get.dom.cell.data(context);
 
-  const data = state?.databases[db]?.table_items[tb];
-  const original = get.tb.value(db, tb, col, index);
-  const original_is_null = original === null ? true : false;
-
-  if (!data?.pending_updates) {
-    data.pending_updates = {};
+  if (!state?.databases?.[db]?.table_items?.[tb]?.updates) {
+    state.databases[db].table_items[tb].updates = {};
   }
 
-  if (!data?.pending_updates[row]) {
-    data.pending_updates[row] = {};
-  }
-
-  if (original !== content) {
-    data.pending_updates[row][col] = content;
-    context.closest("table-cell").setAttribute("state", "changed");
+  if (data[col] !== data[`${col}:value`]) {
+    state.databases[db].table_items[tb].updates[`${index}:${col}`] = "";
   } else {
-    delete data.pending_updates[row][col];
-
-    if (!data?.pending_updates[row]) {
-      delete data.pending_updates[row];
-    }
-
-    if (!data?.pending_updates) {
-      delete data.pending_updates;
-    }
-
-    triggers.cell.update(context);
-    // Se till att null accepteras som värde
-    // SetUpdate() class
-    // Cell-edit som component
+    delete state.databases[db].table_items[tb].updates[`${index}:${col}`];
   }
 
-  // Ta bort tomma
+  console.log("UPDATES");
+  console.log(state.databases[db].table_items[tb]);
 };
 
 // Items
@@ -652,6 +686,14 @@ triggers.cell = {};
 
 triggers.cell.update = (context) => {
   context.closest("table-cell").removeAttribute("state");
+};
+
+triggers.cell.state = (data, col, context) => {
+  if (data[col] !== data[`${col}:value`]) {
+    context.closest("table-cell").setAttribute("state", "changed");
+  } else {
+    context.closest("table-cell").removeAttribute("state");
+  }
 };
 
 triggers.db = {};
@@ -1664,140 +1706,6 @@ class PaneClose extends HTMLElement {
 
 customElements.define("pane-close", PaneClose);
 
-class ColumnsItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["checked"];
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const checked = this.getAttribute("checked");
-    this.classList.add("flex");
-
-    this.innerHTML = this.template(name, checked);
-    this.onClick();
-  }
-
-  template(name, checked) {
-    return `
-      <label class="btn btn-borderless">
-        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
-      checked ? "checked" : ""
-    }>
-        ${name}
-      </label>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "checked") {
-        this.onChange();
-      }
-    }
-  }
-
-  onClick() {
-    $("input", this).addEventListener("change", (e) => {
-      if (e.currentTarget.checked) {
-        this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-  }
-
-  onChange() {
-    //console.log("Something has changed");
-  }
-
-  activate() {
-    this.setAttribute("checked", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("checked");
-  }
-}
-
-customElements.define("columns-item", ColumnsItem);
-
-class ColumnsX extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
-    this.hidden = true;
-    this.innerHTML = this.template("Columns");
-  }
-
-  checkboxes() {
-    const db = this.closest("pane-main").getAttribute("database");
-    const tb = this.closest("pane-main").getAttribute("table");
-    const data = get.tb.items(db, tb);
-    const data_cols_all = data.cols_all;
-    const data_cols_active = data.cols_order;
-    let html = "";
-
-    data_cols_all.forEach((item) => {
-      const checked = data_cols_active.includes(item);
-      const checked_html = checked ? `checked="true"` : "";
-      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
-    });
-
-    return html;
-  }
-
-  template(title) {
-    return `
-      <div class="font-bold">${title}</div>
-      <div class="flex gap-x-4 gap-y-1 flex-wrap">
-        ${this.checkboxes()}
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.classList.remove("hidden");
-  }
-
-  thisDeactivate() {
-    this.classList.add("hidden");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("columns-x", ColumnsX);
-
 class FilterItem extends HTMLElement {
   constructor() {
     super();
@@ -1961,6 +1869,140 @@ class FilterX extends HTMLElement {
 
 customElements.define("filter-x", FilterX);
 
+class ColumnsItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const checked = this.getAttribute("checked");
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, checked);
+    this.onClick();
+  }
+
+  template(name, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${name}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange();
+      }
+    }
+  }
+
+  onClick() {
+    $("input", this).addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange() {
+    //console.log("Something has changed");
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("columns-item", ColumnsItem);
+
+class ColumnsX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
+    this.hidden = true;
+    this.innerHTML = this.template("Columns");
+  }
+
+  checkboxes() {
+    const db = this.closest("pane-main").getAttribute("database");
+    const tb = this.closest("pane-main").getAttribute("table");
+    const data = get.tb.items(db, tb);
+    const data_cols_all = data.cols_all;
+    const data_cols_active = data.cols_order;
+    let html = "";
+
+    data_cols_all.forEach((item) => {
+      const checked = data_cols_active.includes(item);
+      const checked_html = checked ? `checked="true"` : "";
+      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
+    });
+
+    return html;
+  }
+
+  template(title) {
+    return `
+      <div class="font-bold">${title}</div>
+      <div class="flex gap-x-4 gap-y-1 flex-wrap">
+        ${this.checkboxes()}
+      </div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("columns-x", ColumnsX);
+
 class OrderItem extends HTMLElement {
   constructor() {
     super();
@@ -2097,147 +2139,6 @@ class OrderX extends HTMLElement {
 }
 
 customElements.define("order-x", OrderX);
-
-class PanesItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["checked"];
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const label = this.getAttribute("label");
-    const checked = this.getAttribute("checked");
-
-    this.classList.add("flex");
-
-    this.innerHTML = this.template(name, label, checked);
-    this.onClick();
-  }
-
-  template(name, label, checked) {
-    return `
-      <label class="btn btn-borderless">
-        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
-      checked ? "checked" : ""
-    }>
-        ${label}
-      </label>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "checked") {
-        this.onChange(newValue);
-      }
-    }
-  }
-
-  onClick() {
-    this.querySelector("input").addEventListener("change", (e) => {
-      if (e.currentTarget.checked) {
-        this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-  }
-
-  onChange(checked) {
-    const name = this.getAttribute("name");
-
-    $$(name).forEach((el) => {
-      el.hidden = !checked;
-
-      // Sync
-      $$(`panes-item[name="${name}"]`).forEach((item) => {
-        if (!checked) {
-          item.removeAttribute("checked");
-        } else {
-          item.setAttribute("checked", "true");
-        }
-        item.querySelector("input").checked = checked;
-      });
-    });
-  }
-
-  activate() {
-    this.setAttribute("checked", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("checked");
-  }
-}
-
-customElements.define("panes-item", PanesItem);
-
-class PanesX extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-2", "flex", "flex-col", "p-4", "text-sm");
-    this.hidden = true;
-    this.innerHTML = this.template();
-  }
-
-  checkboxes() {
-    return `
-      <panes-item name="topbar-wrap" label="Top" checked="true"></panes-item>
-      <panes-item name="sidebar-wrap" label="Sidebar" checked="true"></panes-item>
-      <panes-item name="pagination-x" label="Footer" checked="true"></panes-item>
-    `;
-  }
-
-  template() {
-    return `
-      <div class="font-bold">Panes</div>
-      <div class="flex gap-4">
-        ${this.checkboxes()}
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.classList.remove("hidden");
-  }
-
-  thisDeactivate() {
-    this.classList.add("hidden");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("panes-x", PanesX);
 
 class DeleteX extends HTMLElement {
   constructor() {
@@ -2532,6 +2433,147 @@ class RowActions extends HTMLElement {
   }
 }
 customElements.define("row-actions", RowActions);
+
+class PanesItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const label = this.getAttribute("label");
+    const checked = this.getAttribute("checked");
+
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, label, checked);
+    this.onClick();
+  }
+
+  template(name, label, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${label}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange(newValue);
+      }
+    }
+  }
+
+  onClick() {
+    this.querySelector("input").addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange(checked) {
+    const name = this.getAttribute("name");
+
+    $$(name).forEach((el) => {
+      el.hidden = !checked;
+
+      // Sync
+      $$(`panes-item[name="${name}"]`).forEach((item) => {
+        if (!checked) {
+          item.removeAttribute("checked");
+        } else {
+          item.setAttribute("checked", "true");
+        }
+        item.querySelector("input").checked = checked;
+      });
+    });
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("panes-item", PanesItem);
+
+class PanesX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-2", "flex", "flex-col", "p-4", "text-sm");
+    this.hidden = true;
+    this.innerHTML = this.template();
+  }
+
+  checkboxes() {
+    return `
+      <panes-item name="topbar-wrap" label="Top" checked="true"></panes-item>
+      <panes-item name="sidebar-wrap" label="Sidebar" checked="true"></panes-item>
+      <panes-item name="pagination-x" label="Footer" checked="true"></panes-item>
+    `;
+  }
+
+  template() {
+    return `
+      <div class="font-bold">Panes</div>
+      <div class="flex gap-4">
+        ${this.checkboxes()}
+      </div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("panes-x", PanesX);
 
 class DbList extends HTMLElement {
   constructor() {
@@ -3020,32 +3062,13 @@ class CellEdit extends HTMLElement {
   }
 
   onClickNull() {
-    // Jämför mot original null
-    // Om olika, spara null i set som is_null: true eller is_null: false
-    // Om värde saknas, lägg till från original
-
     $("label:first-child input", this).on("change", (e) => {
-      const new_preview = get.new.param(this, "preview");
-      const new_value = get.new.param(this, "value");
-      console.log(new_preview);
-      console.log(new_value);
-
-      const Update = new UpdateClass();
-      Update.initByContext(this);
-
-      //const origial_value = Update.old_value;
-
       const checked = e.currentTarget.checked;
+
+      set.new.nulled(checked, e.currentTarget);
+
       $("preview-null", this.parentElement).hidden = !checked;
       $("preview-value", this.parentElement).hidden = checked;
-
-      console.log(Update.data);
-
-      console.log(Update.isUniqueNull());
-
-      if (Update.isUniqueNull()) {
-        Update.storeAddIsNull(checked);
-      }
     });
   }
 }
@@ -3491,7 +3514,8 @@ class FieldText extends HTMLElement {
     this.onEnter();
     this.onEscape();
 
-    updatePreview($("input", this).value, this);
+    set.new.buffer(value, this);
+    updatePreview(value, this);
 
     $("input", this).focus();
     $("input", this).select();
@@ -3501,8 +3525,10 @@ class FieldText extends HTMLElement {
   onKeyup() {
     $("input", this).addEventListener("keyup", (e) => {
       const value = e.currentTarget.value;
-      set.pending.update(value, this);
+      set.new.buffer(value, this);
       updatePreview(value, this);
+
+      console.log(state);
     });
   }
 
