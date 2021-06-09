@@ -10,8 +10,9 @@ test:
         hidden: true
       content:
         passive: true
-        field: textarea
-        preview: textblock
+      success:
+        field: number
+        preview: number
   wp_many_columns:
     id: post_id
     columns:

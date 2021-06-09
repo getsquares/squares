@@ -5,10 +5,6 @@ cell-ring {
     @apply ring-gray-500;
   }
 
-  &[state="changed"] {
-    @apply ring-yellow-500;
-  }
-
   &[state="edit"] {
     @apply ring-blue-500;
   }

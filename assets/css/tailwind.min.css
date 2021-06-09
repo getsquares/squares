@@ -1083,10 +1083,6 @@ cell-ring[state="active"] {
 	--tw-ring-opacity: 1;
 	--tw-ring-color: rgba(115, 115, 115, var(--tw-ring-opacity));
 }
-cell-ring[state="changed"] {
-	--tw-ring-opacity: 1;
-	--tw-ring-color: rgba(234, 179, 8, var(--tw-ring-opacity));
-}
 cell-ring[state="edit"] {
 	--tw-ring-opacity: 1;
 	--tw-ring-color: rgba(59, 130, 246, var(--tw-ring-opacity));
@@ -1178,6 +1174,88 @@ table-cell[state="changed"] {
 	--tw-bg-opacity: 1;
 	background-color: rgba(254, 249, 195, var(--tw-bg-opacity));
 }
+table-cell[state="saving"] {
+	--tw-bg-opacity: 1;
+	background-color: rgba(254, 249, 195, var(--tw-bg-opacity));
+}
+table-cell[state="saving"]:before {
+	position: absolute;
+}
+table-cell[state="saving"]:before {
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+}
+table-cell[state="saving"]:before {
+	--tw-bg-opacity: 1;
+	background-color: rgba(220, 252, 231, var(--tw-bg-opacity));
+}
+table-cell[state="saving"]:before {
+      content: "";
+      -webkit-animation: saving 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+              animation: saving 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+table-cell[state="saved"]:before {
+	position: absolute;
+}
+table-cell[state="saved"]:before {
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+}
+table-cell[state="saved"]:before {
+	--tw-bg-opacity: 1;
+	background-color: rgba(220, 252, 231, var(--tw-bg-opacity));
+}
+table-cell[state="saved"]:before {
+      content: "";
+      -webkit-animation: fadeOut 1s ease-in-out both 0.5s;
+              animation: fadeOut 1s ease-in-out both 0.5s;
+    }
+table-cell[state="error"]:before {
+	position: absolute;
+}
+table-cell[state="error"]:before {
+	top: 0px;
+	right: 0px;
+	bottom: 0px;
+	left: 0px;
+}
+table-cell[state="error"]:before {
+	--tw-bg-opacity: 1;
+	background-color: rgba(254, 226, 226, var(--tw-bg-opacity));
+}
+table-cell[state="error"]:before {
+      content: "";
+    }
+@-webkit-keyframes saving {
+  50% {
+    opacity: 0;
+  }
+}
+@keyframes saving {
+  50% {
+    opacity: 0;
+  }
+}
+@-webkit-keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 .invisible {
 	visibility: hidden;
 }
@@ -1238,6 +1316,9 @@ table-cell[state="changed"] {
 }
 .inline-block {
 	display: inline-block;
+}
+.inline {
+	display: inline;
 }
 .flex {
 	display: flex;
@@ -1669,6 +1750,9 @@ table-cell[state="changed"] {
 }
 .uppercase {
 	text-transform: uppercase;
+}
+.capitalize {
+	text-transform: capitalize;
 }
 .italic {
 	font-style: italic;

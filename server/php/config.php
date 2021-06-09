@@ -23,7 +23,7 @@ return [
       'a_table_with_a_really_long_name' => [
         'id' => 'id',
         'fields' => [
-          'id' => [
+          'success' => [
             'type' => 'int'
           ]
         ]

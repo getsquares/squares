@@ -2,4 +2,44 @@ table-cell {
   &[state="changed"] {
     @apply bg-yellow-100;
   }
+
+  &[state="saving"] {
+    @apply bg-yellow-100;
+
+    &:before {
+      @apply inset-0 absolute bg-green-100;
+      content: "";
+      animation: saving 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+  }
+
+  &[state="saved"] {
+    &:before {
+      @apply inset-0 absolute bg-green-100;
+      content: "";
+      animation: fadeOut 1s ease-in-out both 0.5s;
+    }
+  }
+
+  &[state="error"] {
+    &:before {
+      @apply inset-0 absolute bg-red-100;
+      content: "";
+    }
+  }
+}
+
+@keyframes saving {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
 }

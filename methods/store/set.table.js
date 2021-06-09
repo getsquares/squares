@@ -38,8 +38,6 @@ set.new.data = (content, is_null, context) => {
 
   data[`${col}:value`] = value;
   data[`${col}:buffer`] = content;
-
-  console.log(data);
 };
 
 // Set nulled
@@ -91,13 +89,15 @@ set.new.updates = (data, context) => {
   }
 
   if (data[col] !== data[`${col}:value`]) {
-    state.databases[db].table_items[tb].updates[`${index}:${col}`] = "";
+    state.databases[db].table_items[tb].updates[`${index}:${col}`] = {
+      content: data[`${col}:value`],
+      col: col,
+      row: row,
+      index: index,
+    };
   } else {
     delete state.databases[db].table_items[tb].updates[`${index}:${col}`];
   }
-
-  console.log("UPDATES");
-  console.log(state.databases[db].table_items[tb]);
 };
 
 // Items

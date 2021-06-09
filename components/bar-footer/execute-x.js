@@ -13,22 +13,54 @@ class ExecuteX extends HTMLElement {
       <img-svg src="remixicon/flashlight-fill.svg" classes="w-5 h-5"></img-svg>
       Execute
     `;
-    //this.onClick();
+    this.onClick();
   }
 
   onClick() {
     this.addEventListener("click", () => {
-      this.run();
+      const main = this.closest("pane-main");
+      $$(`table-cell[state="changed"]`, main).forEach((el) => {
+        el.setAttribute("state", "saving");
+      });
+
+      this.run().then((data) => {
+        data.forEach((item) => {
+          const el = $(
+            `table-cell[row="${item.row}"][col="${item.col}"]`,
+            main
+          );
+
+          const table = get.tb.items(main.db, main.tb);
+          var field_type = "text";
+          if (table?.cols?.[item.col]?.config?.field !== undefined) {
+            field_type = table?.cols?.[item.col]?.config?.field;
+          }
+
+          console.log(table);
+          console.log(field_type);
+
+          if (item.success) {
+            el.setAttribute("state", "saved");
+          } else {
+            el.setAttribute("state", "error");
+          }
+        });
+      });
     });
   }
 
   async run() {
-    const ids = [1, 2, 3];
+    const main = this.closest("pane-main");
+    const db = main.db;
+    const tb = main.tb;
+
+    const items = get.tb.items(db, tb);
+
     try {
       const resp = await axios.post(
-        `http://localhost/tools/squares/server/php/queries/delete.php?database=asda&table=asda`,
+        `http://localhost/tools/squares/server/php/queries/insert.php?database=test&table=a_table_with_a_really_long_name`,
         {
-          ids: ids,
+          updates: items?.updates,
         }
       );
 

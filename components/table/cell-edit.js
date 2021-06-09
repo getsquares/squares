@@ -14,6 +14,13 @@ class CellEdit extends HTMLElement {
 
   populateEdit() {
     let html_null = "";
+
+    const table = get.tb.items(this.db, this.tb);
+    var field_type = "text";
+    if (table?.cols?.[this.col]?.config?.field !== undefined) {
+      field_type = table?.cols?.[this.col]?.config?.field;
+    }
+
     if (this.isNullable()) {
       html_null = `
         <label class="flex gap-2 items-center">
@@ -28,7 +35,7 @@ class CellEdit extends HTMLElement {
     }
     let html = `
       ${html_null}
-      <field-text></field-text>
+      <field-${field_type}></field-${field_type}>
     `;
 
     this.hidden = false;

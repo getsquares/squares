@@ -1,4 +1,4 @@
-class FieldText extends HTMLElement {
+class FieldNumber extends HTMLElement {
   constructor() {
     super();
   }
@@ -9,7 +9,7 @@ class FieldText extends HTMLElement {
 
   config() {
     return {
-      mode: "inline",
+      mode: "dropdown",
     };
   }
 
@@ -18,7 +18,7 @@ class FieldText extends HTMLElement {
     const value = get.tb.updated(db, tb, row, col, index);
 
     this.innerHTML = `
-      <input value="${value}" type="text" class="form-input leading-normal focus:outline-none focus:ring-0 focus:ring-offset-0 border focus:border-gray-300 border-gray-300 text-13 tp">
+      <input value="${value}" type="number" class="form-input leading-normal focus:outline-none focus:ring-0 focus:ring-offset-0 border focus:border-gray-300 border-gray-300 text-13 tp">
     `;
 
     this.onKeyup();
@@ -35,7 +35,7 @@ class FieldText extends HTMLElement {
   // On key up
   onKeyup() {
     $("input", this).addEventListener("keyup", (e) => {
-      const value = e.currentTarget.value;
+      const value = parseInt(e.currentTarget.value);
       set.new.buffer(value, this);
       updatePreview(value, this);
     });
@@ -77,4 +77,4 @@ class FieldText extends HTMLElement {
   }
 }
 
-customElements.define("field-text", FieldText);
+customElements.define("field-number", FieldNumber);

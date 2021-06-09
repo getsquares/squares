@@ -13,9 +13,29 @@ class TableCell extends HTMLElement {
     this.value = get.tb.value(this.db, this.tb, this.col, this.index);
     this.col_data = get.col.data(this.db, this.tb, this.col);
 
+    const table = get.tb.items(this.db, this.tb);
+    var field_type = "text";
+    if (table?.cols?.[this.col]?.config?.field !== undefined) {
+      field_type = table?.cols?.[this.col]?.config?.field;
+    }
+
+    const class_name = `Field${field_type.capitalize()}`;
+
+    const field = eval(`new ${class_name}()`);
+    let mode = "dropdown";
+
+    if (field?.config) {
+      mode = field.config().mode;
+
+      console.log(mode);
+
+      console.log(this);
+    }
+    //}
+
     this.innerHTML = `
       <cell-ring></cell-ring>
-      <cell-edit hidden></cell-edit>
+      <cell-edit-${mode} hidden></cell-edit>
       <cell-preview>
         <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
         <preview-value></preview-value>

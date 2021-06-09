@@ -42,6 +42,11 @@ class db {
     $this->results = $stmt->fetchAll($this->attr);
   }
 
+  function q($args = []) {
+    $stmt = $this->pdo->prepare($this->sql);
+    return $stmt->execute($args);
+  }
+
   // Connect to PDO
   function connect($db_name) {
     $data = $this->data($db_name);
