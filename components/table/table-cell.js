@@ -3,6 +3,10 @@ class TableCell extends HTMLElement {
     super();
   }
 
+  mode() {
+    return this.mode;
+  }
+
   connectedCallback() {
     this.db = this.closest("pane-main").getAttribute("db");
     this.tb = this.closest("pane-main").getAttribute("tb");
@@ -31,11 +35,15 @@ class TableCell extends HTMLElement {
 
       console.log(this);
     }
+
+    this.mode = mode;
+
+    this.setAttribute("mode", mode);
     //}
 
     this.innerHTML = `
       <cell-ring></cell-ring>
-      <cell-edit-${mode} hidden></cell-edit>
+      <cell-edit-${mode} hidden></cell-edit-${mode}>
       <cell-preview>
         <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
         <preview-value></preview-value>
@@ -141,8 +149,17 @@ class TableCell extends HTMLElement {
       in_field = false;
       return;
     }
+
+    /*const table = get.tb.items(this.db, this.tb);
+    var field_type = "text";
+    if (table?.cols?.[this.col]?.config?.field !== undefined) {
+      field_type = table?.cols?.[this.col]?.config?.field;
+    }*/
+
+    console.log(`cell-edit-${this.mode}`);
+
     $("cell-ring", this).setAttribute("state", "edit");
-    $("cell-edit", this).populateEdit();
+    $(`cell-edit-${this.mode}`, this).populateEdit();
   }
 
   handleCellActive(el) {
@@ -150,6 +167,15 @@ class TableCell extends HTMLElement {
 
     this.closest("pane-main").deactivateCells();
     $("cell-ring", el).setAttribute("state", "active");
+
+    state.row = el.getAttribute("row");
+    state.col = el.getAttribute("col");
+    state.index = el.getAttribute("index");
+
+    debug("row", state.row);
+    debug("col", state.col);
+    debug("index", state.index);
+    debug("cell", cellData());
   }
 
   xEdges() {

@@ -13,11 +13,6 @@ function updateNull(obj) {
   el_null.hidden = false;
 }
 
-// Set cell field state
-function setCellFieldState(state, el_cell) {
-  el_cell.querySelector("cell-edit").setAttribute("active", state);
-}
-
 // Set cell preview state
 function setCellPreviewState(state, el_cell) {
   el_cell.querySelector("cell-preview").setAttribute("active", state);

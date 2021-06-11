@@ -195,9 +195,13 @@ class PaneMain extends HTMLElement {
   }
 
   deactivateCellEdit() {
-    $$("cell-edit", this).forEach((el) => {
+    $$("cell-edit-dropdown, cell-edit-inline", this).forEach((el) => {
       el.innerHTML = "";
       el.hidden = true;
+    });
+
+    $$("cell-preview", this).forEach((el) => {
+      el.hidden = false;
     });
   }
 
@@ -248,7 +252,7 @@ class PaneMain extends HTMLElement {
       html += `
         <table-cell class="relative" col="${column}">
           <cell-ring></cell-ring>
-          <cell-edit></cell-edit>
+          <cell-edit-dropdown></cell-edit-dropdown>
           <cell-preview>
             <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
             <preview-value>${row[column]}</preview-value>

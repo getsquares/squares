@@ -1,13 +1,3 @@
-// Spread dom cell
-function spreadDomCell(el_table_cell) {
-  return (current = {
-    table_cell: el_table_cell,
-    cell_ring: el_table_cell.querySelector("cell-ring"),
-    cell_edit: el_table_cell.querySelector("cell-edit"),
-    cell_preview: el_table_cell.querySelector("cell-preview"),
-  });
-}
-
 // Reset store
 function resetStore() {
   dom.current = null;
@@ -17,11 +7,27 @@ function resetStore() {
   dom.down = null;
 }
 
-// Store dom cell
-function storeDomCell(el_table_cell) {
-  dom.current = spreadDomCell(el_table_cell);
-  dom.left = spreadDomCell(getDomCellLeft());
-  dom.right = spreadDomCell(getDomCellRight());
-  dom.down = spreadDomCell(getDomCellDown());
-  dom.up = spreadDomCell(getDomCellUp());
+function debug(name, message) {
+  if (!$(`debug-box [data-${name}] span`)) return;
+  $(`debug-box [data-${name}] span`).innerHTML = message;
+}
+
+function cellData() {
+  const cell =
+    state?.databases?.[state.database]?.table_items?.[state.table]?.rows?.[
+      state.index
+    ]?.[state.col];
+
+  return JSON.stringify(cell);
+  console.log(cell);
+
+  /*const root = context.closest("pane-main");
+  const table_cell = context.closest("table-cell");
+  const db = root.db;
+  const tb = root.tb;
+  const col = table_cell.getAttribute("col");
+  const row = table_cell.getAttribute("row");
+  const index = table_cell.getAttribute("index");
+
+  return { db, tb, col, row, index };*/
 }

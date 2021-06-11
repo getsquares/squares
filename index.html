@@ -33,6 +33,15 @@
 
     <modal-box></modal-box>
 
+    <debug-box class="text-sm bottom-0 absolute left-0 p-2 m-1 w-[400px] bg-red-100 border-2 border-red-500">
+      <div data-db><strong>db:</strong><span></span></div>
+      <div data-tb><strong>tb:</strong><span></span></div>
+      <div data-row><strong>row:</strong><span></span></div>
+      <div data-col><strong>col:</strong><span></span></div>
+      <div data-index><strong>index:</strong><span></span></div>
+      <div data-cell><strong>cell:</strong><span></span></div>
+    </debug-box>
+
     <script>
       function dump(myObject) {
         console.log(JSON.stringify(myObject, null, 4));
@@ -53,6 +62,8 @@
       var current = {
         database: null,
         table: null,
+        row: null,
+        col: null
       };
 
       var data = {};

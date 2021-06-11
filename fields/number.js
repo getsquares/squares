@@ -3,13 +3,9 @@ class FieldNumber extends HTMLElement {
     super();
   }
 
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
   config() {
     return {
-      mode: "dropdown",
+      mode: "inline",
     };
   }
 
@@ -17,13 +13,14 @@ class FieldNumber extends HTMLElement {
     const { db, tb, col, row, index } = get.dom.cell.data(this);
     const value = get.tb.updated(db, tb, row, col, index);
 
+    this.classList.add("w-full");
+
     this.innerHTML = `
-      <input value="${value}" type="number" class="form-input leading-normal focus:outline-none focus:ring-0 focus:ring-offset-0 border focus:border-gray-300 border-gray-300 text-13 tp">
+      <input value="${value}" type="number" class="w-full form-input leading-normal focus:outline-none focus:ring-0 bg-transparent focus:ring-offset-0 border-0 focus:border-gray-300 border-gray-300 text-13 tp">
     `;
 
     this.onKeyup();
     this.onEnter();
-    this.onEscape();
 
     set.new.buffer(value, this);
     updatePreview(value, this);
@@ -47,33 +44,6 @@ class FieldNumber extends HTMLElement {
       e.preventDefault();
       leaveEdit(e.currentTarget);
     });
-  }
-
-  onEscape() {
-    window.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-
-      const root = $(`pane-main[db=${state.database}][tb=${state.table}]`);
-      const el = $(`cell-ring[state="edit"]`, root);
-
-      if (!el) return;
-
-      e.preventDefault();
-      fieldClose(el);
-    });
-  }
-
-  // Enter
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    /*if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }*/
   }
 }
 

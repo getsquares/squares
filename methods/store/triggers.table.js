@@ -4,6 +4,9 @@ triggers.tb.activate = () => {
   $(`db-list`).deactivateTb();
   $(`db-list`).activateTb();
   $(`tab-items`).activate();
+
+  debug("db", state.database);
+  debug("tb", state.table);
 };
 
 triggers.tb.closeTab = (db, tb) => {

@@ -55,23 +55,36 @@ function eventCellKeydown() {
   window.addEventListener("keydown", (e) => {
     const root_el = $(`pane-main[db="${state.database}"][tb="${state.table}"]`);
     const active_ring = $('cell-ring[state="active"]', root_el);
-    if (!active_ring) return;
-    let table_cell = active_ring.closest("table-cell");
-    if (!table_cell) return;
+    const edit_ring = $('cell-ring[state="edit"]', root_el);
 
-    switch (e.key) {
-      case "ArrowLeft":
-      case "ArrowRight":
-      case "ArrowDown":
-      case "ArrowUp":
-        table_cell.handleStep(e.key);
-        break;
-      case "Tab":
-        table_cell.handleCellTab(e);
-        break;
-      case "Enter":
-        table_cell.handleCellEdit();
-        break;
+    if (active_ring) {
+      let table_cell = active_ring.closest("table-cell");
+      if (!table_cell) return;
+
+      switch (e.key) {
+        case "ArrowLeft":
+        case "ArrowRight":
+        case "ArrowDown":
+        case "ArrowUp":
+          table_cell.handleStep(e.key);
+          break;
+        case "Tab":
+          table_cell.handleCellTab(e);
+          break;
+        case "Enter":
+          table_cell.handleCellEdit();
+          break;
+      }
+    } else if (edit_ring) {
+      switch (e.key) {
+        case "Enter":
+          console.log("ENTER");
+          break;
+        case "Escape":
+          console.log("escape");
+          fieldClose(edit_ring);
+          break;
+      }
     }
   });
 }
@@ -156,11 +169,13 @@ function leaveEdit(el) {
 // Field close helper
 function fieldClose(el) {
   const table_cell = el.closest("table-cell");
+  const mode = table_cell.getAttribute("mode");
 
   if (!$('cell-ring[state="edit"]', table_cell)) return;
 
+  $("cell-preview", table_cell).hidden = false;
   $("cell-ring", table_cell).setAttribute("state", "active");
-  $("cell-edit", table_cell).hidden = true;
+  $(`cell-edit-${mode}`, table_cell).hidden = true;
 }
 
 // Update preview
@@ -176,11 +191,6 @@ function updateNull(obj) {
 
   const el_null = $("preview-null", obj.closest("table-cell"));
   el_null.hidden = false;
-}
-
-// Set cell field state
-function setCellFieldState(state, el_cell) {
-  el_cell.querySelector("cell-edit").setAttribute("active", state);
 }
 
 // Set cell preview state
@@ -216,16 +226,6 @@ function error(message) {}
 
 function success(message) {}
 
-// Spread dom cell
-function spreadDomCell(el_table_cell) {
-  return (current = {
-    table_cell: el_table_cell,
-    cell_ring: el_table_cell.querySelector("cell-ring"),
-    cell_edit: el_table_cell.querySelector("cell-edit"),
-    cell_preview: el_table_cell.querySelector("cell-preview"),
-  });
-}
-
 // Reset store
 function resetStore() {
   dom.current = null;
@@ -235,13 +235,29 @@ function resetStore() {
   dom.down = null;
 }
 
-// Store dom cell
-function storeDomCell(el_table_cell) {
-  dom.current = spreadDomCell(el_table_cell);
-  dom.left = spreadDomCell(getDomCellLeft());
-  dom.right = spreadDomCell(getDomCellRight());
-  dom.down = spreadDomCell(getDomCellDown());
-  dom.up = spreadDomCell(getDomCellUp());
+function debug(name, message) {
+  if (!$(`debug-box [data-${name}] span`)) return;
+  $(`debug-box [data-${name}] span`).innerHTML = message;
+}
+
+function cellData() {
+  const cell =
+    state?.databases?.[state.database]?.table_items?.[state.table]?.rows?.[
+      state.index
+    ]?.[state.col];
+
+  return JSON.stringify(cell);
+  console.log(cell);
+
+  /*const root = context.closest("pane-main");
+  const table_cell = context.closest("table-cell");
+  const db = root.db;
+  const tb = root.tb;
+  const col = table_cell.getAttribute("col");
+  const row = table_cell.getAttribute("row");
+  const index = table_cell.getAttribute("index");
+
+  return { db, tb, col, row, index };*/
 }
 
 class row {
@@ -735,6 +751,9 @@ triggers.tb.activate = () => {
   $(`db-list`).deactivateTb();
   $(`db-list`).activateTb();
   $(`tab-items`).activate();
+
+  debug("db", state.database);
+  debug("tb", state.table);
 };
 
 triggers.tb.closeTab = (db, tb) => {
@@ -1234,9 +1253,13 @@ class PaneMain extends HTMLElement {
   }
 
   deactivateCellEdit() {
-    $$("cell-edit", this).forEach((el) => {
+    $$("cell-edit-dropdown, cell-edit-inline", this).forEach((el) => {
       el.innerHTML = "";
       el.hidden = true;
+    });
+
+    $$("cell-preview", this).forEach((el) => {
+      el.hidden = false;
     });
   }
 
@@ -1287,7 +1310,7 @@ class PaneMain extends HTMLElement {
       html += `
         <table-cell class="relative" col="${column}">
           <cell-ring></cell-ring>
-          <cell-edit></cell-edit>
+          <cell-edit-dropdown></cell-edit-dropdown>
           <cell-preview>
             <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
             <preview-value>${row[column]}</preview-value>
@@ -3047,7 +3070,7 @@ class ModalLogout extends HTMLElement {
 
 customElements.define("modal-logout", ModalLogout);
 
-class CellEdit extends HTMLElement {
+class CellEditDropdown extends HTMLElement {
   constructor() {
     super();
   }
@@ -3112,11 +3135,84 @@ class CellEdit extends HTMLElement {
   }
 }
 
-customElements.define("cell-edit", CellEdit);
+customElements.define("cell-edit-dropdown", CellEditDropdown);
+
+class CellEditInline extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const { db, tb, col, row, index } = get.dom.cell.data(this);
+    this.db = db;
+    this.tb = tb;
+    this.col = col;
+    this.row = row;
+    this.index = index;
+  }
+
+  populateEdit() {
+    $("cell-preview", this.closest("table-cell")).hidden = true;
+
+    let html_null = "";
+
+    const table = get.tb.items(this.db, this.tb);
+    var field_type = "text";
+    if (table?.cols?.[this.col]?.config?.field !== undefined) {
+      field_type = table?.cols?.[this.col]?.config?.field;
+    }
+
+    if (this.isNullable()) {
+      html_null = `
+        <label class="flex gap-2 items-center">
+          <input
+            type="checkbox"
+            class="checkstyle-white form-checkbox"
+            ${this.value === null ? "checked" : ""}
+          >
+          <div class="italic pr-3">NULL</div>
+        </label>
+      `;
+    }
+    let html = `
+      <field-${field_type}></field-${field_type}>
+      ${html_null}
+    `;
+
+    this.hidden = false;
+    this.innerHTML = html;
+
+    if (!this.isNullable()) return;
+
+    this.onClickNull();
+  }
+
+  isNullable() {
+    const col = get.col.data(this.db, this.tb, this.col);
+    return col.meta.Null == "YES";
+  }
+
+  onClickNull() {
+    $("label:first-of-type input", this).on("change", (e) => {
+      const checked = e.currentTarget.checked;
+
+      set.new.nulled(checked, e.currentTarget);
+
+      $("preview-null", this.parentElement).hidden = !checked;
+      $("preview-value", this.parentElement).hidden = checked;
+    });
+  }
+}
+
+customElements.define("cell-edit-inline", CellEditInline);
 
 class TableCell extends HTMLElement {
   constructor() {
     super();
+  }
+
+  mode() {
+    return this.mode;
   }
 
   connectedCallback() {
@@ -3147,11 +3243,15 @@ class TableCell extends HTMLElement {
 
       console.log(this);
     }
+
+    this.mode = mode;
+
+    this.setAttribute("mode", mode);
     //}
 
     this.innerHTML = `
       <cell-ring></cell-ring>
-      <cell-edit-${mode} hidden></cell-edit>
+      <cell-edit-${mode} hidden></cell-edit-${mode}>
       <cell-preview>
         <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
         <preview-value></preview-value>
@@ -3257,8 +3357,17 @@ class TableCell extends HTMLElement {
       in_field = false;
       return;
     }
+
+    /*const table = get.tb.items(this.db, this.tb);
+    var field_type = "text";
+    if (table?.cols?.[this.col]?.config?.field !== undefined) {
+      field_type = table?.cols?.[this.col]?.config?.field;
+    }*/
+
+    console.log(`cell-edit-${this.mode}`);
+
     $("cell-ring", this).setAttribute("state", "edit");
-    $("cell-edit", this).populateEdit();
+    $(`cell-edit-${this.mode}`, this).populateEdit();
   }
 
   handleCellActive(el) {
@@ -3266,6 +3375,15 @@ class TableCell extends HTMLElement {
 
     this.closest("pane-main").deactivateCells();
     $("cell-ring", el).setAttribute("state", "active");
+
+    state.row = el.getAttribute("row");
+    state.col = el.getAttribute("col");
+    state.index = el.getAttribute("index");
+
+    debug("row", state.row);
+    debug("col", state.col);
+    debug("index", state.index);
+    debug("cell", cellData());
   }
 
   xEdges() {
@@ -3557,13 +3675,9 @@ class FieldNumber extends HTMLElement {
     super();
   }
 
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
   config() {
     return {
-      mode: "dropdown",
+      mode: "inline",
     };
   }
 
@@ -3571,13 +3685,14 @@ class FieldNumber extends HTMLElement {
     const { db, tb, col, row, index } = get.dom.cell.data(this);
     const value = get.tb.updated(db, tb, row, col, index);
 
+    this.classList.add("w-full");
+
     this.innerHTML = `
-      <input value="${value}" type="number" class="form-input leading-normal focus:outline-none focus:ring-0 focus:ring-offset-0 border focus:border-gray-300 border-gray-300 text-13 tp">
+      <input value="${value}" type="number" class="w-full form-input leading-normal focus:outline-none focus:ring-0 bg-transparent focus:ring-offset-0 border-0 focus:border-gray-300 border-gray-300 text-13 tp">
     `;
 
     this.onKeyup();
     this.onEnter();
-    this.onEscape();
 
     set.new.buffer(value, this);
     updatePreview(value, this);
@@ -3602,33 +3717,6 @@ class FieldNumber extends HTMLElement {
       leaveEdit(e.currentTarget);
     });
   }
-
-  onEscape() {
-    window.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-
-      const root = $(`pane-main[db=${state.database}][tb=${state.table}]`);
-      const el = $(`cell-ring[state="edit"]`, root);
-
-      if (!el) return;
-
-      e.preventDefault();
-      fieldClose(el);
-    });
-  }
-
-  // Enter
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    /*if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }*/
-  }
 }
 
 customElements.define("field-number", FieldNumber);
@@ -3638,13 +3726,9 @@ class FieldText extends HTMLElement {
     super();
   }
 
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
   config() {
     return {
-      mode: "inline",
+      mode: "dropdown",
     };
   }
 
@@ -3658,7 +3742,6 @@ class FieldText extends HTMLElement {
 
     this.onKeyup();
     this.onEnter();
-    this.onEscape();
 
     set.new.buffer(value, this);
     updatePreview(value, this);
@@ -3682,33 +3765,6 @@ class FieldText extends HTMLElement {
       e.preventDefault();
       leaveEdit(e.currentTarget);
     });
-  }
-
-  onEscape() {
-    window.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-
-      const root = $(`pane-main[db=${state.database}][tb=${state.table}]`);
-      const el = $(`cell-ring[state="edit"]`, root);
-
-      if (!el) return;
-
-      e.preventDefault();
-      fieldClose(el);
-    });
-  }
-
-  // Enter
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    /*if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }*/
   }
 }
 

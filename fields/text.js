@@ -3,13 +3,9 @@ class FieldText extends HTMLElement {
     super();
   }
 
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
   config() {
     return {
-      mode: "inline",
+      mode: "dropdown",
     };
   }
 
@@ -23,7 +19,6 @@ class FieldText extends HTMLElement {
 
     this.onKeyup();
     this.onEnter();
-    this.onEscape();
 
     set.new.buffer(value, this);
     updatePreview(value, this);
@@ -47,33 +42,6 @@ class FieldText extends HTMLElement {
       e.preventDefault();
       leaveEdit(e.currentTarget);
     });
-  }
-
-  onEscape() {
-    window.addEventListener("keydown", (e) => {
-      if (e.key !== "Escape") return;
-
-      const root = $(`pane-main[db=${state.database}][tb=${state.table}]`);
-      const el = $(`cell-ring[state="edit"]`, root);
-
-      if (!el) return;
-
-      e.preventDefault();
-      fieldClose(el);
-    });
-  }
-
-  // Enter
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    /*if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }*/
   }
 }
 

@@ -3,23 +3,36 @@ function eventCellKeydown() {
   window.addEventListener("keydown", (e) => {
     const root_el = $(`pane-main[db="${state.database}"][tb="${state.table}"]`);
     const active_ring = $('cell-ring[state="active"]', root_el);
-    if (!active_ring) return;
-    let table_cell = active_ring.closest("table-cell");
-    if (!table_cell) return;
+    const edit_ring = $('cell-ring[state="edit"]', root_el);
 
-    switch (e.key) {
-      case "ArrowLeft":
-      case "ArrowRight":
-      case "ArrowDown":
-      case "ArrowUp":
-        table_cell.handleStep(e.key);
-        break;
-      case "Tab":
-        table_cell.handleCellTab(e);
-        break;
-      case "Enter":
-        table_cell.handleCellEdit();
-        break;
+    if (active_ring) {
+      let table_cell = active_ring.closest("table-cell");
+      if (!table_cell) return;
+
+      switch (e.key) {
+        case "ArrowLeft":
+        case "ArrowRight":
+        case "ArrowDown":
+        case "ArrowUp":
+          table_cell.handleStep(e.key);
+          break;
+        case "Tab":
+          table_cell.handleCellTab(e);
+          break;
+        case "Enter":
+          table_cell.handleCellEdit();
+          break;
+      }
+    } else if (edit_ring) {
+      switch (e.key) {
+        case "Enter":
+          console.log("ENTER");
+          break;
+        case "Escape":
+          console.log("escape");
+          fieldClose(edit_ring);
+          break;
+      }
     }
   });
 }

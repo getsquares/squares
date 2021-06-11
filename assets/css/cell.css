@@ -6,7 +6,7 @@ cell-ring {
   }
 
   &[state="edit"] {
-    @apply ring-blue-500;
+    @apply ring-blue-500 pointer-events-none;
   }
 
   &[state="active"],
@@ -20,6 +20,10 @@ cell-preview {
   @apply relative block select-none tp leading-normal;
 }
 
-cell-edit {
+cell-edit-dropdown {
   @apply z-20 flex flex-col gap-2 absolute bg-gray-100 shadow-md top-full p-4 left-0 mt-0.5;
+}
+
+cell-edit-inline {
+  @apply relative z-30 flex gap-2;
 }

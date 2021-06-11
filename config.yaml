@@ -13,6 +13,9 @@ test:
       success:
         field: number
         preview: number
+      extrafield:
+        field: number
+        preview: number
   wp_many_columns:
     id: post_id
     columns:

@@ -1,4 +1,4 @@
-class CellEdit extends HTMLElement {
+class CellEditDropdown extends HTMLElement {
   constructor() {
     super();
   }
@@ -63,4 +63,4 @@ class CellEdit extends HTMLElement {
   }
 }
 
-customElements.define("cell-edit", CellEdit);
+customElements.define("cell-edit-dropdown", CellEditDropdown);
