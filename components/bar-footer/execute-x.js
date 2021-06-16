@@ -11,7 +11,7 @@ class ExecuteX extends HTMLElement {
     this.classList.add("btn", "btn-primary");
     this.innerHTML = `
       <img-svg src="remixicon/flashlight-fill.svg" classes="w-5 h-5"></img-svg>
-      Execute
+      Commit
     `;
     this.onClick();
   }
@@ -24,11 +24,14 @@ class ExecuteX extends HTMLElement {
       });
 
       this.run().then((data) => {
+        console.log(data);
         data.forEach((item) => {
           const el = $(
             `table-cell[row="${item.row}"][col="${item.col}"]`,
             main
           );
+
+          const index = el.getAttribute("index");
 
           const table = get.tb.items(main.db, main.tb);
           var field_type = "text";
@@ -36,15 +39,29 @@ class ExecuteX extends HTMLElement {
             field_type = table?.cols?.[item.col]?.config?.field;
           }
 
-          console.log(table);
-          console.log(field_type);
+          const table_data =
+            state?.databases?.[state.database]?.table_items?.[state.table];
+          table_data.rows[index][item.col] = item.content;
 
-          if (item.success) {
-            el.setAttribute("state", "saved");
+          const cell_state = item.success && item.match ? "saved" : "error";
+          el.setAttribute("state", cell_state);
+
+          if (item.success && item.match) {
+            console.log("SUCCESS");
+            delete table_data.updates[`${index}:${item.col}`];
           } else {
-            el.setAttribute("state", "error");
+            // UPPDATERA Update
+
+            table_data.updates[`${index}:${item.col}`].success = item.success;
+            table_data.updates[`${index}:${item.col}`].match = item.match;
+            //table_data.updates[`${index}:${item.col}`].content = item.content;
+            /*table_data.updates[`${index}:${item.col}`]["content:after"] =
+              item["content:after"];*/
+            table_data.updates[`${index}:${item.col}`].message = item.message;
           }
         });
+
+        debug("response", JSON.stringify(data, null, 4), "textarea");
       });
     });
   }

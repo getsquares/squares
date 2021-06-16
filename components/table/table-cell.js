@@ -30,10 +30,6 @@ class TableCell extends HTMLElement {
 
     if (field?.config) {
       mode = field.config().mode;
-
-      console.log(mode);
-
-      console.log(this);
     }
 
     this.mode = mode;
@@ -156,8 +152,6 @@ class TableCell extends HTMLElement {
       field_type = table?.cols?.[this.col]?.config?.field;
     }*/
 
-    console.log(`cell-edit-${this.mode}`);
-
     $("cell-ring", this).setAttribute("state", "edit");
     $(`cell-edit-${this.mode}`, this).populateEdit();
   }
@@ -175,7 +169,8 @@ class TableCell extends HTMLElement {
     debug("row", state.row);
     debug("col", state.col);
     debug("index", state.index);
-    debug("cell", cellData());
+
+    debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
   }
 
   xEdges() {

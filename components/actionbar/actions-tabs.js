@@ -20,10 +20,12 @@ class ActionsTabs extends HTMLElement {
         <actions-tab name="order-x" label="Order" icon="remixicon/arrow-up-down.svg"></actions-tab>
       </div>
       <div class="flex gap-1">
+      <error-x></error-x>
         <actions-btn name="refresh" label="Refresh" icon="material-icons/refresh.svg"></actions-btn>
         <actions-add></actions-add>
         <execute-x></execute-x>
         <revert-x></revert-x>
+        
       </div>
     `;
   }

@@ -4,11 +4,11 @@ class MessageItem extends HTMLElement {
   }
 
   connectedCallback() {
-    const state = this.getAttribute("state");
+    const message_state = this.getAttribute("state");
     const message = this.innerHTML;
     let state_class = "";
 
-    switch (state) {
+    switch (message_state) {
       case "success":
         state_class = "bg-green-600";
         break;

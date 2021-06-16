@@ -29,7 +29,6 @@ function eventCellKeydown() {
           console.log("ENTER");
           break;
         case "Escape":
-          console.log("escape");
           fieldClose(edit_ring);
           break;
       }

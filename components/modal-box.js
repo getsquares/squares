@@ -8,7 +8,7 @@ class ModalBox extends HTMLElement {
     this.innerHTML = `
       <div
         data-backdrop
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        class="fixed inset-0 z-[500000] flex items-center justify-center bg-black bg-opacity-50"
       >
         <div class="flex items-start w-full max-w-lg bg-white shadow-md">
           <div class="p-8 flex-1" data-modal-content>

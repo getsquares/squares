@@ -23,22 +23,23 @@ if(!isset($config[$args->database]))
 if(!is_array($config[$args->database]))
   header::error('Tables are not an array');
 
-
 $raw = file_get_contents("php://input");
 $data = json_decode($raw);
 
 $out = [];
+$db = new db();
+$db->connect($args->database);
 
 foreach($data->updates as $item) {
-  $db = new db();
+  
   $col = $item->col;
   $row = $item->row;
   $content = $item->content;
-
-  $db->connect($args->database);
+  
   $db->sql("
     UPDATE $args->table
     SET $col = :content
+    fdsfsd
     WHERE $id_col = :id
   ");
   $db->attr(PDO::FETCH_GROUP|PDO::FETCH_OBJ);
@@ -47,6 +48,12 @@ foreach($data->updates as $item) {
     "$id_col" => $row
   ];
   $success = $db->q($params);
+
+  $message_temp = $db->message != "" ? $db->message . "\n\n" : "";
+
+  if(!$db->success) {
+    $success = $db->success;
+  }
 
   $db->sql("
     SELECT $col AS content
@@ -59,13 +66,15 @@ foreach($data->updates as $item) {
   ];
 
   $db->attr(PDO::FETCH_OBJ);
-
   $db->query($params);
 
-  //var_dump($db->results);
+  $messages = $message_temp . $db->message;
 
-  // Hämta värdet med select
-  // Kolla diff
+  if(!$db->success) {
+    $success = $db->success;
+  }
+
+  $success = $success ? true : false;
 
   $out[] = [
     'success' => $success,
@@ -73,7 +82,8 @@ foreach($data->updates as $item) {
     'row' => $row,
     'content' => $content,
     'content:after' => $db->results[0]->content,
-    'match' => $content === $db->results[0]->content
+    'match' => $content === $db->results[0]->content,
+    'message' => $messages
   ];
 }
 

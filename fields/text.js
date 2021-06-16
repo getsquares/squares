@@ -46,3 +46,5 @@ class FieldText extends HTMLElement {
 }
 
 customElements.define("field-text", FieldText);
+
+set.field.config("text", { mode: "dropdown" });

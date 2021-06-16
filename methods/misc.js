@@ -7,27 +7,48 @@ function resetStore() {
   dom.down = null;
 }
 
-function debug(name, message) {
-  if (!$(`debug-box [data-${name}] span`)) return;
-  $(`debug-box [data-${name}] span`).innerHTML = message;
+function debug(name, message, type = "span") {
+  if (!$(`debug-box [data-${name}] ${type}`)) return;
+  $(`debug-box [data-${name}] ${type}`).innerHTML = message;
 }
 
 function cellData() {
-  const cell =
-    state?.databases?.[state.database]?.table_items?.[state.table]?.rows?.[
-      state.index
-    ]?.[state.col];
+  const table = state?.databases?.[state.database]?.table_items?.[state.table];
+  const cell_value = table?.rows?.[state.index]?.[state.col];
+  const cell_meta = table?.cols?.[state.col]?.meta;
+  let cell_config = table?.cols?.[state.col]?.config;
 
-  return JSON.stringify(cell);
-  console.log(cell);
+  // Saved data
+  // Efter saved uppdateras inte value
 
-  /*const root = context.closest("pane-main");
-  const table_cell = context.closest("table-cell");
-  const db = root.db;
-  const tb = root.tb;
-  const col = table_cell.getAttribute("col");
-  const row = table_cell.getAttribute("row");
-  const index = table_cell.getAttribute("index");
+  const updates = table?.updates?.[`${state.index}:${state.col}`];
 
-  return { db, tb, col, row, index };*/
+  const default_cell_config = {
+    field: "text",
+    preview: "text",
+  };
+
+  const default_field_config = {
+    mode: "dropdown",
+  };
+
+  cell_config = { ...default_cell_config, ...cell_config };
+
+  field_config = {
+    ...default_field_config,
+    ...state?.fields[cell_config.field]?.config,
+  };
+
+  const meta = {
+    is_nullable: cell_meta["Null"] === "YES" ? true : false,
+    type: cell_meta["Type"],
+  };
+
+  return {
+    value: cell_value,
+    meta: meta,
+    cell_config: cell_config,
+    field_config: field_config,
+    updates: updates,
+  };
 }

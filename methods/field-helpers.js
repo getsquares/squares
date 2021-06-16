@@ -3,6 +3,8 @@ function leaveEdit(el) {
   in_field = true;
 
   fieldClose(el);
+
+  debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
 }
 
 // Field close helper

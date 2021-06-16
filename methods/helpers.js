@@ -1,6 +1,8 @@
 // Update preview
 function updatePreview(html, obj) {
   $("preview-value", obj.closest("table-cell")).innerHTML = html;
+
+  debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
 }
 
 function updateNull(obj) {

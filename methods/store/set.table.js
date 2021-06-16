@@ -1,6 +1,7 @@
 set.table = {};
 set.pending = {};
 set.new = {};
+set.field = {};
 
 // Order
 set.table.order = (content, db) => {
@@ -107,6 +108,11 @@ set.table.items = (content, db) => {
   });
 
   triggers.tb.items(db);
+};
+
+set.field.config = (name, config) => {
+  state.fields[name] = {};
+  state.fields[name].config = config;
 };
 
 var test = [];

@@ -48,3 +48,5 @@ class FieldNumber extends HTMLElement {
 }
 
 customElements.define("field-number", FieldNumber);
+
+set.field.config("number", { mode: "inline" });

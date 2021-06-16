@@ -19,4 +19,5 @@ var state = {
   databases_order: [],
   databases: {},
   tables: [],
+  fields: {},
 };

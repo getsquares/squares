@@ -44,6 +44,15 @@
   @apply bg-red-800;
 }
 
+/* Error */
+.btn-error {
+  @apply bg-red-100 text-red-800 border-red-300;
+}
+
+.btn-error:hover {
+  @apply bg-red-200;
+}
+
 /* Clone */
 .btn-clone {
   @apply text-yellow-800 bg-yellow-100 border-yellow-300;

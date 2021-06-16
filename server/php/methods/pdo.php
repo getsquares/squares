@@ -4,6 +4,8 @@ class db {
   public $attr = null;
   public $sql = null;
   public $pdo = null;
+  public $success = true;
+  public $message = "";
 
   function __construct() {
     $this->config = $this->load();
@@ -37,14 +39,26 @@ class db {
   }
 
   function query($args = []) {
-    $stmt = $this->pdo->prepare($this->sql);
-    $stmt->execute($args);
-    $this->results = $stmt->fetchAll($this->attr);
+    try {
+      $stmt = $this->pdo->prepare($this->sql);
+      $stmt->execute($args);
+      $this->results = $stmt->fetchAll($this->attr);
+      $this->message = "";
+    } catch(PDOException $e) {
+      $this->success = false;
+      $this->message = $e->getMessage();
+    }
   }
 
   function q($args = []) {
-    $stmt = $this->pdo->prepare($this->sql);
-    return $stmt->execute($args);
+    try {
+      $stmt = $this->pdo->prepare($this->sql);
+      $this->message = "";
+      return $stmt->execute($args);
+    } catch(PDOException $e) {
+      $this->success = false;
+      $this->message = $e->getMessage();
+    }
   }
 
   // Connect to PDO

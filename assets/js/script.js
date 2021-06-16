@@ -19,6 +19,7 @@ var state = {
   databases_order: [],
   databases: {},
   tables: [],
+  fields: {},
 };
 
 function tabClassActive() {
@@ -81,7 +82,6 @@ function eventCellKeydown() {
           console.log("ENTER");
           break;
         case "Escape":
-          console.log("escape");
           fieldClose(edit_ring);
           break;
       }
@@ -164,6 +164,8 @@ function leaveEdit(el) {
   in_field = true;
 
   fieldClose(el);
+
+  debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
 }
 
 // Field close helper
@@ -181,6 +183,8 @@ function fieldClose(el) {
 // Update preview
 function updatePreview(html, obj) {
   $("preview-value", obj.closest("table-cell")).innerHTML = html;
+
+  debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
 }
 
 function updateNull(obj) {
@@ -235,29 +239,50 @@ function resetStore() {
   dom.down = null;
 }
 
-function debug(name, message) {
-  if (!$(`debug-box [data-${name}] span`)) return;
-  $(`debug-box [data-${name}] span`).innerHTML = message;
+function debug(name, message, type = "span") {
+  if (!$(`debug-box [data-${name}] ${type}`)) return;
+  $(`debug-box [data-${name}] ${type}`).innerHTML = message;
 }
 
 function cellData() {
-  const cell =
-    state?.databases?.[state.database]?.table_items?.[state.table]?.rows?.[
-      state.index
-    ]?.[state.col];
+  const table = state?.databases?.[state.database]?.table_items?.[state.table];
+  const cell_value = table?.rows?.[state.index]?.[state.col];
+  const cell_meta = table?.cols?.[state.col]?.meta;
+  let cell_config = table?.cols?.[state.col]?.config;
 
-  return JSON.stringify(cell);
-  console.log(cell);
+  // Saved data
+  // Efter saved uppdateras inte value
 
-  /*const root = context.closest("pane-main");
-  const table_cell = context.closest("table-cell");
-  const db = root.db;
-  const tb = root.tb;
-  const col = table_cell.getAttribute("col");
-  const row = table_cell.getAttribute("row");
-  const index = table_cell.getAttribute("index");
+  const updates = table?.updates?.[`${state.index}:${state.col}`];
 
-  return { db, tb, col, row, index };*/
+  const default_cell_config = {
+    field: "text",
+    preview: "text",
+  };
+
+  const default_field_config = {
+    mode: "dropdown",
+  };
+
+  cell_config = { ...default_cell_config, ...cell_config };
+
+  field_config = {
+    ...default_field_config,
+    ...state?.fields[cell_config.field]?.config,
+  };
+
+  const meta = {
+    is_nullable: cell_meta["Null"] === "YES" ? true : false,
+    type: cell_meta["Type"],
+  };
+
+  return {
+    value: cell_value,
+    meta: meta,
+    cell_config: cell_config,
+    field_config: field_config,
+    updates: updates,
+  };
 }
 
 class row {
@@ -586,6 +611,7 @@ set.database.toggleState = (db) => {
 set.table = {};
 set.pending = {};
 set.new = {};
+set.field = {};
 
 // Order
 set.table.order = (content, db) => {
@@ -694,6 +720,11 @@ set.table.items = (content, db) => {
   triggers.tb.items(db);
 };
 
+set.field.config = (name, config) => {
+  state.fields[name] = {};
+  state.fields[name].config = config;
+};
+
 var test = [];
 
 test[3] = "Hello";
@@ -708,6 +739,7 @@ triggers.cell.state = (data, col, context) => {
   if (data[col] !== data[`${col}:value`]) {
     context.closest("table-cell").setAttribute("state", "changed");
   } else {
+    if (context.closest("table-cell").getAttribute("state") == "error") return;
     context.closest("table-cell").removeAttribute("state");
   }
 };
@@ -982,11 +1014,11 @@ class MessageItem extends HTMLElement {
   }
 
   connectedCallback() {
-    const state = this.getAttribute("state");
+    const message_state = this.getAttribute("state");
     const message = this.innerHTML;
     let state_class = "";
 
-    switch (state) {
+    switch (message_state) {
       case "success":
         state_class = "bg-green-600";
         break;
@@ -1019,7 +1051,7 @@ class ModalBox extends HTMLElement {
     this.innerHTML = `
       <div
         data-backdrop
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+        class="fixed inset-0 z-[500000] flex items-center justify-center bg-black bg-opacity-50"
       >
         <div class="flex items-start w-full max-w-lg bg-white shadow-md">
           <div class="p-8 flex-1" data-modal-content>
@@ -1399,6 +1431,140 @@ class RadioItem extends HTMLElement {
 
 customElements.define("radio-item", RadioItem);
 
+class ColumnsItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const checked = this.getAttribute("checked");
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, checked);
+    this.onClick();
+  }
+
+  template(name, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${name}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange();
+      }
+    }
+  }
+
+  onClick() {
+    $("input", this).addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange() {
+    //console.log("Something has changed");
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("columns-item", ColumnsItem);
+
+class ColumnsX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
+    this.hidden = true;
+    this.innerHTML = this.template("Columns");
+  }
+
+  checkboxes() {
+    const db = this.closest("pane-main").getAttribute("database");
+    const tb = this.closest("pane-main").getAttribute("table");
+    const data = get.tb.items(db, tb);
+    const data_cols_all = data.cols_all;
+    const data_cols_active = data.cols_order;
+    let html = "";
+
+    data_cols_all.forEach((item) => {
+      const checked = data_cols_active.includes(item);
+      const checked_html = checked ? `checked="true"` : "";
+      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
+    });
+
+    return html;
+  }
+
+  template(title) {
+    return `
+      <div class="font-bold">${title}</div>
+      <div class="flex gap-x-4 gap-y-1 flex-wrap">
+        ${this.checkboxes()}
+      </div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("columns-x", ColumnsX);
+
 class ActionsAdd extends HTMLElement {
   constructor() {
     super();
@@ -1669,10 +1835,12 @@ class ActionsTabs extends HTMLElement {
         <actions-tab name="order-x" label="Order" icon="remixicon/arrow-up-down.svg"></actions-tab>
       </div>
       <div class="flex gap-1">
+      <error-x></error-x>
         <actions-btn name="refresh" label="Refresh" icon="material-icons/refresh.svg"></actions-btn>
         <actions-add></actions-add>
         <execute-x></execute-x>
         <revert-x></revert-x>
+        
       </div>
     `;
   }
@@ -1728,140 +1896,6 @@ class PaneClose extends HTMLElement {
 }
 
 customElements.define("pane-close", PaneClose);
-
-class ColumnsItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["checked"];
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const checked = this.getAttribute("checked");
-    this.classList.add("flex");
-
-    this.innerHTML = this.template(name, checked);
-    this.onClick();
-  }
-
-  template(name, checked) {
-    return `
-      <label class="btn btn-borderless">
-        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
-      checked ? "checked" : ""
-    }>
-        ${name}
-      </label>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "checked") {
-        this.onChange();
-      }
-    }
-  }
-
-  onClick() {
-    $("input", this).addEventListener("change", (e) => {
-      if (e.currentTarget.checked) {
-        this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-  }
-
-  onChange() {
-    //console.log("Something has changed");
-  }
-
-  activate() {
-    this.setAttribute("checked", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("checked");
-  }
-}
-
-customElements.define("columns-item", ColumnsItem);
-
-class ColumnsX extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
-    this.hidden = true;
-    this.innerHTML = this.template("Columns");
-  }
-
-  checkboxes() {
-    const db = this.closest("pane-main").getAttribute("database");
-    const tb = this.closest("pane-main").getAttribute("table");
-    const data = get.tb.items(db, tb);
-    const data_cols_all = data.cols_all;
-    const data_cols_active = data.cols_order;
-    let html = "";
-
-    data_cols_all.forEach((item) => {
-      const checked = data_cols_active.includes(item);
-      const checked_html = checked ? `checked="true"` : "";
-      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
-    });
-
-    return html;
-  }
-
-  template(title) {
-    return `
-      <div class="font-bold">${title}</div>
-      <div class="flex gap-x-4 gap-y-1 flex-wrap">
-        ${this.checkboxes()}
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.classList.remove("hidden");
-  }
-
-  thisDeactivate() {
-    this.classList.add("hidden");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("columns-x", ColumnsX);
 
 class FilterItem extends HTMLElement {
   constructor() {
@@ -2364,6 +2398,33 @@ class DeleteX extends HTMLElement {
 
 customElements.define("delete-x", DeleteX);
 
+class ErrorX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.classList.add("btn", "btn-error");
+    this.innerHTML = `
+      <img-svg src="remixicon/error-warning-line.svg" classes="w-5 h-5"></img-svg>
+      Error in selected cell
+    `;
+    this.onClick();
+  }
+
+  onClick() {
+    this.addEventListener("click", () => {
+      console.log(cellData());
+      $("[data-modal-content]").innerHTML = `<modal-error></modal-error>`;
+      $("modal-error [data-error-message]").innerText =
+        cellData().updates.message;
+      $("modal-box").activate();
+    });
+  }
+}
+
+customElements.define("error-x", ErrorX);
+
 class ExecuteX extends HTMLElement {
   constructor() {
     super();
@@ -2377,7 +2438,7 @@ class ExecuteX extends HTMLElement {
     this.classList.add("btn", "btn-primary");
     this.innerHTML = `
       <img-svg src="remixicon/flashlight-fill.svg" classes="w-5 h-5"></img-svg>
-      Execute
+      Commit
     `;
     this.onClick();
   }
@@ -2390,11 +2451,14 @@ class ExecuteX extends HTMLElement {
       });
 
       this.run().then((data) => {
+        console.log(data);
         data.forEach((item) => {
           const el = $(
             `table-cell[row="${item.row}"][col="${item.col}"]`,
             main
           );
+
+          const index = el.getAttribute("index");
 
           const table = get.tb.items(main.db, main.tb);
           var field_type = "text";
@@ -2402,15 +2466,29 @@ class ExecuteX extends HTMLElement {
             field_type = table?.cols?.[item.col]?.config?.field;
           }
 
-          console.log(table);
-          console.log(field_type);
+          const table_data =
+            state?.databases?.[state.database]?.table_items?.[state.table];
+          table_data.rows[index][item.col] = item.content;
 
-          if (item.success) {
-            el.setAttribute("state", "saved");
+          const cell_state = item.success && item.match ? "saved" : "error";
+          el.setAttribute("state", cell_state);
+
+          if (item.success && item.match) {
+            console.log("SUCCESS");
+            delete table_data.updates[`${index}:${item.col}`];
           } else {
-            el.setAttribute("state", "error");
+            // UPPDATERA Update
+
+            table_data.updates[`${index}:${item.col}`].success = item.success;
+            table_data.updates[`${index}:${item.col}`].match = item.match;
+            //table_data.updates[`${index}:${item.col}`].content = item.content;
+            /*table_data.updates[`${index}:${item.col}`]["content:after"] =
+              item["content:after"];*/
+            table_data.updates[`${index}:${item.col}`].message = item.message;
           }
         });
+
+        debug("response", JSON.stringify(data, null, 4), "textarea");
       });
     });
   }
@@ -3070,6 +3148,26 @@ class ModalLogout extends HTMLElement {
 
 customElements.define("modal-logout", ModalLogout);
 
+class ModalError extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+    <div class="flex flex-col flex-1 gap-6">      
+      <h2 class="text-xl font-bold">Error</h2>
+      <p>
+        The selected cell has errors.
+      </p>
+      <div data-error-message class="border border-red-300 h-[300px] focus:outline-none focus:border-red-300 w-full p-2 bg-red-100 text-red-800">dfsf</div>
+    </div>
+    `;
+  }
+}
+
+customElements.define("modal-error", ModalError);
+
 class CellEditDropdown extends HTMLElement {
   constructor() {
     super();
@@ -3238,10 +3336,6 @@ class TableCell extends HTMLElement {
 
     if (field?.config) {
       mode = field.config().mode;
-
-      console.log(mode);
-
-      console.log(this);
     }
 
     this.mode = mode;
@@ -3364,8 +3458,6 @@ class TableCell extends HTMLElement {
       field_type = table?.cols?.[this.col]?.config?.field;
     }*/
 
-    console.log(`cell-edit-${this.mode}`);
-
     $("cell-ring", this).setAttribute("state", "edit");
     $(`cell-edit-${this.mode}`, this).populateEdit();
   }
@@ -3383,7 +3475,8 @@ class TableCell extends HTMLElement {
     debug("row", state.row);
     debug("col", state.col);
     debug("index", state.index);
-    debug("cell", cellData());
+
+    debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
   }
 
   xEdges() {
@@ -3721,6 +3814,8 @@ class FieldNumber extends HTMLElement {
 
 customElements.define("field-number", FieldNumber);
 
+set.field.config("number", { mode: "inline" });
+
 class FieldText extends HTMLElement {
   constructor() {
     super();
@@ -3769,4 +3864,6 @@ class FieldText extends HTMLElement {
 }
 
 customElements.define("field-text", FieldText);
+
+set.field.config("text", { mode: "dropdown" });
 
