@@ -77,6 +77,8 @@ set.new.buffer = (content, context) => {
     data[`${col}:value`] = content;
   }
 
+  console.log(data);
+
   set.new.updates(data, context);
 
   triggers.cell.state(data, col, context);
@@ -90,14 +92,28 @@ set.new.updates = (data, context) => {
   }
 
   if (data[col] !== data[`${col}:value`]) {
-    state.databases[db].table_items[tb].updates[`${index}:${col}`] = {
-      content: data[`${col}:value`],
-      col: col,
-      row: row,
-      index: index,
-    };
+    let current = state.databases[db].table_items[tb].updates;
+
+    if (!current[`${index}:${col}`]) {
+      current[`${index}:${col}`] = {};
+    }
+    current[`${index}:${col}`].content = data[`${col}:value`];
+    current[`${index}:${col}`].col = col;
+    current[`${index}:${col}`].row = row;
+    current[`${index}:${col}`].index = index;
+  } else if (current[`${index}:${col}`]?.success) {
+    delete current[`${index}:${col}`];
   } else {
-    delete state.databases[db].table_items[tb].updates[`${index}:${col}`];
+    let current = state.databases[db].table_items[tb].updates;
+
+    if (!current[`${index}:${col}`]) {
+      current[`${index}:${col}`] = {};
+    }
+
+    current[`${index}:${col}`].content = data[`${col}:value`];
+    current[`${index}:${col}`].col = col;
+    current[`${index}:${col}`].row = row;
+    current[`${index}:${col}`].index = index;
   }
 };
 

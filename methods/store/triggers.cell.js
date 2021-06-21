@@ -5,10 +5,17 @@ triggers.cell.update = (context) => {
 };
 
 triggers.cell.state = (data, col, context) => {
-  if (data[col] !== data[`${col}:value`]) {
+  const cell_data = cellData();
+
+  if (cell_data?.updates?.success === false) return;
+
+  console.log("CONTINUE");
+  console.log(cell_data?.updates?.content);
+  console.log(cell_data.value);
+
+  if (cell_data?.updates?.content !== cell_data.value) {
     context.closest("table-cell").setAttribute("state", "changed");
   } else {
-    if (context.closest("table-cell").getAttribute("state") == "error") return;
     context.closest("table-cell").removeAttribute("state");
   }
 };

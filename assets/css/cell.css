@@ -1,5 +1,5 @@
 cell-ring {
-  @apply absolute inset-0 z-10 block shadow-y;
+  @apply absolute inset-0 z-10 block ring-1 ring-gray-200 m-[.5px];
 
   &[state="active"] {
     @apply ring-gray-500;
@@ -12,7 +12,7 @@ cell-ring {
   &[state="active"],
   &[state="changed"],
   &[state="edit"] {
-    @apply z-30 ring-2 shadow-none;
+    @apply z-30 ring-2 shadow-none m-[2px];
   }
 }
 

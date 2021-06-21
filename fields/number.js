@@ -22,8 +22,8 @@ class FieldNumber extends HTMLElement {
     this.onKeyup();
     this.onEnter();
 
-    set.new.buffer(value, this);
-    updatePreview(value, this);
+    //set.new.buffer(value, this);
+    //updatePreview(value, this);
 
     $("input", this).focus();
     $("input", this).select();

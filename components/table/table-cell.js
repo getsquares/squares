@@ -46,8 +46,6 @@ class TableCell extends HTMLElement {
       </cell-preview>
     `;
 
-    this.xEdges();
-
     this.setPreviewValue();
     this.setPreviewNull();
 
@@ -71,6 +69,11 @@ class TableCell extends HTMLElement {
   onClickRing() {
     $("cell-ring", this).on("click", () => {
       this.handleCellActive(this);
+
+      const cell_data = cellData();
+
+      $("error-x", this.closest("pane-main")).hidden =
+        cell_data?.updates?.success !== false;
     });
   }
 
@@ -170,18 +173,8 @@ class TableCell extends HTMLElement {
     debug("col", state.col);
     debug("index", state.index);
 
+    console.log("HandleCellActive");
     debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
-  }
-
-  xEdges() {
-    const prev_el = this.previousElementSibling;
-    const next_el = this.nextElementSibling;
-
-    if (prev_el.tagName == "ROW-SELECT") {
-      $("cell-ring", this).classList.add("ml-2px");
-    } else if (!next_el) {
-      $("cell-ring", this).classList.add("mr-2px");
-    }
   }
 }
 

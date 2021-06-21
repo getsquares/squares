@@ -10,7 +10,7 @@ class ModalError extends HTMLElement {
       <p>
         The selected cell has errors.
       </p>
-      <div data-error-message class="border border-red-300 h-[300px] focus:outline-none focus:border-red-300 w-full p-2 bg-red-100 text-red-800">dfsf</div>
+      <div data-error-message class="overflow-y-auto border border-red-300 h-[300px] focus:outline-none focus:border-red-300 w-full p-2 bg-red-100 text-red-800">dfsf</div>
     </div>
     `;
   }

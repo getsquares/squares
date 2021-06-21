@@ -687,6 +687,8 @@ set.new.buffer = (content, context) => {
     data[`${col}:value`] = content;
   }
 
+  console.log(data);
+
   set.new.updates(data, context);
 
   triggers.cell.state(data, col, context);
@@ -700,14 +702,28 @@ set.new.updates = (data, context) => {
   }
 
   if (data[col] !== data[`${col}:value`]) {
-    state.databases[db].table_items[tb].updates[`${index}:${col}`] = {
-      content: data[`${col}:value`],
-      col: col,
-      row: row,
-      index: index,
-    };
+    let current = state.databases[db].table_items[tb].updates;
+
+    if (!current[`${index}:${col}`]) {
+      current[`${index}:${col}`] = {};
+    }
+    current[`${index}:${col}`].content = data[`${col}:value`];
+    current[`${index}:${col}`].col = col;
+    current[`${index}:${col}`].row = row;
+    current[`${index}:${col}`].index = index;
+  } else if (current[`${index}:${col}`]?.success) {
+    delete current[`${index}:${col}`];
   } else {
-    delete state.databases[db].table_items[tb].updates[`${index}:${col}`];
+    let current = state.databases[db].table_items[tb].updates;
+
+    if (!current[`${index}:${col}`]) {
+      current[`${index}:${col}`] = {};
+    }
+
+    current[`${index}:${col}`].content = data[`${col}:value`];
+    current[`${index}:${col}`].col = col;
+    current[`${index}:${col}`].row = row;
+    current[`${index}:${col}`].index = index;
   }
 };
 
@@ -736,10 +752,17 @@ triggers.cell.update = (context) => {
 };
 
 triggers.cell.state = (data, col, context) => {
-  if (data[col] !== data[`${col}:value`]) {
+  const cell_data = cellData();
+
+  if (cell_data?.updates?.success === false) return;
+
+  console.log("CONTINUE");
+  console.log(cell_data?.updates?.content);
+  console.log(cell_data.value);
+
+  if (cell_data?.updates?.content !== cell_data.value) {
     context.closest("table-cell").setAttribute("state", "changed");
   } else {
-    if (context.closest("table-cell").getAttribute("state") == "error") return;
     context.closest("table-cell").removeAttribute("state");
   }
 };
@@ -802,768 +825,6 @@ triggers.tb.data = () => {
   $("main-x").deactivatePanes();
   $("main-x").addPane();
 };
-
-class ActionbarRefresh extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    //return ["active"];
-  }
-
-  connectedCallback() {
-    this.innerHTML = `
-      <div data-action>
-        <img-svg src="material-icons/refresh.svg" classes="animate-spin w-5 h-5"></img-svg>
-        <div>Refresh</div>
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (attr != "active") return;
-    if (oldValue !== newValue) {
-      if (newValue == "true") {
-        this.classList.remove("hidden");
-      } else {
-        this.classList.add("hidden");
-      }
-    }
-  }
-}
-
-customElements.define("actionbar-refresh", ActionbarRefresh);
-
-class ButtonItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const href = this.getAttribute("href");
-    const title = this.getAttribute("title");
-    this.removeAttribute("title");
-    let html = "";
-
-    if (href) {
-      html = this.linkHtml(title, href);
-    } else {
-      html = this.buttonHtml(title, href);
-    }
-
-    this.innerHTML = html;
-  }
-
-  getClasses() {
-    const style = this.getAttribute("style");
-    let classes = "";
-
-    switch (style) {
-      case "default":
-        classes = this.classesStyleDefault();
-        break;
-      case "action":
-        classes = this.classesStyleAction();
-        break;
-      case "ghost":
-        classes = this.classesStyleGhost();
-        break;
-    }
-
-    return this.classesBase().concat(classes);
-  }
-
-  linkHtml(title, href) {
-    return `<a href="${href}" class="${this.getClasses().join(
-      " "
-    )}">${title}</a>`;
-  }
-
-  buttonHtml(title) {
-    return `<button class="focus:outline-none cursor-default ${this.getClasses().join(
-      " "
-    )}">${title}</button>`;
-  }
-
-  classesBase() {
-    return [
-      "inline-flex",
-      "items-center",
-      "gap-2",
-      "px-4",
-      "py-1.5",
-      "font-bold",
-      "rounded",
-      "fill-current",
-    ];
-  }
-
-  classesStyleDefault() {
-    return [
-      "text-white",
-      "border-2",
-      "bg-blueGray-700",
-      "border-black",
-      "hover:bg-blueGray-800",
-    ];
-  }
-
-  classesStyleAction() {
-    return [
-      "text-white",
-      "bg-gradient-to-br",
-      "from-navy-500",
-      "via-navy-600",
-      "to-navy-600",
-      "hover:from-navy-600",
-      "border",
-      "border-navy-600",
-    ];
-  }
-
-  classesStyleGhost() {
-    return ["border-2", "border-gray-200", "hover:border-gray-400"];
-  }
-}
-
-customElements.define("button-item", ButtonItem);
-
-class CheckboxItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const label = this.getAttribute("label");
-    const checked = this.getAttribute("checked") == "true" ? " checked" : "";
-
-    this.innerHTML = `
-      <label class="flex select-none items-center gap-2">
-        <input type="checkbox" class="form-checkbox w-4 h-4 rounded focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
-        ${label ? label : ""}
-      </label>
-    `;
-  }
-}
-
-customElements.define("checkbox-item", CheckboxItem);
-
-class ImgSvg extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["classes", "src"];
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "src" && newValue != "") {
-        fetch(`assets/icons/${newValue}`)
-          .then((response) => response.text())
-          .then((text) => {
-            this.innerHTML = text;
-            const svg = this.querySelector("svg");
-            svg.setAttribute("class", this.getAttribute("classes"));
-            svg.classList.add("fill-current");
-          })
-          .catch(console.error.bind(console));
-      }
-    }
-  }
-}
-
-customElements.define("img-svg", ImgSvg);
-
-class MainX extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  /*static get observedAttributes() {
-    return ["active"];
-  }*/
-
-  connectedCallback() {}
-
-  deactivatePanes() {
-    $$("pane-main").forEach((item) => {
-      item.deactivate();
-    });
-  }
-
-  addPane() {
-    $("main-x").insertAdjacentHTML("beforeend", this.templatePane());
-  }
-
-  templatePane() {
-    return `
-      <pane-main database="${state.database}" db="${state.database}" table="${state.table}" tb="${state.table}"></pane-main>
-    `;
-  }
-}
-
-customElements.define("main-x", MainX);
-
-class MessageItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const message_state = this.getAttribute("state");
-    const message = this.innerHTML;
-    let state_class = "";
-
-    switch (message_state) {
-      case "success":
-        state_class = "bg-green-600";
-        break;
-      case "error":
-        state_class = "bg-red-700";
-        break;
-    }
-
-    this.classList.add("flex", state_class, "text-white", "text-opacity-90");
-    this.innerHTML = `
-      <div class="flex-1 p-6">${message}</div>
-      <div class="p-2">
-        <button class="hover:bg-black hover:bg-opacity-10 p-2 focus:outline-none cursor-default">
-          <img-svg src="remixicon/close.svg"></img-svg>
-        </button>
-      </div>
-    `;
-  }
-}
-
-customElements.define("message-item", MessageItem);
-
-class ModalBox extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    this.deactivate();
-    this.innerHTML = `
-      <div
-        data-backdrop
-        class="fixed inset-0 z-[500000] flex items-center justify-center bg-black bg-opacity-50"
-      >
-        <div class="flex items-start w-full max-w-lg bg-white shadow-md">
-          <div class="p-8 flex-1" data-modal-content>
-            <modal-info></modal-info>
-          </div>
-          <button class="p-2 m-2 focus:outline-none hover:bg-gray-100 rounded">
-            <img-svg src="remixicon/close.svg"></img-svg>
-          </button>
-        </div>
-      </div>
-    `;
-    this.onClose();
-  }
-
-  onClose() {
-    this.querySelector("button").addEventListener("click", (e) => {
-      this.deactivate();
-    });
-
-    this.querySelector("[data-backdrop]").addEventListener("click", (e) => {
-      if (e.target != e.currentTarget) return;
-      this.deactivate();
-    });
-  }
-
-  activate() {
-    this.hidden = false;
-  }
-
-  deactivate() {
-    this.hidden = true;
-  }
-}
-
-customElements.define("modal-box", ModalBox);
-
-class PaneMain extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  set db(value) {
-    this.dbValue = value;
-  }
-
-  get db() {
-    return this.dbValue;
-  }
-
-  set tb(value) {
-    this.tbValue = value;
-  }
-
-  get tb() {
-    return this.tbValue;
-  }
-
-  connectedCallback() {
-    this.db = this.getAttribute("db");
-    this.tb = this.getAttribute("tb");
-    this.data = get.tb.items(this.db, this.tb);
-
-    this.classList.add("flex", "flex-col", "overflow-auto", "flex-1");
-
-    const grid_cols = this.gridCols();
-    const grid_cols_class = `auto ${grid_cols.widths.join("px ")}px`;
-
-    this.innerHTML = `
-      <actions-x></actions-x>
-      <div class="flex-1 flex overflow-auto">
-        <div class="overflow-x-auto flex-1 my-4 border border-gray-200 rounded bg-white">
-          <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
-            <div data-table class="grid gap-y-px bg-white" style="grid-template-columns: ${grid_cols_class};">
-              <table-headings class="z-40 contents">
-                <table-heading-check
-                  class="sticky top-0 z-[600] flex bg-gray-100 heading-bkg left-0">
-                  <label class="tp relative heading-bkg flex items-center bg-gray-100">
-                    <input type="checkbox" class="form-checkbox checkstyle-white" name="test" />
-                  </label>
-                </table-heading-check>
-                ${this.data.cols_order
-                  .map((column_name) => {
-                    const column_data = this.data.cols[column_name];
-
-                    return `
-                      <table-heading
-                        class="tp heading-bkg font-bold flex gap-2 items-center text-sm sticky top-0 z-[500] bg-gray-100"
-                      >
-                        ${this.keyIcon(column_name)}
-                        <div class="flex flex-col gap-1">
-                          <div>
-                            <div class="text-opacity-60 text-black inline-block py-0.5 text-xs font-normal rounded">${
-                              column_data.meta.Type
-                            }</div>
-                          </div>
-                          ${column_name}
-                        </div>
-                      </table-heading>
-                    `;
-                  })
-                  .join("")}
-              </table-headings>
-              <table-cells class="contents">
-                <table-row-ghost hidden>
-                  <template data-first>
-                    <table-row class="contents row-new">
-                      <row-select></row-select>
-                      ${this.templateTableCells()}
-                    </table-row>
-                  </template>
-                </table-row-ghost>
-                ${this.data.rows
-                  .map((row, index) => {
-                    return `
-                    <table-row class="contents">
-                      <row-select class="flex sticky z-50 left-0 heading-bkg">
-                        <label class="tp relative">
-                          <input type="checkbox" class="checkstyle form-checkbox" name="test" />
-                          <div class="absolute block inset-0 shadow-y"></div>
-                        </label>
-                      </row-select>
-                      ${this.data.cols_order
-                        .map((col) => {
-                          return `
-                            <table-cell
-                              class="relative"
-                              col="${col}"
-                              row="${row[this.data.meta.id]}"
-                              index="${index}"
-                            ></table-cell>
-                          `;
-                        })
-                        .join("")}
-                    </table-row>`;
-                  })
-                  .join("")}
-              </table-cells>
-            </div>
-          </div>
-        </div>
-      </div>
-      <pagination-x></pagination-x>
-    `;
-
-    this.setFirstCellActive();
-
-    this.onChangeCheckAll();
-    this.onChangeCheckOne();
-  }
-
-  keyIcon(col) {
-    if (!col.config || !col.config.id) return "";
-    return `<img-svg src="remixicon/key-2-line.svg" classes="w-5 h-5"></img-svg>`;
-  }
-
-  // EVENTS
-
-  onChangeCheckAll() {
-    $("table-heading-check input", this).on("change", (e) => {
-      const checked = e.currentTarget.checked;
-
-      $$("row-select input", this).forEach(() => {
-        this.checkToggleAll(checked);
-      });
-    });
-  }
-
-  onChangeCheckOne() {
-    $$("row-select input", this).forEach((el) => {
-      el.on("change", (e) => {
-        const el = e.currentTarget;
-        const checked = el.checked;
-
-        el.closest("table-row").classList.toggle("row-selected", checked);
-      });
-    });
-  }
-
-  // ACTIONS
-
-  setFirstCellActive() {
-    $("cell-ring", this).setAttribute("state", "active");
-  }
-
-  checkToggleAll(checked) {
-    $$("table-row", this).forEach((el) => {
-      el.classList.toggle("row-selected", checked);
-    });
-
-    $$("row-select input", this).forEach((el) => {
-      el.checked = checked;
-    });
-  }
-
-  addRow() {
-    const db_name = `${this.db} ${this.tb}`;
-    const row = $("[data-first]", this).innerHTML;
-    const current_row = $('cell-ring[state="active"]', this).closest(
-      "table-row"
-    );
-
-    $('cell-ring[state="active"]', this)
-      .closest("table-row")
-      .insertAdjacentHTML("afterend", row);
-
-    const currentDate = new Date();
-    const timestamp = currentDate.getTime();
-    current_row.nextElementSibling.dataset.index = timestamp;
-
-    temp["insert"][db_name].data[timestamp] = temp["insert"][db_name].defaults;
-  }
-
-  deactivateCells() {
-    this.deactivateCellEdit();
-    this.deactivateCellRing();
-  }
-
-  deactivateCellRing() {
-    const el_cell = $(
-      'cell-ring[state="active"], cell-ring[state="edit"]',
-      this
-    );
-
-    if (!el_cell) return;
-
-    el_cell.setAttribute("state", "default");
-  }
-
-  deactivateCellEdit() {
-    $$("cell-edit-dropdown, cell-edit-inline", this).forEach((el) => {
-      el.innerHTML = "";
-      el.hidden = true;
-    });
-
-    $$("cell-preview", this).forEach((el) => {
-      el.hidden = false;
-    });
-  }
-
-  gridCols() {
-    const this_data = get.tb.items(this.db, this.tb);
-
-    let sum = 0;
-    let widths = [];
-
-    this_data.cols_order.forEach((item) => {
-      let width = null;
-      const item_obj = this_data.cols[item];
-
-      if (item_obj.config && item_obj.config.hasOwnProperty("width")) {
-        width = item_obj.config.width;
-      } else {
-        width = 300;
-      }
-
-      widths.push(width);
-
-      sum += width;
-    });
-
-    return {
-      sum: sum,
-      widths: widths,
-    };
-  }
-
-  templateTableCells() {
-    let html = "";
-
-    temp["insert"][this.tb] = {
-      defaults: {},
-      data: [],
-    };
-
-    this.data.cols_order.forEach((column) => {
-      const nullable = this.isNullable(column);
-      const value = this.parseDefault(column);
-
-      if (this.data.meta.id !== column) {
-        temp["insert"][this.tb]["defaults"][column] =
-          nullable == "true" ? "" : value;
-      }
-
-      html += `
-        <table-cell class="relative" col="${column}">
-          <cell-ring></cell-ring>
-          <cell-edit-dropdown></cell-edit-dropdown>
-          <cell-preview>
-            <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
-            <preview-value>${row[column]}</preview-value>
-          </cell-preview>
-        </table-cell>
-      `;
-    });
-
-    return html;
-  }
-
-  parseDefault(column) {
-    let value = this.data.cols[column].meta.Default;
-
-    value = this.trimNull(value);
-    value = this.trimQuotes(value);
-
-    return value;
-  }
-
-  trimNull(value) {
-    if (value !== null) return value;
-    return "";
-  }
-
-  trimQuotes(value) {
-    if (!value.startsWith("'")) return value;
-    if (!value.endsWith("'")) return value;
-
-    return value.slice(1, -1);
-  }
-
-  isNullable(column) {
-    return this.data.cols[column].meta.Null == "YES" ? "true" : "false";
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.hidden = false;
-  }
-
-  thisDeactivate() {
-    this.hidden = true;
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("pane-main", PaneMain);
-
-class RadioItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const label = this.getAttribute("label");
-    const checked = this.getAttribute("checked") == "true" ? " checked" : "";
-
-    this.innerHTML = `
-      <label class="flex select-none items-center gap-2">
-        <input type="radio" class="w-4 h-4 focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
-        ${label}
-      </label>
-    `;
-  }
-}
-
-customElements.define("radio-item", RadioItem);
-
-class ColumnsItem extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["checked"];
-  }
-
-  connectedCallback() {
-    const name = this.getAttribute("name");
-    const checked = this.getAttribute("checked");
-    this.classList.add("flex");
-
-    this.innerHTML = this.template(name, checked);
-    this.onClick();
-  }
-
-  template(name, checked) {
-    return `
-      <label class="btn btn-borderless">
-        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
-      checked ? "checked" : ""
-    }>
-        ${name}
-      </label>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "checked") {
-        this.onChange();
-      }
-    }
-  }
-
-  onClick() {
-    $("input", this).addEventListener("change", (e) => {
-      if (e.currentTarget.checked) {
-        this.activate();
-      } else {
-        this.deactivate();
-      }
-    });
-  }
-
-  onChange() {
-    //console.log("Something has changed");
-  }
-
-  activate() {
-    this.setAttribute("checked", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("checked");
-  }
-}
-
-customElements.define("columns-item", ColumnsItem);
-
-class ColumnsX extends HTMLElement {
-  constructor() {
-    super();
-  }
-
-  static get observedAttributes() {
-    return ["active"];
-  }
-
-  connectedCallback() {
-    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
-    this.hidden = true;
-    this.innerHTML = this.template("Columns");
-  }
-
-  checkboxes() {
-    const db = this.closest("pane-main").getAttribute("database");
-    const tb = this.closest("pane-main").getAttribute("table");
-    const data = get.tb.items(db, tb);
-    const data_cols_all = data.cols_all;
-    const data_cols_active = data.cols_order;
-    let html = "";
-
-    data_cols_all.forEach((item) => {
-      const checked = data_cols_active.includes(item);
-      const checked_html = checked ? `checked="true"` : "";
-      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
-    });
-
-    return html;
-  }
-
-  template(title) {
-    return `
-      <div class="font-bold">${title}</div>
-      <div class="flex gap-x-4 gap-y-1 flex-wrap">
-        ${this.checkboxes()}
-      </div>
-    `;
-  }
-
-  attributeChangedCallback(attr, oldValue, newValue) {
-    if (oldValue !== newValue) {
-      if (attr == "active") {
-        if (newValue == "true") {
-          this.thisActivate();
-        } else {
-          this.thisDeactivate();
-        }
-      }
-    }
-  }
-
-  thisActivate() {
-    this.classList.remove("hidden");
-  }
-
-  thisDeactivate() {
-    this.classList.add("hidden");
-  }
-
-  activate() {
-    this.setAttribute("active", "true");
-  }
-
-  deactivate() {
-    this.removeAttribute("active");
-  }
-}
-
-customElements.define("columns-x", ColumnsX);
 
 class ActionsAdd extends HTMLElement {
   constructor() {
@@ -1835,7 +1096,7 @@ class ActionsTabs extends HTMLElement {
         <actions-tab name="order-x" label="Order" icon="remixicon/arrow-up-down.svg"></actions-tab>
       </div>
       <div class="flex gap-1">
-      <error-x></error-x>
+        <error-x hidden></error-x>
         <actions-btn name="refresh" label="Refresh" icon="material-icons/refresh.svg"></actions-btn>
         <actions-add></actions-add>
         <execute-x></execute-x>
@@ -1896,6 +1157,140 @@ class PaneClose extends HTMLElement {
 }
 
 customElements.define("pane-close", PaneClose);
+
+class ColumnsItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["checked"];
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const checked = this.getAttribute("checked");
+    this.classList.add("flex");
+
+    this.innerHTML = this.template(name, checked);
+    this.onClick();
+  }
+
+  template(name, checked) {
+    return `
+      <label class="btn btn-borderless">
+        <input type="checkbox" name="${name}" class="checkbox form-checkbox" ${
+      checked ? "checked" : ""
+    }>
+        ${name}
+      </label>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "checked") {
+        this.onChange();
+      }
+    }
+  }
+
+  onClick() {
+    $("input", this).addEventListener("change", (e) => {
+      if (e.currentTarget.checked) {
+        this.activate();
+      } else {
+        this.deactivate();
+      }
+    });
+  }
+
+  onChange() {
+    //console.log("Something has changed");
+  }
+
+  activate() {
+    this.setAttribute("checked", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("checked");
+  }
+}
+
+customElements.define("columns-item", ColumnsItem);
+
+class ColumnsX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  connectedCallback() {
+    this.classList.add("gap-2", "flex", "flex-col", "text-sm", "p-4");
+    this.hidden = true;
+    this.innerHTML = this.template("Columns");
+  }
+
+  checkboxes() {
+    const db = this.closest("pane-main").getAttribute("database");
+    const tb = this.closest("pane-main").getAttribute("table");
+    const data = get.tb.items(db, tb);
+    const data_cols_all = data.cols_all;
+    const data_cols_active = data.cols_order;
+    let html = "";
+
+    data_cols_all.forEach((item) => {
+      const checked = data_cols_active.includes(item);
+      const checked_html = checked ? `checked="true"` : "";
+      html += `<columns-item name="${item}" ${checked_html}></columns-item>`;
+    });
+
+    return html;
+  }
+
+  template(title) {
+    return `
+      <div class="font-bold">${title}</div>
+      <div class="flex gap-x-4 gap-y-px flex-wrap">
+        ${this.checkboxes()}
+      </div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.classList.remove("hidden");
+  }
+
+  thisDeactivate() {
+    this.classList.add("hidden");
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("columns-x", ColumnsX);
 
 class FilterItem extends HTMLElement {
   constructor() {
@@ -2414,7 +1809,6 @@ class ErrorX extends HTMLElement {
 
   onClick() {
     this.addEventListener("click", () => {
-      console.log(cellData());
       $("[data-modal-content]").innerHTML = `<modal-error></modal-error>`;
       $("modal-error [data-error-message]").innerText =
         cellData().updates.message;
@@ -2451,7 +1845,6 @@ class ExecuteX extends HTMLElement {
       });
 
       this.run().then((data) => {
-        console.log(data);
         data.forEach((item) => {
           const el = $(
             `table-cell[row="${item.row}"][col="${item.col}"]`,
@@ -3160,7 +2553,7 @@ class ModalError extends HTMLElement {
       <p>
         The selected cell has errors.
       </p>
-      <div data-error-message class="border border-red-300 h-[300px] focus:outline-none focus:border-red-300 w-full p-2 bg-red-100 text-red-800">dfsf</div>
+      <div data-error-message class="overflow-y-auto border border-red-300 h-[300px] focus:outline-none focus:border-red-300 w-full p-2 bg-red-100 text-red-800">dfsf</div>
     </div>
     `;
   }
@@ -3298,6 +2691,8 @@ class CellEditInline extends HTMLElement {
 
       $("preview-null", this.parentElement).hidden = !checked;
       $("preview-value", this.parentElement).hidden = checked;
+
+      debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
     });
   }
 }
@@ -3352,8 +2747,6 @@ class TableCell extends HTMLElement {
       </cell-preview>
     `;
 
-    this.xEdges();
-
     this.setPreviewValue();
     this.setPreviewNull();
 
@@ -3377,6 +2770,11 @@ class TableCell extends HTMLElement {
   onClickRing() {
     $("cell-ring", this).on("click", () => {
       this.handleCellActive(this);
+
+      const cell_data = cellData();
+
+      $("error-x", this.closest("pane-main")).hidden =
+        cell_data?.updates?.success !== false;
     });
   }
 
@@ -3476,18 +2874,8 @@ class TableCell extends HTMLElement {
     debug("col", state.col);
     debug("index", state.index);
 
+    console.log("HandleCellActive");
     debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
-  }
-
-  xEdges() {
-    const prev_el = this.previousElementSibling;
-    const next_el = this.nextElementSibling;
-
-    if (prev_el.tagName == "ROW-SELECT") {
-      $("cell-ring", this).classList.add("ml-2px");
-    } else if (!next_el) {
-      $("cell-ring", this).classList.add("mr-2px");
-    }
   }
 }
 
@@ -3762,6 +3150,634 @@ class TopbarWrap extends HTMLElement {
 
 customElements.define("topbar-wrap", TopbarWrap);
 
+class ActionbarRefresh extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    //return ["active"];
+  }
+
+  connectedCallback() {
+    this.innerHTML = `
+      <div data-action>
+        <img-svg src="material-icons/refresh.svg" classes="animate-spin w-5 h-5"></img-svg>
+        <div>Refresh</div>
+      </div>
+    `;
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (attr != "active") return;
+    if (oldValue !== newValue) {
+      if (newValue == "true") {
+        this.classList.remove("hidden");
+      } else {
+        this.classList.add("hidden");
+      }
+    }
+  }
+}
+
+customElements.define("actionbar-refresh", ActionbarRefresh);
+
+class ButtonItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const href = this.getAttribute("href");
+    const title = this.getAttribute("title");
+    this.removeAttribute("title");
+    let html = "";
+
+    if (href) {
+      html = this.linkHtml(title, href);
+    } else {
+      html = this.buttonHtml(title, href);
+    }
+
+    this.innerHTML = html;
+  }
+
+  getClasses() {
+    const style = this.getAttribute("style");
+    let classes = "";
+
+    switch (style) {
+      case "default":
+        classes = this.classesStyleDefault();
+        break;
+      case "action":
+        classes = this.classesStyleAction();
+        break;
+      case "ghost":
+        classes = this.classesStyleGhost();
+        break;
+    }
+
+    return this.classesBase().concat(classes);
+  }
+
+  linkHtml(title, href) {
+    return `<a href="${href}" class="${this.getClasses().join(
+      " "
+    )}">${title}</a>`;
+  }
+
+  buttonHtml(title) {
+    return `<button class="focus:outline-none cursor-default ${this.getClasses().join(
+      " "
+    )}">${title}</button>`;
+  }
+
+  classesBase() {
+    return [
+      "inline-flex",
+      "items-center",
+      "gap-2",
+      "px-4",
+      "py-1.5",
+      "font-bold",
+      "rounded",
+      "fill-current",
+    ];
+  }
+
+  classesStyleDefault() {
+    return [
+      "text-white",
+      "border-2",
+      "bg-blueGray-700",
+      "border-black",
+      "hover:bg-blueGray-800",
+    ];
+  }
+
+  classesStyleAction() {
+    return [
+      "text-white",
+      "bg-gradient-to-br",
+      "from-navy-500",
+      "via-navy-600",
+      "to-navy-600",
+      "hover:from-navy-600",
+      "border",
+      "border-navy-600",
+    ];
+  }
+
+  classesStyleGhost() {
+    return ["border-2", "border-gray-200", "hover:border-gray-400"];
+  }
+}
+
+customElements.define("button-item", ButtonItem);
+
+class CheckboxItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const label = this.getAttribute("label");
+    const checked = this.getAttribute("checked") == "true" ? " checked" : "";
+
+    this.innerHTML = `
+      <label class="flex select-none items-center gap-2">
+        <input type="checkbox" class="form-checkbox w-4 h-4 rounded focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
+        ${label ? label : ""}
+      </label>
+    `;
+  }
+}
+
+customElements.define("checkbox-item", CheckboxItem);
+
+class ImgSvg extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["classes", "src"];
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "src" && newValue != "") {
+        fetch(`assets/icons/${newValue}`)
+          .then((response) => response.text())
+          .then((text) => {
+            this.innerHTML = text;
+            const svg = this.querySelector("svg");
+            svg.setAttribute("class", this.getAttribute("classes"));
+            svg.classList.add("fill-current");
+          })
+          .catch(console.error.bind(console));
+      }
+    }
+  }
+}
+
+customElements.define("img-svg", ImgSvg);
+
+class MainX extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  /*static get observedAttributes() {
+    return ["active"];
+  }*/
+
+  connectedCallback() {}
+
+  deactivatePanes() {
+    $$("pane-main").forEach((item) => {
+      item.deactivate();
+    });
+  }
+
+  addPane() {
+    $("main-x").insertAdjacentHTML("beforeend", this.templatePane());
+  }
+
+  templatePane() {
+    return `
+      <pane-main database="${state.database}" db="${state.database}" table="${state.table}" tb="${state.table}"></pane-main>
+    `;
+  }
+}
+
+customElements.define("main-x", MainX);
+
+class MessageItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const message_state = this.getAttribute("state");
+    const message = this.innerHTML;
+    let state_class = "";
+
+    switch (message_state) {
+      case "success":
+        state_class = "bg-green-600";
+        break;
+      case "error":
+        state_class = "bg-red-700";
+        break;
+    }
+
+    this.classList.add("flex", state_class, "text-white", "text-opacity-90");
+    this.innerHTML = `
+      <div class="flex-1 p-6">${message}</div>
+      <div class="p-2">
+        <button class="hover:bg-black hover:bg-opacity-10 p-2 focus:outline-none cursor-default">
+          <img-svg src="remixicon/close.svg"></img-svg>
+        </button>
+      </div>
+    `;
+  }
+}
+
+customElements.define("message-item", MessageItem);
+
+class ModalBox extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    this.deactivate();
+    this.innerHTML = `
+      <div
+        data-backdrop
+        class="fixed inset-0 z-[500000] flex items-center justify-center bg-black bg-opacity-50"
+      >
+        <div class="flex items-start w-full max-w-lg bg-white shadow-md">
+          <div class="p-8 flex-1" data-modal-content>
+            <modal-info></modal-info>
+          </div>
+          <button class="p-2 m-2 focus:outline-none hover:bg-gray-100 rounded">
+            <img-svg src="remixicon/close.svg"></img-svg>
+          </button>
+        </div>
+      </div>
+    `;
+    this.onClose();
+  }
+
+  onClose() {
+    this.querySelector("button").addEventListener("click", (e) => {
+      this.deactivate();
+    });
+
+    this.querySelector("[data-backdrop]").addEventListener("click", (e) => {
+      if (e.target != e.currentTarget) return;
+      this.deactivate();
+    });
+  }
+
+  activate() {
+    this.hidden = false;
+  }
+
+  deactivate() {
+    this.hidden = true;
+  }
+}
+
+customElements.define("modal-box", ModalBox);
+
+class PaneMain extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  static get observedAttributes() {
+    return ["active"];
+  }
+
+  set db(value) {
+    this.dbValue = value;
+  }
+
+  get db() {
+    return this.dbValue;
+  }
+
+  set tb(value) {
+    this.tbValue = value;
+  }
+
+  get tb() {
+    return this.tbValue;
+  }
+
+  connectedCallback() {
+    this.db = this.getAttribute("db");
+    this.tb = this.getAttribute("tb");
+    this.data = get.tb.items(this.db, this.tb);
+
+    this.classList.add("flex", "flex-col", "overflow-auto", "flex-1");
+
+    const grid_cols = this.gridCols();
+    const grid_cols_class = `auto ${grid_cols.widths.join("px ")}px`;
+
+    this.innerHTML = `
+      <actions-x></actions-x>
+      <div class="flex-1 flex overflow-auto">
+        <div class="overflow-x-auto flex-1 my-4 border border-gray-200 rounded bg-white">
+          <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
+            <div data-table class="grid gap-0 bg-white" style="grid-template-columns: ${grid_cols_class};">
+              <table-headings class="z-40 contents">
+                <table-heading-check
+                  class="sticky top-0 z-[600] flex bg-gray-100 heading-bkg left-0">
+                  <label class="tp relative heading-bkg flex items-center bg-gray-100">
+                    <input type="checkbox" class="form-checkbox checkstyle-white" name="test" />
+                  </label>
+                </table-heading-check>
+                ${this.data.cols_order
+                  .map((column_name) => {
+                    const column_data = this.data.cols[column_name];
+
+                    return `
+                      <table-heading
+                        class="tp heading-bkg font-bold flex gap-2 items-center text-sm sticky top-0 z-[500] bg-gray-100"
+                      >
+                        ${this.keyIcon(column_name)}
+                        <div class="flex flex-col gap-1">
+                          <div>
+                            <div class="text-opacity-60 text-black inline-block py-0.5 text-xs font-normal rounded">${
+                              column_data.meta.Type
+                            }</div>
+                          </div>
+                          ${column_name}
+                        </div>
+                      </table-heading>
+                    `;
+                  })
+                  .join("")}
+              </table-headings>
+              <table-cells class="contents">
+                <table-row-ghost hidden>
+                  <template data-first>
+                    <table-row class="contents row-new">
+                      <row-select></row-select>
+                      ${this.templateTableCells()}
+                    </table-row>
+                  </template>
+                </table-row-ghost>
+                ${this.data.rows
+                  .map((row, index) => {
+                    return `
+                    <table-row class="contents">
+                      <row-select class="flex sticky z-50 left-0 heading-bkg">
+                        <label class="tp relative">
+                          <input type="checkbox" class="checkstyle form-checkbox" name="test" />
+                          <div class="absolute block inset-0 shadow-y"></div>
+                        </label>
+                      </row-select>
+                      ${this.data.cols_order
+                        .map((col) => {
+                          return `
+                            <table-cell
+                              class="relative"
+                              col="${col}"
+                              row="${row[this.data.meta.id]}"
+                              index="${index}"
+                            ></table-cell>
+                          `;
+                        })
+                        .join("")}
+                    </table-row>`;
+                  })
+                  .join("")}
+              </table-cells>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pagination-x></pagination-x>
+    `;
+
+    this.setFirstCellActive();
+
+    this.onChangeCheckAll();
+    this.onChangeCheckOne();
+  }
+
+  keyIcon(col) {
+    if (!col.config || !col.config.id) return "";
+    return `<img-svg src="remixicon/key-2-line.svg" classes="w-5 h-5"></img-svg>`;
+  }
+
+  // EVENTS
+
+  onChangeCheckAll() {
+    $("table-heading-check input", this).on("change", (e) => {
+      const checked = e.currentTarget.checked;
+
+      $$("row-select input", this).forEach(() => {
+        this.checkToggleAll(checked);
+      });
+    });
+  }
+
+  onChangeCheckOne() {
+    $$("row-select input", this).forEach((el) => {
+      el.on("change", (e) => {
+        const el = e.currentTarget;
+        const checked = el.checked;
+
+        el.closest("table-row").classList.toggle("row-selected", checked);
+      });
+    });
+  }
+
+  // ACTIONS
+
+  setFirstCellActive() {
+    $("cell-ring", this).setAttribute("state", "active");
+  }
+
+  checkToggleAll(checked) {
+    $$("table-row", this).forEach((el) => {
+      el.classList.toggle("row-selected", checked);
+    });
+
+    $$("row-select input", this).forEach((el) => {
+      el.checked = checked;
+    });
+  }
+
+  addRow() {
+    const db_name = `${this.db} ${this.tb}`;
+    const row = $("[data-first]", this).innerHTML;
+    const current_row = $('cell-ring[state="active"]', this).closest(
+      "table-row"
+    );
+
+    $('cell-ring[state="active"]', this)
+      .closest("table-row")
+      .insertAdjacentHTML("afterend", row);
+
+    const currentDate = new Date();
+    const timestamp = currentDate.getTime();
+    current_row.nextElementSibling.dataset.index = timestamp;
+
+    temp["insert"][db_name].data[timestamp] = temp["insert"][db_name].defaults;
+  }
+
+  deactivateCells() {
+    this.deactivateCellEdit();
+    this.deactivateCellRing();
+  }
+
+  deactivateCellRing() {
+    const el_cell = $(
+      'cell-ring[state="active"], cell-ring[state="edit"]',
+      this
+    );
+
+    if (!el_cell) return;
+
+    el_cell.setAttribute("state", "default");
+  }
+
+  deactivateCellEdit() {
+    $$("cell-edit-dropdown, cell-edit-inline", this).forEach((el) => {
+      el.innerHTML = "";
+      el.hidden = true;
+    });
+
+    $$("cell-preview", this).forEach((el) => {
+      el.hidden = false;
+    });
+  }
+
+  gridCols() {
+    const this_data = get.tb.items(this.db, this.tb);
+
+    let sum = 0;
+    let widths = [];
+
+    this_data.cols_order.forEach((item) => {
+      let width = null;
+      const item_obj = this_data.cols[item];
+
+      if (item_obj.config && item_obj.config.hasOwnProperty("width")) {
+        width = item_obj.config.width;
+      } else {
+        width = 300;
+      }
+
+      widths.push(width);
+
+      sum += width;
+    });
+
+    return {
+      sum: sum,
+      widths: widths,
+    };
+  }
+
+  templateTableCells() {
+    let html = "";
+
+    temp["insert"][this.tb] = {
+      defaults: {},
+      data: [],
+    };
+
+    this.data.cols_order.forEach((column) => {
+      const nullable = this.isNullable(column);
+      const value = this.parseDefault(column);
+
+      if (this.data.meta.id !== column) {
+        temp["insert"][this.tb]["defaults"][column] =
+          nullable == "true" ? "" : value;
+      }
+
+      html += `
+        <table-cell class="relative" col="${column}">
+          <cell-ring></cell-ring>
+          <cell-edit-dropdown></cell-edit-dropdown>
+          <cell-preview>
+            <preview-null class="text-opacity-50 text-gray-800 italic">NULL</preview-null>
+            <preview-value>${row[column]}</preview-value>
+          </cell-preview>
+        </table-cell>
+      `;
+    });
+
+    return html;
+  }
+
+  parseDefault(column) {
+    let value = this.data.cols[column].meta.Default;
+
+    value = this.trimNull(value);
+    value = this.trimQuotes(value);
+
+    return value;
+  }
+
+  trimNull(value) {
+    if (value !== null) return value;
+    return "";
+  }
+
+  trimQuotes(value) {
+    if (!value.startsWith("'")) return value;
+    if (!value.endsWith("'")) return value;
+
+    return value.slice(1, -1);
+  }
+
+  isNullable(column) {
+    return this.data.cols[column].meta.Null == "YES" ? "true" : "false";
+  }
+
+  attributeChangedCallback(attr, oldValue, newValue) {
+    if (oldValue !== newValue) {
+      if (attr == "active") {
+        if (newValue == "true") {
+          this.thisActivate();
+        } else {
+          this.thisDeactivate();
+        }
+      }
+    }
+  }
+
+  thisActivate() {
+    this.hidden = false;
+  }
+
+  thisDeactivate() {
+    this.hidden = true;
+  }
+
+  activate() {
+    this.setAttribute("active", "true");
+  }
+
+  deactivate() {
+    this.removeAttribute("active");
+  }
+}
+
+customElements.define("pane-main", PaneMain);
+
+class RadioItem extends HTMLElement {
+  constructor() {
+    super();
+  }
+
+  connectedCallback() {
+    const name = this.getAttribute("name");
+    const label = this.getAttribute("label");
+    const checked = this.getAttribute("checked") == "true" ? " checked" : "";
+
+    this.innerHTML = `
+      <label class="flex select-none items-center gap-2">
+        <input type="radio" class="w-4 h-4 focus:outline-none focus:ring-0 focus:ring-offset-0 text-navy-600" name="${name}" ${checked} />
+        ${label}
+      </label>
+    `;
+  }
+}
+
+customElements.define("radio-item", RadioItem);
+
 
 class FieldNumber extends HTMLElement {
   constructor() {
@@ -3787,8 +3803,8 @@ class FieldNumber extends HTMLElement {
     this.onKeyup();
     this.onEnter();
 
-    set.new.buffer(value, this);
-    updatePreview(value, this);
+    //set.new.buffer(value, this);
+    //updatePreview(value, this);
 
     $("input", this).focus();
     $("input", this).select();

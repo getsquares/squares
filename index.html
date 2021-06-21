@@ -19,8 +19,20 @@
     <topbar-wrap></topbar-wrap>
     <!-- Sidebar main -->
     <div class="flex flex-1 overflow-hidden">
+
+      <debug-box class="z-[10000] text-sm p-2 w-[400px] bg-red-100 border-2 border-red-500">
+        <div data-db><strong>db:</strong><span></span></div>
+        <div data-tb><strong>tb:</strong><span></span></div>
+        <div data-row><strong>row:</strong><span></span></div>
+        <div data-col><strong>col:</strong><span></span></div>
+        <div data-index><strong>index:</strong><span></span></div>
+        <div data-cell><strong>cell:</strong><textarea class="w-full h-[300px]"></textarea></div>
+        <div data-response><strong>response:</strong><textarea class="w-full h-[300px]"></textarea></div>
+      </debug-box>
+
       <!-- Sidebar -->
       <sidebar-x></sidebar-x>
+      
       <!-- Main -->
       <main-x class="flex flex-col flex-1 px-4 overflow-hidden bg-gray-50">
         <tab-items></tab-items>
@@ -32,16 +44,6 @@
     </div>
 
     <modal-box></modal-box>
-
-    <debug-box class="z-[10000] text-sm bottom-0 absolute left-0 p-2 m-1 w-[400px] bg-red-100 border-2 border-red-500">
-      <div data-db><strong>db:</strong><span></span></div>
-      <div data-tb><strong>tb:</strong><span></span></div>
-      <div data-row><strong>row:</strong><span></span></div>
-      <div data-col><strong>col:</strong><span></span></div>
-      <div data-index><strong>index:</strong><span></span></div>
-      <div data-cell><strong>cell:</strong><textarea class="w-full h-[300px]"></textarea></div>
-      <div data-response><strong>response:</strong><textarea class="w-full h-[300px]"></textarea></div>
-    </debug-box>
 
     <script>
       function dump(myObject) {

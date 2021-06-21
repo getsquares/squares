@@ -24,7 +24,6 @@ class ExecuteX extends HTMLElement {
       });
 
       this.run().then((data) => {
-        console.log(data);
         data.forEach((item) => {
           const el = $(
             `table-cell[row="${item.row}"][col="${item.col}"]`,

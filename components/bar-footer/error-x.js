@@ -14,7 +14,6 @@ class ErrorX extends HTMLElement {
 
   onClick() {
     this.addEventListener("click", () => {
-      console.log(cellData());
       $("[data-modal-content]").innerHTML = `<modal-error></modal-error>`;
       $("modal-error [data-error-message]").innerText =
         cellData().updates.message;

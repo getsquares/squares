@@ -38,7 +38,7 @@ class PaneMain extends HTMLElement {
       <div class="flex-1 flex overflow-auto">
         <div class="overflow-x-auto flex-1 my-4 border border-gray-200 rounded bg-white">
           <div class="flex-1 text-13" style="width: ${grid_cols.sum}px;">
-            <div data-table class="grid gap-y-px bg-white" style="grid-template-columns: ${grid_cols_class};">
+            <div data-table class="grid gap-0 bg-white" style="grid-template-columns: ${grid_cols_class};">
               <table-headings class="z-40 contents">
                 <table-heading-check
                   class="sticky top-0 z-[600] flex bg-gray-100 heading-bkg left-0">

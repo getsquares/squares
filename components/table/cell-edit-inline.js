@@ -61,6 +61,8 @@ class CellEditInline extends HTMLElement {
 
       $("preview-null", this.parentElement).hidden = !checked;
       $("preview-value", this.parentElement).hidden = checked;
+
+      debug("cell", JSON.stringify(cellData(), null, 4), "textarea");
     });
   }
 }

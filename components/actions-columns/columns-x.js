@@ -33,7 +33,7 @@ class ColumnsX extends HTMLElement {
   template(title) {
     return `
       <div class="font-bold">${title}</div>
-      <div class="flex gap-x-4 gap-y-1 flex-wrap">
+      <div class="flex gap-x-4 gap-y-px flex-wrap">
         ${this.checkboxes()}
       </div>
     `;
